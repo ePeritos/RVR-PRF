@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Calculator, DollarSign, Percent, Home } from 'lucide-react';
+import { Calculator, DollarSign, Percent } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,12 +13,12 @@ interface DataRow {
   valor: number;
   data: string;
   status: string;
+  area?: number; // Area will come from spreadsheet
 }
 
 interface ParameterData {
   cub: number;
   valorM2: number;
-  area: number;
   bdi: number;
 }
 
@@ -31,7 +31,6 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
   const [parameters, setParameters] = useState<ParameterData>({
     cub: 0,
     valorM2: 0,
-    area: 0,
     bdi: 0
   });
 
@@ -47,9 +46,9 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
     }));
   };
 
-  // Calcular valores RVR para cada imóvel
+  // Calcular valores RVR para cada imóvel usando área da planilha
   const calculateRVR = (item: DataRow) => {
-    if (!parameters.cub || !parameters.valorM2 || !parameters.area || !parameters.bdi) {
+    if (!parameters.cub || !parameters.valorM2 || !parameters.bdi) {
       return {
         valorRvr: item.valor,
         diferenca: 0,
@@ -57,9 +56,11 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
       };
     }
 
+    // Use area from spreadsheet data, fallback to 100 if not available
+    const areaImovel = item.area || 100;
     const fatorLocalizacao = 1.1;
     const fatorMercado = 1.05;
-    const valorRvr = (parameters.valorM2 * parameters.area) * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
+    const valorRvr = (parameters.valorM2 * areaImovel) * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
     const diferenca = valorRvr - item.valor;
     const percentual = item.valor > 0 ? (diferenca / item.valor) * 100 : 0;
 
@@ -85,7 +86,7 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <Label htmlFor="cub" className="text-sm font-medium text-foreground flex items-center gap-2">
                 <DollarSign className="h-4 w-4 text-primary" />
@@ -127,26 +128,6 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="area" className="text-sm font-medium text-foreground flex items-center gap-2">
-                <Home className="h-4 w-4 text-primary" />
-                Área (m²)
-              </Label>
-              <Input
-                id="area"
-                type="number"
-                step="0.01"
-                placeholder="0,00"
-                value={parameters.area || ''}
-                onChange={(e) => handleChange('area', e.target.value)}
-                className="bg-background border-border focus:border-primary"
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Área total do imóvel em metros quadrados
-              </p>
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="bdi" className="text-sm font-medium text-foreground flex items-center gap-2">
                 <Percent className="h-4 w-4 text-primary" />
                 BDI (%)
@@ -171,7 +152,7 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
 
           <div className="bg-muted/20 border border-border rounded-lg p-4">
             <h4 className="text-sm font-medium text-foreground mb-2">Resumo dos Parâmetros RVR</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
               <div>
                 <span className="text-muted-foreground">CUB:</span>
                 <span className="ml-2 font-medium text-foreground">
@@ -182,12 +163,6 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
                 <span className="text-muted-foreground">Valor m²:</span>
                 <span className="ml-2 font-medium text-foreground">
                   {parameters.valorM2 ? parameters.valorM2.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'}
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Área:</span>
-                <span className="ml-2 font-medium text-foreground">
-                  {parameters.area ? `${parameters.area} m²` : '0 m²'}
                 </span>
               </div>
               <div>
@@ -225,6 +200,7 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
                 <tr>
                   <th className="p-4 text-left text-sm font-medium text-foreground">Nome</th>
                   <th className="p-4 text-left text-sm font-medium text-foreground">Categoria</th>
+                  <th className="p-4 text-left text-sm font-medium text-foreground">Área (m²)</th>
                   <th className="p-4 text-left text-sm font-medium text-foreground">Valor Original</th>
                   <th className="p-4 text-left text-sm font-medium text-foreground">Valor RVR</th>
                   <th className="p-4 text-left text-sm font-medium text-foreground">Diferença</th>
@@ -234,6 +210,7 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
               <tbody>
                 {selectedData.map((row, index) => {
                   const { valorRvr, diferenca, percentual } = calculateRVR(row);
+                  const areaImovel = row.area || 100;
                   return (
                     <tr 
                       key={row.id} 
@@ -243,6 +220,7 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
                     >
                       <td className="p-4 text-sm font-medium text-foreground">{row.nome}</td>
                       <td className="p-4 text-sm text-muted-foreground">{row.categoria}</td>
+                      <td className="p-4 text-sm text-muted-foreground">{areaImovel} m²</td>
                       <td className="p-4 text-sm text-foreground">
                         {row.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       </td>

@@ -69,10 +69,11 @@ const Index = () => {
     const calculatedResults = filteredData
       .filter(item => selectedItems.includes(item.id))
       .map(item => {
-        // RVR calculation formula (simplified example)
+        // RVR calculation formula using area from spreadsheet data
+        const areaImovel = item.area || 100; // Use area from spreadsheet, fallback to 100
         const fatorLocalizacao = 1.1; // Factor based on location
         const fatorMercado = 1.05; // Market factor
-        const valorRvr = (parameters.valorM2 * parameters.area || item.valor) * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
+        const valorRvr = (parameters.valorM2 * areaImovel) * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
         const diferenca = valorRvr - item.valor;
         const percentual = (diferenca / item.valor) * 100;
         
