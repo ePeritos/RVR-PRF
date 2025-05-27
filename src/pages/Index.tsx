@@ -161,6 +161,7 @@ const Index = () => {
         );
       
       case 3:
+        const selectedData = filteredData.filter(item => selectedItems.includes(item.id));
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
@@ -171,7 +172,10 @@ const Index = () => {
                 Configure os parâmetros técnicos para geração do Relatório de Valor Referencial
               </p>
             </div>
-            <ParameterForm onSubmit={handleParameterSubmit} />
+            <ParameterForm 
+              onSubmit={handleParameterSubmit} 
+              selectedData={selectedData}
+            />
           </div>
         );
       
