@@ -10,12 +10,12 @@ import { ResultsTable } from '@/components/ResultsTable';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Mock data for demonstration
+// Mock data for demonstration - adjusted for real estate context
 const mockData = [
-  { id: '1', nome: 'Obra Residencial A', categoria: 'Edificações', valor: 450000, data: '2024-01-15', status: 'ativo' },
-  { id: '2', nome: 'Infraestrutura Vias', categoria: 'Infraestrutura', valor: 280000, data: '2024-02-10', status: 'concluido' },
-  { id: '3', nome: 'Sistema Elétrico', categoria: 'Instalações', valor: 125000, data: '2024-01-20', status: 'pendente' },
-  { id: '4', nome: 'Obra Comercial B', categoria: 'Edificações', valor: 680000, data: '2024-03-05', status: 'ativo' },
+  { id: '1', nome: 'Imóvel Residencial Centro', categoria: 'Residencial', valor: 450000, data: '2024-01-15', status: 'ativo' },
+  { id: '2', nome: 'Terreno Comercial BR-101', categoria: 'Comercial', valor: 280000, data: '2024-02-10', status: 'concluido' },
+  { id: '3', nome: 'Galpão Industrial', categoria: 'Industrial', valor: 125000, data: '2024-01-20', status: 'pendente' },
+  { id: '4', nome: 'Apartamento Zona Sul', categoria: 'Residencial', valor: 680000, data: '2024-03-05', status: 'ativo' },
 ];
 
 const Index = () => {
@@ -52,12 +52,15 @@ const Index = () => {
   };
 
   const handleParameterSubmit = (parameters: any) => {
-    // Mock calculation - in real app, this would use actual formulas
+    // RVR calculation - using real estate evaluation parameters
     const calculatedResults = filteredData
       .filter(item => selectedItems.includes(item.id))
       .map(item => {
-        const valorAvaliado = item.valor * (1 + parameters.bdi / 100) * 1.15; // Mock calculation
-        const diferenca = valorAvaliado - item.valor;
+        // RVR calculation formula (simplified example)
+        const fatorLocalizacao = 1.1; // Factor based on location
+        const fatorMercado = 1.05; // Market factor
+        const valorRvr = (parameters.valorM2 * parameters.area || item.valor) * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
+        const diferenca = valorRvr - item.valor;
         const percentual = (diferenca / item.valor) * 100;
         
         return {
@@ -65,7 +68,7 @@ const Index = () => {
           nome: item.nome,
           categoria: item.categoria,
           valorOriginal: item.valor,
-          valorAvaliado,
+          valorAvaliado: valorRvr,
           diferenca,
           percentual
         };
@@ -73,17 +76,17 @@ const Index = () => {
     
     setResults(calculatedResults);
     setCurrentStep(4);
-    console.log('Parameters submitted:', parameters);
+    console.log('RVR Parameters submitted:', parameters);
   };
 
   const handleViewPDF = (id: string) => {
-    console.log('View PDF for item:', id);
-    // In real app, this would open PDF viewer
+    console.log('View RVR PDF for property:', id);
+    // In real app, this would open RVR PDF viewer
   };
 
   const handleDownloadPDF = (id: string) => {
-    console.log('Download PDF for item:', id);
-    // In real app, this would download the PDF
+    console.log('Download RVR PDF for property:', id);
+    // In real app, this would download the RVR PDF
   };
 
   const nextStep = () => {
@@ -114,10 +117,10 @@ const Index = () => {
           <div className="space-y-6">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                Etapa 1: Upload de Arquivo
+                Etapa 1: Upload da Base de Dados
               </h2>
               <p className="text-muted-foreground">
-                Faça o upload da planilha contendo os dados das obras
+                Faça o upload da planilha contendo os dados dos imóveis para avaliação RVR
               </p>
             </div>
             <FileUpload onFileUpload={handleFileUpload} uploadedFile={uploadedFile} />
@@ -129,10 +132,10 @@ const Index = () => {
           <div className="space-y-6">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                Etapa 2: Filtros e Seleção
+                Etapa 2: Seleção de Imóveis
               </h2>
               <p className="text-muted-foreground">
-                Filtre os dados e selecione os itens para avaliação
+                Filtre e selecione os imóveis que serão incluídos no Relatório de Valor Referencial
               </p>
             </div>
             <DataFilter onFilterChange={handleFilterChange} />
@@ -149,10 +152,10 @@ const Index = () => {
           <div className="space-y-6">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                Etapa 3: Parâmetros de Avaliação
+                Etapa 3: Parâmetros RVR
               </h2>
               <p className="text-muted-foreground">
-                Insira os parâmetros necessários para o cálculo da avaliação
+                Configure os parâmetros técnicos para geração do Relatório de Valor Referencial
               </p>
             </div>
             <ParameterForm onSubmit={handleParameterSubmit} />
@@ -164,10 +167,10 @@ const Index = () => {
           <div className="space-y-6">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                Etapa 4: Resultados
+                Etapa 4: Relatório RVR
               </h2>
               <p className="text-muted-foreground">
-                Visualize os resultados da avaliação e gere relatórios em PDF
+                Visualize os resultados da avaliação e gere os Relatórios de Valor Referencial em PDF
               </p>
             </div>
             <ResultsTable 
@@ -213,7 +216,7 @@ const Index = () => {
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                Passo {currentStep} de 4
+                Passo {currentStep} de 4 - Processo RVR
               </p>
             </div>
           </div>
@@ -259,7 +262,7 @@ const Index = () => {
                 }}
                 className="hover-scale"
               >
-                Nova Avaliação
+                Nova Avaliação RVR
               </Button>
             </div>
           )}
