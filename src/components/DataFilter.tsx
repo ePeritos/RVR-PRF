@@ -9,9 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 interface FilterData {
   search: string;
-  category: string;
-  dateRange: string;
-  status: string;
+  anoCAIP: string;
+  tipoUnidade: string;
+  unidadeGestora: string;
 }
 
 interface DataFilterProps {
@@ -21,9 +21,9 @@ interface DataFilterProps {
 export function DataFilter({ onFilterChange }: DataFilterProps) {
   const [filters, setFilters] = useState<FilterData>({
     search: '',
-    category: '',
-    dateRange: '',
-    status: ''
+    anoCAIP: '',
+    tipoUnidade: '',
+    unidadeGestora: ''
   });
 
   const handleFilterChange = (key: keyof FilterData, value: string) => {
@@ -33,7 +33,7 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
   };
 
   const clearFilters = () => {
-    const emptyFilters = { search: '', category: '', dateRange: '', status: '' };
+    const emptyFilters = { search: '', anoCAIP: '', tipoUnidade: '', unidadeGestora: '' };
     setFilters(emptyFilters);
     onFilterChange(emptyFilters);
   };
@@ -63,46 +63,47 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">Categoria</Label>
-          <Select value={filters.category} onValueChange={(value) => handleFilterChange('category', value)}>
+          <Label className="text-sm font-medium text-foreground">Ano CAIP</Label>
+          <Select value={filters.anoCAIP} onValueChange={(value) => handleFilterChange('anoCAIP', value)}>
             <SelectTrigger className="bg-background border-border focus:border-primary">
-              <SelectValue placeholder="Selecionar categoria" />
+              <SelectValue placeholder="Selecionar ano" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
-              <SelectItem value="edificacoes">Edificações</SelectItem>
-              <SelectItem value="infraestrutura">Infraestrutura</SelectItem>
-              <SelectItem value="instalacoes">Instalações</SelectItem>
-              <SelectItem value="outros">Outros</SelectItem>
+              <SelectItem value="2024">2024</SelectItem>
+              <SelectItem value="2023">2023</SelectItem>
+              <SelectItem value="2022">2022</SelectItem>
+              <SelectItem value="2021">2021</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">Período</Label>
-          <Select value={filters.dateRange} onValueChange={(value) => handleFilterChange('dateRange', value)}>
+          <Label className="text-sm font-medium text-foreground">Tipo de Unidade</Label>
+          <Select value={filters.tipoUnidade} onValueChange={(value) => handleFilterChange('tipoUnidade', value)}>
             <SelectTrigger className="bg-background border-border focus:border-primary">
-              <SelectValue placeholder="Selecionar período" />
+              <SelectValue placeholder="Selecionar tipo" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
-              <SelectItem value="last-month">Último mês</SelectItem>
-              <SelectItem value="last-quarter">Último trimestre</SelectItem>
-              <SelectItem value="last-year">Último ano</SelectItem>
-              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="residencial">Residencial</SelectItem>
+              <SelectItem value="comercial">Comercial</SelectItem>
+              <SelectItem value="industrial">Industrial</SelectItem>
+              <SelectItem value="misto">Misto</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">Status</Label>
-          <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
+          <Label className="text-sm font-medium text-foreground">Unidade Gestora</Label>
+          <Select value={filters.unidadeGestora} onValueChange={(value) => handleFilterChange('unidadeGestora', value)}>
             <SelectTrigger className="bg-background border-border focus:border-primary">
-              <SelectValue placeholder="Selecionar status" />
+              <SelectValue placeholder="Selecionar unidade" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
-              <SelectItem value="ativo">Ativo</SelectItem>
-              <SelectItem value="concluido">Concluído</SelectItem>
-              <SelectItem value="pendente">Pendente</SelectItem>
-              <SelectItem value="cancelado">Cancelado</SelectItem>
+              <SelectItem value="dprf-df">DPRF/DF</SelectItem>
+              <SelectItem value="dprf-go">DPRF/GO</SelectItem>
+              <SelectItem value="dprf-mg">DPRF/MG</SelectItem>
+              <SelectItem value="dprf-sp">DPRF/SP</SelectItem>
+              <SelectItem value="dprf-rj">DPRF/RJ</SelectItem>
             </SelectContent>
           </Select>
         </div>

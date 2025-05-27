@@ -66,7 +66,6 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
                 <Checkbox
                   checked={selectedItems.length === data.length && data.length > 0}
                   onCheckedChange={handleSelectAll}
-                  className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
               </th>
               <th className="p-4 text-left text-sm font-medium text-foreground">Nome</th>
@@ -88,7 +87,6 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
                   <Checkbox
                     checked={selectedItems.includes(row.id)}
                     onCheckedChange={() => handleSelectItem(row.id)}
-                    className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   />
                 </td>
                 <td className="p-4 text-sm font-medium text-foreground">{row.nome}</td>

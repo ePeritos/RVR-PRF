@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -39,12 +38,26 @@ const Index = () => {
       );
     }
     
-    if (filters.category) {
-      filtered = filtered.filter(item => item.categoria === filters.category);
+    if (filters.anoCAIP) {
+      // Filtrar por ano CAIP - assumindo que a data contém o ano
+      filtered = filtered.filter(item => item.data.includes(filters.anoCAIP));
     }
     
-    if (filters.status) {
-      filtered = filtered.filter(item => item.status === filters.status);
+    if (filters.tipoUnidade) {
+      // Mapear categoria para tipo de unidade
+      const categoryMap: Record<string, string> = {
+        'residencial': 'Residencial',
+        'comercial': 'Comercial', 
+        'industrial': 'Industrial',
+        'misto': 'Misto'
+      };
+      filtered = filtered.filter(item => item.categoria === categoryMap[filters.tipoUnidade]);
+    }
+    
+    if (filters.unidadeGestora) {
+      // Para demonstração, filtrar por uma propriedade simulada
+      // Em um app real, isso viria dos dados da planilha
+      console.log('Filtrando por unidade gestora:', filters.unidadeGestora);
     }
     
     setFilteredData(filtered);
