@@ -10,11 +10,21 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Mock data for demonstration - adjusted for real estate context
-const mockData = [
-  { id: '1', nome: 'Imóvel Residencial Centro', categoria: 'Residencial', valor: 450000, data: '2024-01-15', status: 'ativo' },
-  { id: '2', nome: 'Terreno Comercial BR-101', categoria: 'Comercial', valor: 280000, data: '2024-02-10', status: 'concluido' },
-  { id: '3', nome: 'Galpão Industrial', categoria: 'Industrial', valor: 125000, data: '2024-01-20', status: 'pendente' },
-  { id: '4', nome: 'Apartamento Zona Sul', categoria: 'Residencial', valor: 680000, data: '2024-03-05', status: 'ativo' },
+interface DataRow {
+  id: string;
+  nome: string;
+  categoria: string;
+  valor: number;
+  data: string;
+  status: string;
+  area?: number; // Area will come from spreadsheet
+}
+
+const mockData: DataRow[] = [
+  { id: '1', nome: 'Imóvel Residencial Centro', categoria: 'Residencial', valor: 450000, data: '2024-01-15', status: 'ativo', area: 120 },
+  { id: '2', nome: 'Terreno Comercial BR-101', categoria: 'Comercial', valor: 280000, data: '2024-02-10', status: 'concluido', area: 150 },
+  { id: '3', nome: 'Galpão Industrial', categoria: 'Industrial', valor: 125000, data: '2024-01-20', status: 'pendente', area: 300 },
+  { id: '4', nome: 'Apartamento Zona Sul', categoria: 'Residencial', valor: 680000, data: '2024-03-05', status: 'ativo', area: 95 },
 ];
 
 const Index = () => {
