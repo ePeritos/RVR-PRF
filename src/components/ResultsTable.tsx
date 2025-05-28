@@ -39,11 +39,6 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
   const [selectedReport, setSelectedReport] = useState<ResultRow | null>(null);
   const [isReportViewerOpen, setIsReportViewerOpen] = useState(false);
 
-  const totalOriginal = results.reduce((sum, item) => sum + item.valorOriginal, 0);
-  const totalAvaliado = results.reduce((sum, item) => sum + item.valorAvaliado, 0);
-  const totalDiferenca = totalAvaliado - totalOriginal;
-  const totalPercentual = totalOriginal > 0 ? (totalDiferenca / totalOriginal) * 100 : 0;
-
   const getDiferencaColor = (valor: number) => {
     if (valor > 0) return 'text-green-600 dark:text-green-400';
     if (valor < 0) return 'text-red-600 dark:text-red-400';
@@ -143,24 +138,6 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
                 </tr>
               ))}
             </tbody>
-            <tfoot className="bg-muted/50 border-t-2 border-border">
-              <tr>
-                <td colSpan={2} className="p-4 text-sm font-semibold text-foreground">TOTAL</td>
-                <td className="p-4 text-sm font-semibold text-foreground">
-                  {totalOriginal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                </td>
-                <td className="p-4 text-sm font-semibold text-foreground">
-                  {totalAvaliado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                </td>
-                <td className={`p-4 text-sm font-semibold ${getDiferencaColor(totalDiferenca)}`}>
-                  {totalDiferenca > 0 ? '+' : ''}{totalDiferenca.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                </td>
-                <td className={`p-4 text-sm font-semibold ${getDiferencaColor(totalDiferenca)}`}>
-                  {totalPercentual > 0 ? '+' : ''}{totalPercentual.toFixed(2)}%
-                </td>
-                <td className="p-4"></td>
-              </tr>
-            </tfoot>
           </table>
         </div>
 
