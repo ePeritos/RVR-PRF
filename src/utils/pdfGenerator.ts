@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -89,7 +88,6 @@ export const generatePDF = async (data: RVRReportData): Promise<void> => {
       foreignObjectRendering: true,
       logging: true, // Ativado para debug
       removeContainer: false,
-      async: true,
       onclone: (clonedDoc) => {
         // Garante que o elemento clonado está visível
         const clonedElement = clonedDoc.getElementById(elementId);
