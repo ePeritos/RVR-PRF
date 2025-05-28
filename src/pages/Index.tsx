@@ -1,13 +1,10 @@
+
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
-import { FileUpload } from '@/components/FileUpload';
-import { DataFilter } from '@/components/DataFilter';
-import { DataTable } from '@/components/DataTable';
-import { ParameterForm } from '@/components/ParameterForm';
-import { ResultsTable } from '@/components/ResultsTable';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { StepIndicator } from '@/components/StepIndicator';
+import { StepContent } from '@/components/StepContent';
+import { NavigationButtons } from '@/components/NavigationButtons';
 
 // Mock data for demonstration - adjusted for real estate context using spreadsheet column names
 interface DataRow {
@@ -162,85 +159,11 @@ const Index = () => {
     }
   };
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
-                Etapa 1: Upload da Base de Dados
-              </h2>
-              <p className="text-muted-foreground">
-                Faça o upload da planilha contendo os dados dos imóveis para avaliação RVR
-              </p>
-            </div>
-            <FileUpload onFileUpload={handleFileUpload} uploadedFile={uploadedFile} />
-          </div>
-        );
-      
-      case 2:
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
-                Etapa 2: Seleção de Imóveis
-              </h2>
-              <p className="text-muted-foreground">
-                Filtre e selecione os imóveis que serão incluídos no Relatório de Valor Referencial
-              </p>
-            </div>
-            <DataFilter onFilterChange={handleFilterChange} />
-            <DataTable 
-              data={filteredData} 
-              selectedItems={selectedItems}
-              onSelectionChange={setSelectedItems}
-            />
-          </div>
-        );
-      
-      case 3:
-        const selectedData = filteredData.filter(item => selectedItems.includes(item.id));
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
-                Etapa 3: Parâmetros RVR
-              </h2>
-              <p className="text-muted-foreground">
-                Configure os parâmetros técnicos para geração do Relatório de Valor Referencial
-              </p>
-            </div>
-            <ParameterForm 
-              onSubmit={handleParameterSubmit} 
-              selectedData={selectedData}
-            />
-          </div>
-        );
-      
-      case 4:
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
-                Etapa 4: Relatório RVR
-              </h2>
-              <p className="text-muted-foreground">
-                Visualize os resultados da avaliação e gere os Relatórios de Valor Referencial em PDF
-              </p>
-            </div>
-            <ResultsTable 
-              results={results}
-              onViewPDF={handleViewPDF}
-              onDownloadPDF={handleDownloadPDF}
-              parametros={currentParameters}
-            />
-          </div>
-        );
-      
-      default:
-        return null;
-    }
+  const handleNewEvaluation = () => {
+    setCurrentStep(1);
+    setUploadedFile(null);
+    setSelectedItems([]);
+    setResults([]);
   };
 
   return (
@@ -249,80 +172,30 @@ const Index = () => {
         <Header />
         
         <main className="container mx-auto px-4 py-8">
-          {/* Progress Steps */}
-          <div className="mb-8">
-            <div className="flex justify-center items-center space-x-4 mb-4">
-              {[1, 2, 3, 4].map((step) => (
-                <div key={step} className="flex items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                    step === currentStep 
-                      ? 'bg-primary text-primary-foreground' 
-                      : step < currentStep 
-                        ? 'bg-green-500 text-white' 
-                        : 'bg-muted text-muted-foreground'
-                  }`}>
-                    {step}
-                  </div>
-                  {step < 4 && (
-                    <div className={`w-12 h-0.5 mx-2 transition-colors ${
-                      step < currentStep ? 'bg-green-500' : 'bg-muted'
-                    }`} />
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Passo {currentStep} de 4 - Processo RVR
-              </p>
-            </div>
-          </div>
+          <StepIndicator currentStep={currentStep} totalSteps={4} />
 
-          {/* Step Content */}
-          <div className="animate-fade-in">
-            {renderStep()}
-          </div>
+          <StepContent
+            currentStep={currentStep}
+            uploadedFile={uploadedFile}
+            onFileUpload={handleFileUpload}
+            filteredData={filteredData}
+            onFilterChange={handleFilterChange}
+            selectedItems={selectedItems}
+            onSelectionChange={setSelectedItems}
+            onParameterSubmit={handleParameterSubmit}
+            results={results}
+            onViewPDF={handleViewPDF}
+            onDownloadPDF={handleDownloadPDF}
+            currentParameters={currentParameters}
+          />
 
-          {/* Navigation */}
-          {currentStep < 4 && (
-            <div className="flex justify-between mt-8">
-              <Button 
-                variant="outline" 
-                onClick={prevStep} 
-                disabled={currentStep === 1}
-                className="hover-scale"
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Anterior
-              </Button>
-              
-              <Button 
-                onClick={nextStep} 
-                disabled={!canProceed()}
-                className="hover-scale"
-              >
-                Próximo
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          )}
-          
-          {currentStep === 4 && (
-            <div className="flex justify-center mt-8">
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setCurrentStep(1);
-                  setUploadedFile(null);
-                  setSelectedItems([]);
-                  setResults([]);
-                }}
-                className="hover-scale"
-              >
-                Nova Avaliação RVR
-              </Button>
-            </div>
-          )}
+          <NavigationButtons
+            currentStep={currentStep}
+            canProceed={canProceed()}
+            onNextStep={nextStep}
+            onPrevStep={prevStep}
+            onNewEvaluation={handleNewEvaluation}
+          />
         </main>
       </div>
     </ThemeProvider>
