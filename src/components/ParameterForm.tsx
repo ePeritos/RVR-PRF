@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Calculator, DollarSign, Percent } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -79,7 +78,7 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       <Card className="p-6 bg-card border border-border">
         <div className="flex items-center gap-2 mb-6">
           <Calculator className="h-5 w-5 text-primary" />
@@ -150,13 +149,6 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
               </p>
             </div>
           </div>
-
-          {/* Botão movido para o final do formulário, no local do "Próximo" */}
-          <div className="flex justify-end mt-8">
-            <Button type="submit" className="hover-scale">
-              Gerar Relatório RVR
-            </Button>
-          </div>
         </form>
       </Card>
 
@@ -219,6 +211,13 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
           </div>
         </Card>
       )}
+
+      {/* Botão "Gerar Relatório RVR" posicionado no canto inferior direito */}
+      <div className="fixed bottom-8 right-8 z-10">
+        <Button onClick={handleSubmit} className="hover-scale shadow-lg">
+          Gerar Relatório RVR
+        </Button>
+      </div>
     </div>
   );
 }
