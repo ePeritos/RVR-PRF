@@ -19,7 +19,16 @@ export const NavigationButtons = ({
 }: NavigationButtonsProps) => {
   if (currentStep === 4) {
     return (
-      <div className="flex justify-center mt-8">
+      <div className="flex justify-between mt-8">
+        <Button 
+          variant="outline" 
+          onClick={onPrevStep}
+          className="hover-scale"
+        >
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Anterior
+        </Button>
+        
         <Button 
           variant="outline" 
           onClick={onNewEvaluation}
