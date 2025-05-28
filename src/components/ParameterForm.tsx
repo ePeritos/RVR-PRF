@@ -151,7 +151,8 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
             </div>
           </div>
 
-          <div className="flex justify-end">
+          {/* Botão movido para o final do formulário, no local do "Próximo" */}
+          <div className="flex justify-end mt-8">
             <Button type="submit" className="hover-scale">
               Gerar Relatório RVR
             </Button>

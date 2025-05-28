@@ -31,6 +31,22 @@ export const NavigationButtons = ({
     );
   }
 
+  // Na etapa 3, não mostra o botão "Próximo" pois será substituído pelo "Gerar Relatório RVR"
+  if (currentStep === 3) {
+    return (
+      <div className="flex justify-start mt-8">
+        <Button 
+          variant="outline" 
+          onClick={onPrevStep}
+          className="hover-scale"
+        >
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Anterior
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex justify-between mt-8">
       <Button 
