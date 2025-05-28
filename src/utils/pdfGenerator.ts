@@ -29,15 +29,19 @@ export const generatePDF = async (data: RVRReportData): Promise<void> => {
   }
 
   try {
+    // Configurações otimizadas para melhor qualidade
     const canvas = await html2canvas(element, {
-      scale: 2,
+      scale: 3, // Aumenta a resolução
       useCORS: true,
       backgroundColor: '#ffffff',
       height: element.scrollHeight,
-      width: element.scrollWidth
+      width: element.scrollWidth,
+      allowTaint: false,
+      foreignObjectRendering: true,
+      logging: false
     });
 
-    const imgData = canvas.toDataURL('image/png');
+    const imgData = canvas.toDataURL('image/png', 1.0);
     const pdf = new jsPDF('p', 'mm', 'a4');
     
     const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -45,11 +49,47 @@ export const generatePDF = async (data: RVRReportData): Promise<void> => {
     const imgWidth = canvas.width;
     const imgHeight = canvas.height;
     
-    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-    const imgX = (pdfWidth - imgWidth * ratio) / 2;
-    const imgY = 10;
-
-    pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+    // Calcula a proporção para usar a largura completa da página
+    const ratio = pdfWidth / (imgWidth / 3); // Divide por 3 devido ao scale
+    const scaledHeight = (imgHeight / 3) * ratio; // Ajusta altura proporcionalmente
+    
+    // Se a imagem for maior que uma página, divide em múltiplas páginas
+    const pageHeight = pdfHeight - 20; // Margem de 10mm em cima e embaixo
+    let yPosition = 10; // Margem superior
+    let remainingHeight = scaledHeight;
+    
+    while (remainingHeight > 0) {
+      const currentPageHeight = Math.min(pageHeight, remainingHeight);
+      
+      // Calcula a posição Y no canvas original
+      const sourceY = ((scaledHeight - remainingHeight) / ratio) * 3;
+      const sourceHeight = (currentPageHeight / ratio) * 3;
+      
+      // Cria um canvas temporário para esta página
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sourceHeight;
+      const pageCtx = pageCanvas.getContext('2d');
+      
+      if (pageCtx) {
+        pageCtx.drawImage(
+          canvas,
+          0, sourceY, canvas.width, sourceHeight,
+          0, 0, canvas.width, sourceHeight
+        );
+        
+        const pageImgData = pageCanvas.toDataURL('image/png', 1.0);
+        pdf.addImage(pageImgData, 'PNG', 0, yPosition, pdfWidth, currentPageHeight);
+      }
+      
+      remainingHeight -= currentPageHeight;
+      
+      // Adiciona nova página se ainda houver conteúdo
+      if (remainingHeight > 0) {
+        pdf.addPage();
+        yPosition = 10;
+      }
+    }
     
     const fileName = `RVR_${data.nome.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
     pdf.save(fileName);
@@ -60,37 +100,25 @@ export const generatePDF = async (data: RVRReportData): Promise<void> => {
 };
 
 export const copyReportToClipboard = async (data: RVRReportData): Promise<void> => {
-  const reportText = `
-RELATÓRIO DE VALOR REFERENCIAL (RVR)
-Polícia Rodoviária Federal - PRF
-
-1. DADOS DO IMÓVEL
-Nome da Unidade: ${data.nome}
-Tipo de Unidade: ${data.categoria}
-Situação do Imóvel: ${data.situacaoImovel || 'Não informado'}
-Área Construída: ${data.areaImovel ? `${data.areaImovel} m²` : 'Não informado'}
-Unidade Gestora: ${data.unidadeGestora || 'Não informado'}
-Ano CAIP: ${data.anoCAIP || 'Não informado'}
-
-${data.parametros ? `2. PARÂMETROS DE AVALIAÇÃO
-CUB (R$/m²): ${data.parametros.cub.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-Valor m² (R$/m²): ${data.parametros.valorM2.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-BDI (%): ${data.parametros.bdi.toFixed(2)}%
-
-` : ''}3. RESULTADO DA AVALIAÇÃO
-Valor RVR Original: ${data.valorOriginal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-Valor RVR Avaliado: ${data.valorAvaliado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-Diferença: ${data.diferenca >= 0 ? '+' : ''}${data.diferenca.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-Variação Percentual: ${data.percentual >= 0 ? '+' : ''}${data.percentual.toFixed(2)}%
-
-4. CONCLUSÃO
-Com base na metodologia aplicada e nos parâmetros utilizados, o valor referencial do imóvel "${data.nome}" foi avaliado em ${data.valorAvaliado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}, representando uma ${data.diferenca >= 0 ? 'valorização' : 'desvalorização'} de ${Math.abs(data.percentual).toFixed(2)}% em relação ao valor RVR original.
-
-Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')}
-  `.trim();
-
+  // Obtém o conteúdo atual do template renderizado
+  const element = document.getElementById(`rvr-report-${data.id}`);
+  
+  if (!element) {
+    throw new Error('Elemento do relatório não encontrado para cópia');
+  }
+  
   try {
-    await navigator.clipboard.writeText(reportText);
+    // Extrai o texto do elemento HTML renderizado
+    const reportText = element.innerText || element.textContent || '';
+    
+    // Remove quebras de linha excessivas e espaços desnecessários
+    const cleanedText = reportText
+      .replace(/\n\s*\n\s*\n/g, '\n\n') // Remove múltiplas quebras de linha
+      .replace(/\s+/g, ' ') // Remove espaços excessivos
+      .replace(/\n /g, '\n') // Remove espaços no início das linhas
+      .trim();
+    
+    await navigator.clipboard.writeText(cleanedText);
   } catch (error) {
     console.error('Erro ao copiar para a área de transferência:', error);
     throw error;
