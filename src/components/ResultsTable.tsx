@@ -59,6 +59,10 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
     setIsReportViewerOpen(true);
   };
 
+  const handleDownloadReport = (result: ResultRow) => {
+    onDownloadPDF(result.id);
+  };
+
   const handleCloseReportViewer = () => {
     setIsReportViewerOpen(false);
     setSelectedReport(null);
@@ -124,6 +128,15 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
                         title="Visualizar Relatório RVR"
                       >
                         <Eye className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDownloadReport(row)}
+                        className="hover-scale"
+                        title="Baixar Relatório RVR"
+                      >
+                        <Download className="h-3 w-3" />
                       </Button>
                     </div>
                   </td>
