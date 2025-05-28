@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -9,22 +10,59 @@ import { ResultsTable } from '@/components/ResultsTable';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Mock data for demonstration - adjusted for real estate context
+// Mock data for demonstration - adjusted for real estate context using spreadsheet column names
 interface DataRow {
   id: string;
-  nome: string;
-  categoria: string;
-  valor: number;
-  data: string;
-  status: string;
-  area?: number; // Area will come from spreadsheet
+  'Nome da unidade': string;
+  'Tipo de unidade': string;
+  'RVR': number;
+  'Ano CAIP': string;
+  'Situação do imóvel': string;
+  'Área construída (m²)'?: number;
+  'Unidade Gestora': string;
 }
 
 const mockData: DataRow[] = [
-  { id: '1', nome: 'Imóvel Residencial Centro', categoria: 'Residencial', valor: 450000, data: '2024-01-15', status: 'ativo', area: 120 },
-  { id: '2', nome: 'Terreno Comercial BR-101', categoria: 'Comercial', valor: 280000, data: '2024-02-10', status: 'concluido', area: 150 },
-  { id: '3', nome: 'Galpão Industrial', categoria: 'Industrial', valor: 125000, data: '2024-01-20', status: 'pendente', area: 300 },
-  { id: '4', nome: 'Apartamento Zona Sul', categoria: 'Residencial', valor: 680000, data: '2024-03-05', status: 'ativo', area: 95 },
+  { 
+    id: '1', 
+    'Nome da unidade': 'UOP Centro Cidade', 
+    'Tipo de unidade': 'UOP', 
+    'RVR': 450000, 
+    'Ano CAIP': '2023', 
+    'Situação do imóvel': 'próprio', 
+    'Área construída (m²)': 120,
+    'Unidade Gestora': 'SPRF/SP'
+  },
+  { 
+    id: '2', 
+    'Nome da unidade': 'Delegacia Regional Norte', 
+    'Tipo de unidade': 'DEL', 
+    'RVR': 280000, 
+    'Ano CAIP': '2021', 
+    'Situação do imóvel': 'alugado', 
+    'Área construída (m²)': 150,
+    'Unidade Gestora': 'SPRF/RJ'
+  },
+  { 
+    id: '3', 
+    'Nome da unidade': 'Sede Regional Sul', 
+    'Tipo de unidade': 'SEDE REGIONAL', 
+    'RVR': 125000, 
+    'Ano CAIP': '2025', 
+    'Situação do imóvel': 'cedido', 
+    'Área construída (m²)': 300,
+    'Unidade Gestora': 'SPRF/RS'
+  },
+  { 
+    id: '4', 
+    'Nome da unidade': 'UNIPRF Campinas', 
+    'Tipo de unidade': 'UNIPRF', 
+    'RVR': 680000, 
+    'Ano CAIP': '2023', 
+    'Situação do imóvel': 'próprio', 
+    'Área construída (m²)': 95,
+    'Unidade Gestora': 'UNIPRF/SC'
+  },
 ];
 
 const Index = () => {
@@ -43,19 +81,15 @@ const Index = () => {
     let filtered = mockData;
     
     if (filters.anoCAIP) {
-      // Filtrar por ano CAIP - assumindo que a data contém o ano
-      filtered = filtered.filter(item => item.data.includes(filters.anoCAIP));
+      filtered = filtered.filter(item => item['Ano CAIP'] === filters.anoCAIP);
     }
     
     if (filters.tipoUnidade) {
-      // Para demonstração, filtrar por categoria
-      filtered = filtered.filter(item => item.categoria.toUpperCase() === filters.tipoUnidade);
+      filtered = filtered.filter(item => item['Tipo de unidade'] === filters.tipoUnidade);
     }
     
     if (filters.unidadeGestora) {
-      // Para demonstração, filtrar por uma propriedade simulada
-      // Em um app real, isso viria dos dados da planilha
-      console.log('Filtrando por unidade gestora:', filters.unidadeGestora);
+      filtered = filtered.filter(item => item['Unidade Gestora'] === filters.unidadeGestora);
     }
     
     setFilteredData(filtered);
@@ -68,18 +102,18 @@ const Index = () => {
       .filter(item => selectedItems.includes(item.id))
       .map(item => {
         // RVR calculation formula using area from spreadsheet data
-        const areaImovel = item.area || 100; // Use area from spreadsheet, fallback to 100
-        const fatorLocalizacao = 1.1; // Factor based on location
-        const fatorMercado = 1.05; // Market factor
+        const areaImovel = item['Área construída (m²)'] || 100;
+        const fatorLocalizacao = 1.1;
+        const fatorMercado = 1.05;
         const valorRvr = (parameters.valorM2 * areaImovel) * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
-        const diferenca = valorRvr - item.valor;
-        const percentual = (diferenca / item.valor) * 100;
+        const diferenca = valorRvr - item['RVR'];
+        const percentual = (diferenca / item['RVR']) * 100;
         
         return {
           id: item.id,
-          nome: item.nome,
-          categoria: item.categoria,
-          valorOriginal: item.valor,
+          nome: item['Nome da unidade'],
+          categoria: item['Tipo de unidade'],
+          valorOriginal: item['RVR'],
           valorAvaliado: valorRvr,
           diferenca,
           percentual

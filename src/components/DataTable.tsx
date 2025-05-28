@@ -7,11 +7,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 interface DataRow {
   id: string;
-  nome: string;
-  categoria: string;
-  valor: number;
-  data: string;
-  status: string;
+  'Nome da unidade': string;
+  'Tipo de unidade': string;
+  'RVR': number;
+  'Ano CAIP': string;
+  'Situação do imóvel': string;
+  'Área construída (m²)'?: number;
+  'Unidade Gestora': string;
 }
 
 interface DataTableProps {
@@ -38,11 +40,11 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ativo': return 'text-green-600 dark:text-green-400';
-      case 'concluido': return 'text-blue-600 dark:text-blue-400';
-      case 'pendente': return 'text-yellow-600 dark:text-yellow-400';
-      case 'cancelado': return 'text-red-600 dark:text-red-400';
+    switch (status.toLowerCase()) {
+      case 'próprio': return 'text-green-600 dark:text-green-400';
+      case 'alugado': return 'text-blue-600 dark:text-blue-400';
+      case 'cedido': return 'text-yellow-600 dark:text-yellow-400';
+      case 'em desuso': return 'text-red-600 dark:text-red-400';
       default: return 'text-muted-foreground';
     }
   };
@@ -68,11 +70,12 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
                   onCheckedChange={handleSelectAll}
                 />
               </th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Nome</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Categoria</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Valor (R$)</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Data</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Status</th>
+              <th className="p-4 text-left text-sm font-medium text-foreground">Nome da Unidade</th>
+              <th className="p-4 text-left text-sm font-medium text-foreground">Tipo de Unidade</th>
+              <th className="p-4 text-left text-sm font-medium text-foreground">Unidade Gestora</th>
+              <th className="p-4 text-left text-sm font-medium text-foreground">RVR (R$)</th>
+              <th className="p-4 text-left text-sm font-medium text-foreground">Ano CAIP</th>
+              <th className="p-4 text-left text-sm font-medium text-foreground">Situação do Imóvel</th>
             </tr>
           </thead>
           <tbody>
@@ -89,15 +92,16 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
                     onCheckedChange={() => handleSelectItem(row.id)}
                   />
                 </td>
-                <td className="p-4 text-sm font-medium text-foreground">{row.nome}</td>
-                <td className="p-4 text-sm text-muted-foreground">{row.categoria}</td>
+                <td className="p-4 text-sm font-medium text-foreground">{row['Nome da unidade']}</td>
+                <td className="p-4 text-sm text-muted-foreground">{row['Tipo de unidade']}</td>
+                <td className="p-4 text-sm text-muted-foreground">{row['Unidade Gestora']}</td>
                 <td className="p-4 text-sm text-foreground">
-                  {row.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  {row['RVR'].toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </td>
-                <td className="p-4 text-sm text-muted-foreground">{row.data}</td>
+                <td className="p-4 text-sm text-muted-foreground">{row['Ano CAIP']}</td>
                 <td className="p-4">
-                  <span className={`text-sm font-medium ${getStatusColor(row.status)}`}>
-                    {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
+                  <span className={`text-sm font-medium ${getStatusColor(row['Situação do imóvel'])}`}>
+                    {row['Situação do imóvel']}
                   </span>
                 </td>
               </tr>

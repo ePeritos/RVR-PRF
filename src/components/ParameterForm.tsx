@@ -8,12 +8,13 @@ import { Label } from '@/components/ui/label';
 
 interface DataRow {
   id: string;
-  nome: string;
-  categoria: string;
-  valor: number;
-  data: string;
-  status: string;
-  area?: number; // Area will come from spreadsheet
+  'Nome da unidade': string;
+  'Tipo de unidade': string;
+  'RVR': number;
+  'Ano CAIP': string;
+  'Situação do imóvel': string;
+  'Área construída (m²)'?: number;
+  'Unidade Gestora': string;
 }
 
 interface ParameterData {
@@ -50,19 +51,19 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
   const calculateRVR = (item: DataRow) => {
     if (!parameters.cub || !parameters.valorM2 || !parameters.bdi) {
       return {
-        valorRvr: item.valor,
+        valorRvr: item['RVR'],
         diferenca: 0,
         percentual: 0
       };
     }
 
     // Use area from spreadsheet data, fallback to 100 if not available
-    const areaImovel = item.area || 100;
+    const areaImovel = item['Área construída (m²)'] || 100;
     const fatorLocalizacao = 1.1;
     const fatorMercado = 1.05;
     const valorRvr = (parameters.valorM2 * areaImovel) * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
-    const diferenca = valorRvr - item.valor;
-    const percentual = item.valor > 0 ? (diferenca / item.valor) * 100 : 0;
+    const diferenca = valorRvr - item['RVR'];
+    const percentual = item['RVR'] > 0 ? (diferenca / item['RVR']) * 100 : 0;
 
     return {
       valorRvr,
@@ -174,11 +175,11 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
             <table className="w-full">
               <thead className="bg-muted/30 border-b border-border">
                 <tr>
-                  <th className="p-4 text-left text-sm font-medium text-foreground">Nome</th>
-                  <th className="p-4 text-left text-sm font-medium text-foreground">Categoria</th>
+                  <th className="p-4 text-left text-sm font-medium text-foreground">Nome da Unidade</th>
+                  <th className="p-4 text-left text-sm font-medium text-foreground">Tipo de Unidade</th>
                   <th className="p-4 text-left text-sm font-medium text-foreground">Área (m²)</th>
-                  <th className="p-4 text-left text-sm font-medium text-foreground">Valor Original</th>
-                  <th className="p-4 text-left text-sm font-medium text-foreground">Valor RVR</th>
+                  <th className="p-4 text-left text-sm font-medium text-foreground">RVR Original</th>
+                  <th className="p-4 text-left text-sm font-medium text-foreground">RVR Calculado</th>
                   <th className="p-4 text-left text-sm font-medium text-foreground">Diferença</th>
                   <th className="p-4 text-left text-sm font-medium text-foreground">%</th>
                 </tr>
@@ -186,7 +187,7 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
               <tbody>
                 {selectedData.map((row, index) => {
                   const { valorRvr, diferenca, percentual } = calculateRVR(row);
-                  const areaImovel = row.area || 100;
+                  const areaImovel = row['Área construída (m²)'] || 100;
                   return (
                     <tr 
                       key={row.id} 
@@ -194,11 +195,11 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
                         index % 2 === 0 ? 'bg-background' : 'bg-muted/10'
                       }`}
                     >
-                      <td className="p-4 text-sm font-medium text-foreground">{row.nome}</td>
-                      <td className="p-4 text-sm text-muted-foreground">{row.categoria}</td>
+                      <td className="p-4 text-sm font-medium text-foreground">{row['Nome da unidade']}</td>
+                      <td className="p-4 text-sm text-muted-foreground">{row['Tipo de unidade']}</td>
                       <td className="p-4 text-sm text-muted-foreground">{areaImovel} m²</td>
                       <td className="p-4 text-sm text-foreground">
-                        {row.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        {row['RVR'].toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       </td>
                       <td className="p-4 text-sm font-medium text-foreground">
                         {valorRvr.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
