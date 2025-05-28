@@ -3,16 +3,16 @@ import jsPDF from 'jspdf';
 import { PDFDimensions } from './types';
 
 export const createPDFDimensions = (canvas: HTMLCanvasElement): PDFDimensions => {
-  // Dimensões A4 em mm com margens adequadas
+  // Dimensões A4 em mm com margens maiores para evitar corte
   const pdfWidth = 210;
   const pdfHeight = 297;
-  const margin = 10; // Margem reduzida para aproveitar melhor o espaço
+  const margin = 15; // Margem aumentada para evitar corte
   const usableWidth = pdfWidth - (margin * 2);
   const usableHeight = pdfHeight - (margin * 2);
   
-  // Calcula proporções corretas mantendo aspect ratio
+  // Calcula proporções com margem de segurança
   const canvasAspectRatio = canvas.height / canvas.width;
-  const scaledWidth = usableWidth;
+  const scaledWidth = usableWidth * 0.95; // 95% da largura disponível
   const scaledHeight = scaledWidth * canvasAspectRatio;
 
   return {
@@ -33,13 +33,16 @@ export const addImageToPDF = (
 ): void => {
   const { margin, scaledWidth, scaledHeight, usableHeight } = dimensions;
   
-  // Se o conteúdo cabe em uma página
-  if (scaledHeight <= usableHeight) {
+  // Se o conteúdo cabe em uma página com margem de segurança
+  if (scaledHeight <= usableHeight * 0.95) {
+    const centerX = margin + (dimensions.usableWidth - scaledWidth) / 2;
+    const centerY = margin + 5; // Pequeno offset do topo
+    
     pdf.addImage(
       imgData, 
       'PNG', 
-      margin, 
-      margin, 
+      centerX, 
+      centerY, 
       scaledWidth, 
       scaledHeight,
       undefined,
@@ -59,17 +62,19 @@ export const addMultiPageImageToPDF = (
 ): void => {
   const { margin, scaledWidth, scaledHeight, usableHeight } = dimensions;
   
-  // Divide o conteúdo em múltiplas páginas sem cortar
+  // Calcula altura útil por página com margem de segurança
+  const pageContentHeight = usableHeight * 0.9; // 90% da altura disponível
+  
   let currentY = 0;
   let pageNumber = 1;
   
   while (currentY < scaledHeight) {
     const remainingHeight = scaledHeight - currentY;
-    const pageContentHeight = Math.min(usableHeight, remainingHeight);
+    const actualPageHeight = Math.min(pageContentHeight, remainingHeight);
     
     // Calcula a área do canvas para esta página
     const sourceY = (currentY / scaledHeight) * canvas.height;
-    const sourceHeight = (pageContentHeight / scaledHeight) * canvas.height;
+    const sourceHeight = (actualPageHeight / scaledHeight) * canvas.height;
     
     // Cria canvas temporário para a página atual
     const pageCanvas = document.createElement('canvas');
@@ -91,20 +96,24 @@ export const addMultiPageImageToPDF = (
       
       const pageImgData = pageCanvas.toDataURL('image/png', 1.0);
       
+      // Centraliza o conteúdo na página
+      const centerX = margin + (dimensions.usableWidth - scaledWidth) / 2;
+      const centerY = margin + 10; // Offset do topo
+      
       // Adiciona ao PDF
       pdf.addImage(
         pageImgData, 
         'PNG', 
-        margin, 
-        margin, 
+        centerX, 
+        centerY, 
         scaledWidth, 
-        pageContentHeight,
+        actualPageHeight,
         undefined,
         'FAST'
       );
     }
     
-    currentY += pageContentHeight;
+    currentY += actualPageHeight;
     
     // Adiciona nova página se necessário
     if (currentY < scaledHeight) {

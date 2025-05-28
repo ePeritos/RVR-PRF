@@ -38,6 +38,7 @@ interface ResultsTableProps {
 export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: ResultsTableProps) {
   const [selectedReport, setSelectedReport] = useState<ResultRow | null>(null);
   const [isReportViewerOpen, setIsReportViewerOpen] = useState(false);
+  const [isDownloadingPDF, setIsDownloadingPDF] = useState<string | null>(null);
 
   const getDiferencaColor = (valor: number) => {
     if (valor > 0) return 'text-green-600 dark:text-green-400';
@@ -54,14 +55,40 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
     setIsReportViewerOpen(true);
   };
 
-  const handleDownloadReport = (result: ResultRow) => {
-    console.log('Downloading PDF for:', result.id);
-    onDownloadPDF(result.id);
+  const handleDownloadReport = async (result: ResultRow) => {
+    setIsDownloadingPDF(result.id);
+    
+    try {
+      const reportData = {
+        ...result,
+        parametros
+      };
+      
+      // Primeiro, renderiza o relatório invisível
+      setSelectedReport(reportData);
+      
+      // Aguarda um pouco para garantir que o elemento seja renderizado
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Chama a função de download do pai
+      await onDownloadPDF(result.id);
+    } catch (error) {
+      console.error('Erro ao baixar PDF:', error);
+    } finally {
+      setIsDownloadingPDF(null);
+      // Limpa o relatório se não estava aberto
+      if (!isReportViewerOpen) {
+        setSelectedReport(null);
+      }
+    }
   };
 
   const handleCloseReportViewer = () => {
     setIsReportViewerOpen(false);
-    setSelectedReport(null);
+    // Só limpa se não está fazendo download
+    if (!isDownloadingPDF) {
+      setSelectedReport(null);
+    }
   };
 
   return (
@@ -129,6 +156,7 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
                         size="sm"
                         variant="outline"
                         onClick={() => handleDownloadReport(row)}
+                        disabled={isDownloadingPDF === row.id}
                         className="hover-scale"
                         title="Baixar Relatório RVR"
                       >
@@ -149,7 +177,7 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
         )}
       </Card>
 
-      {/* Visualizador do Relatório */}
+      {/* Visualizador do Relatório - pode estar visível ou invisível */}
       {selectedReport && (
         <RVRReportViewer
           data={selectedReport}

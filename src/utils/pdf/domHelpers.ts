@@ -1,17 +1,44 @@
 
-// Função auxiliar para aguardar renderização
-export const waitForElement = (selector: string, timeout = 5000): Promise<HTMLElement> => {
+// Função auxiliar para aguardar renderização com timeout maior
+export const waitForElement = (selector: string, timeout = 10000): Promise<HTMLElement> => {
   return new Promise((resolve, reject) => {
-    const element = document.getElementById(selector);
-    if (element && element.offsetHeight > 0) {
-      resolve(element);
+    // Primeiro, tenta encontrar o elemento imediatamente
+    const immediateElement = document.getElementById(selector);
+    if (immediateElement && immediateElement.offsetHeight > 0) {
+      console.log('Elemento encontrado imediatamente:', selector);
+      resolve(immediateElement);
       return;
     }
 
+    let attempts = 0;
+    const maxAttempts = 50; // 50 tentativas
+    const checkInterval = 200; // Verifica a cada 200ms
+
+    const checkElement = () => {
+      attempts++;
+      const element = document.getElementById(selector);
+      
+      if (element && element.offsetHeight > 0) {
+        console.log(`Elemento encontrado após ${attempts} tentativas:`, selector);
+        resolve(element);
+        return;
+      }
+
+      if (attempts >= maxAttempts) {
+        console.error(`Elemento não encontrado após ${attempts} tentativas:`, selector);
+        reject(new Error('Elemento não encontrado ou não renderizado'));
+        return;
+      }
+
+      setTimeout(checkElement, checkInterval);
+    };
+
+    // Também usa MutationObserver como backup
     const observer = new MutationObserver(() => {
       const element = document.getElementById(selector);
       if (element && element.offsetHeight > 0) {
         observer.disconnect();
+        console.log('Elemento encontrado via MutationObserver:', selector);
         resolve(element);
       }
     });
@@ -22,10 +49,13 @@ export const waitForElement = (selector: string, timeout = 5000): Promise<HTMLEl
       attributes: true
     });
 
+    // Inicia a verificação por polling
+    setTimeout(checkElement, checkInterval);
+
     // Timeout de segurança
     setTimeout(() => {
       observer.disconnect();
-      reject(new Error('Elemento não encontrado ou não renderizado'));
+      reject(new Error('Timeout ao aguardar elemento'));
     }, timeout);
   });
 };
@@ -56,13 +86,15 @@ export const prepareElementForCapture = (element: HTMLElement): OriginalStyles =
   // Aplica estilos temporários para garantir captura completa
   element.style.display = 'block';
   element.style.visibility = 'visible';
-  element.style.width = '794px'; // Largura A4 em pixels (210mm)
-  element.style.maxWidth = '794px';
+  element.style.width = '800px'; // Largura aumentada
+  element.style.maxWidth = '800px';
   element.style.position = 'absolute';
   element.style.zIndex = '9999';
   element.style.top = '0';
   element.style.left = '0';
   element.style.backgroundColor = '#ffffff';
+  element.style.margin = '0';
+  element.style.padding = '30px'; // Padding aumentado
 
   return originalStyles;
 };
