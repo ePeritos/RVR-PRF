@@ -42,26 +42,14 @@ const Index = () => {
   const handleFilterChange = (filters: any) => {
     let filtered = mockData;
     
-    if (filters.search) {
-      filtered = filtered.filter(item => 
-        item.nome.toLowerCase().includes(filters.search.toLowerCase())
-      );
-    }
-    
     if (filters.anoCAIP) {
       // Filtrar por ano CAIP - assumindo que a data contém o ano
       filtered = filtered.filter(item => item.data.includes(filters.anoCAIP));
     }
     
     if (filters.tipoUnidade) {
-      // Mapear categoria para tipo de unidade
-      const categoryMap: Record<string, string> = {
-        'residencial': 'Residencial',
-        'comercial': 'Comercial', 
-        'industrial': 'Industrial',
-        'misto': 'Misto'
-      };
-      filtered = filtered.filter(item => item.categoria === categoryMap[filters.tipoUnidade]);
+      // Para demonstração, filtrar por categoria
+      filtered = filtered.filter(item => item.categoria.toUpperCase() === filters.tipoUnidade);
     }
     
     if (filters.unidadeGestora) {
