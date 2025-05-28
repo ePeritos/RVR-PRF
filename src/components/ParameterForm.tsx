@@ -31,7 +31,7 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
   const [parameters, setParameters] = useState<ParameterData>({
     cub: 0,
     valorM2: 0,
-    bdi: 0
+    bdi: 25 // Default value of 25%
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -138,7 +138,7 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
                 step="0.01"
                 min="0"
                 max="100"
-                placeholder="0,00"
+                placeholder="25,00"
                 value={parameters.bdi || ''}
                 onChange={(e) => handleChange('bdi', e.target.value)}
                 className="bg-background border-border focus:border-primary"
@@ -147,30 +147,6 @@ export function ParameterForm({ onSubmit, selectedData }: ParameterFormProps) {
               <p className="text-xs text-muted-foreground">
                 Benefícios e Despesas Indiretas
               </p>
-            </div>
-          </div>
-
-          <div className="bg-muted/20 border border-border rounded-lg p-4">
-            <h4 className="text-sm font-medium text-foreground mb-2">Resumo dos Parâmetros RVR</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">CUB:</span>
-                <span className="ml-2 font-medium text-foreground">
-                  {parameters.cub ? parameters.cub.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'}
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Valor m²:</span>
-                <span className="ml-2 font-medium text-foreground">
-                  {parameters.valorM2 ? parameters.valorM2.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'}
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">BDI:</span>
-                <span className="ml-2 font-medium text-foreground">
-                  {parameters.bdi ? `${parameters.bdi}%` : '0%'}
-                </span>
-              </div>
             </div>
           </div>
 
