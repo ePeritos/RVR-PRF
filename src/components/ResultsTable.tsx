@@ -55,6 +55,7 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
   };
 
   const handleDownloadReport = (result: ResultRow) => {
+    console.log('Downloading PDF for:', result.id);
     onDownloadPDF(result.id);
   };
 

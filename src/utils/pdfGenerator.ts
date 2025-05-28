@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -68,45 +67,69 @@ export const generatePDF = async (data: RVRReportData): Promise<void> => {
       offsetWidth: element.offsetWidth
     });
 
-    // Garante que o elemento está visível e com largura adequada
+    // Configurações aprimoradas para evitar corte de conteúdo
     const originalDisplay = element.style.display;
     const originalVisibility = element.style.visibility;
     const originalWidth = element.style.width;
     const originalMaxWidth = element.style.maxWidth;
     const originalPosition = element.style.position;
+    const originalZIndex = element.style.zIndex;
+    const originalTop = element.style.top;
+    const originalLeft = element.style.left;
     
+    // Aplica estilos temporários para garantir captura completa
     element.style.display = 'block';
     element.style.visibility = 'visible';
-    element.style.width = '210mm'; // Largura exata A4
-    element.style.maxWidth = '210mm';
-    element.style.position = 'relative';
+    element.style.width = '794px'; // Largura A4 em pixels (210mm)
+    element.style.maxWidth = '794px';
+    element.style.position = 'absolute';
+    element.style.zIndex = '9999';
+    element.style.top = '0';
+    element.style.left = '0';
+    element.style.backgroundColor = '#ffffff';
 
-    // Aguarda um frame adicional para garantir renderização
+    // Aguarda renderização completa
     await new Promise(resolve => requestAnimationFrame(resolve));
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Configurações otimizadas para captura A4
+    // Configurações otimizadas do html2canvas
     const canvas = await html2canvas(element, {
-      scale: 2, // Maior qualidade
+      scale: 2, // Alta qualidade
       useCORS: true,
-      backgroundColor: '#ffffff',
-      height: element.scrollHeight,
-      width: element.scrollWidth,
       allowTaint: false,
+      backgroundColor: '#ffffff',
+      width: element.scrollWidth,
+      height: element.scrollHeight,
       foreignObjectRendering: true,
-      logging: true,
+      logging: false,
       removeContainer: false,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: 1200,
+      windowHeight: element.scrollHeight + 100,
       onclone: (clonedDoc) => {
-        // Garante que o elemento clonado está visível e com largura A4
         const clonedElement = clonedDoc.getElementById(elementId);
         if (clonedElement) {
           clonedElement.style.display = 'block';
           clonedElement.style.visibility = 'visible';
           clonedElement.style.position = 'relative';
-          clonedElement.style.width = '210mm';
-          clonedElement.style.maxWidth = '210mm';
-          clonedElement.style.boxSizing = 'border-box';
+          clonedElement.style.width = '794px';
+          clonedElement.style.maxWidth = '794px';
+          clonedElement.style.backgroundColor = '#ffffff';
           clonedElement.style.padding = '20px';
+          clonedElement.style.boxSizing = 'border-box';
+          clonedElement.style.fontSize = '14px';
+          clonedElement.style.lineHeight = '1.5';
+          
+          // Aplica estilos para melhor renderização
+          const allElements = clonedElement.querySelectorAll('*');
+          allElements.forEach((el: Element) => {
+            const htmlEl = el as HTMLElement;
+            htmlEl.style.boxSizing = 'border-box';
+            if (htmlEl.style.transform) {
+              htmlEl.style.transform = 'none';
+            }
+          });
         }
       }
     });
@@ -117,6 +140,9 @@ export const generatePDF = async (data: RVRReportData): Promise<void> => {
     element.style.width = originalWidth;
     element.style.maxWidth = originalMaxWidth;
     element.style.position = originalPosition;
+    element.style.zIndex = originalZIndex;
+    element.style.top = originalTop;
+    element.style.left = originalLeft;
 
     console.log('Canvas gerado, dimensões:', {
       width: canvas.width,
@@ -135,14 +161,14 @@ export const generatePDF = async (data: RVRReportData): Promise<void> => {
 
     const pdf = new jsPDF('p', 'mm', 'a4');
     
-    // Dimensões A4 em mm
+    // Dimensões A4 em mm com margens adequadas
     const pdfWidth = 210;
     const pdfHeight = 297;
-    const margin = 15; // Margem reduzida
+    const margin = 10; // Margem reduzida para aproveitar melhor o espaço
     const usableWidth = pdfWidth - (margin * 2);
     const usableHeight = pdfHeight - (margin * 2);
     
-    // Calcula proporções corretas
+    // Calcula proporções corretas mantendo aspect ratio
     const canvasAspectRatio = canvas.height / canvas.width;
     const scaledWidth = usableWidth;
     const scaledHeight = scaledWidth * canvasAspectRatio;
@@ -165,33 +191,35 @@ export const generatePDF = async (data: RVRReportData): Promise<void> => {
         margin, 
         margin, 
         scaledWidth, 
-        scaledHeight
+        scaledHeight,
+        undefined,
+        'FAST'
       );
     } else {
-      // Divide o conteúdo em páginas
-      let yPosition = 0;
-      let currentPage = 1;
+      // Divide o conteúdo em múltiplas páginas sem cortar
+      let currentY = 0;
+      let pageNumber = 1;
       
-      while (yPosition < scaledHeight) {
-        // Altura da seção atual (limitada pela altura útil da página)
-        const currentSectionHeight = Math.min(usableHeight, scaledHeight - yPosition);
+      while (currentY < scaledHeight) {
+        const remainingHeight = scaledHeight - currentY;
+        const pageContentHeight = Math.min(usableHeight, remainingHeight);
         
-        // Calcula a posição Y no canvas original
-        const sourceY = (yPosition / scaledHeight) * canvas.height;
-        const sourceHeight = (currentSectionHeight / scaledHeight) * canvas.height;
+        // Calcula a área do canvas para esta página
+        const sourceY = (currentY / scaledHeight) * canvas.height;
+        const sourceHeight = (pageContentHeight / scaledHeight) * canvas.height;
         
-        // Cria um canvas temporário para esta página
+        // Cria canvas temporário para a página atual
         const pageCanvas = document.createElement('canvas');
         pageCanvas.width = canvas.width;
-        pageCanvas.height = sourceHeight;
+        pageCanvas.height = Math.ceil(sourceHeight);
         const pageCtx = pageCanvas.getContext('2d');
         
         if (pageCtx) {
-          // Preenche com fundo branco
+          // Fundo branco
           pageCtx.fillStyle = '#ffffff';
           pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
           
-          // Desenha a seção do canvas original
+          // Desenha a seção correspondente
           pageCtx.drawImage(
             canvas,
             0, sourceY, canvas.width, sourceHeight,
@@ -200,28 +228,32 @@ export const generatePDF = async (data: RVRReportData): Promise<void> => {
           
           const pageImgData = pageCanvas.toDataURL('image/png', 1.0);
           
-          // Adiciona a imagem ao PDF com margens
+          // Adiciona ao PDF
           pdf.addImage(
             pageImgData, 
             'PNG', 
             margin, 
             margin, 
             scaledWidth, 
-            currentSectionHeight
+            pageContentHeight,
+            undefined,
+            'FAST'
           );
         }
         
-        yPosition += currentSectionHeight;
+        currentY += pageContentHeight;
         
-        // Adiciona nova página se ainda houver conteúdo
-        if (yPosition < scaledHeight) {
+        // Adiciona nova página se necessário
+        if (currentY < scaledHeight) {
           pdf.addPage();
-          currentPage++;
+          pageNumber++;
         }
       }
+      
+      console.log(`PDF gerado com ${pageNumber} página(s)`);
     }
     
-    console.log(`PDF gerado com sucesso`);
+    console.log('PDF gerado com sucesso');
     
     const fileName = `RVR_${data.nome.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
     pdf.save(fileName);

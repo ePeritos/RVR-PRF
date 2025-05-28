@@ -1,10 +1,11 @@
-
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
 import { StepIndicator } from '@/components/StepIndicator';
 import { StepContent } from '@/components/StepContent';
 import { NavigationButtons } from '@/components/NavigationButtons';
+import { generatePDF } from '@/utils/pdfGenerator';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock data for demonstration - adjusted for real estate context using spreadsheet column names
 interface DataRow {
@@ -68,6 +69,7 @@ const Index = () => {
   const [filteredData, setFilteredData] = useState(mockData);
   const [results, setResults] = useState<any[]>([]);
   const [currentParameters, setCurrentParameters] = useState<any>(null);
+  const { toast } = useToast();
 
   const handleFileUpload = (file: File) => {
     setUploadedFile(file);
@@ -119,7 +121,8 @@ const Index = () => {
           areaImovel: item['Área construída (m²)'],
           situacaoImovel: item['Situação do imóvel'],
           unidadeGestora: item['Unidade Gestora'],
-          anoCAIP: item['Ano CAIP']
+          anoCAIP: item['Ano CAIP'],
+          parametros: parameters
         };
       });
     
@@ -133,9 +136,26 @@ const Index = () => {
     // In real app, this would open RVR PDF viewer
   };
 
-  const handleDownloadPDF = (id: string) => {
+  const handleDownloadPDF = async (id: string) => {
     console.log('Download RVR PDF for property:', id);
-    // In real app, this would download the RVR PDF
+    
+    try {
+      const resultData = results.find(result => result.id === id);
+      if (resultData) {
+        await generatePDF(resultData);
+        toast({
+          title: "PDF Gerado",
+          description: "O relatório RVR foi baixado com sucesso.",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao gerar o PDF. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   const nextStep = () => {
