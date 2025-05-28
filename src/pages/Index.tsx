@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -71,6 +70,7 @@ const Index = () => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [filteredData, setFilteredData] = useState(mockData);
   const [results, setResults] = useState<any[]>([]);
+  const [currentParameters, setCurrentParameters] = useState<any>(null);
 
   const handleFileUpload = (file: File) => {
     setUploadedFile(file);
@@ -97,6 +97,8 @@ const Index = () => {
   };
 
   const handleParameterSubmit = (parameters: any) => {
+    setCurrentParameters(parameters);
+    
     // RVR calculation - using real estate evaluation parameters
     const calculatedResults = filteredData
       .filter(item => selectedItems.includes(item.id))
@@ -116,7 +118,11 @@ const Index = () => {
           valorOriginal: item['RVR'],
           valorAvaliado: valorRvr,
           diferenca,
-          percentual
+          percentual,
+          areaImovel: item['Área construída (m²)'],
+          situacaoImovel: item['Situação do imóvel'],
+          unidadeGestora: item['Unidade Gestora'],
+          anoCAIP: item['Ano CAIP']
         };
       });
     
@@ -227,6 +233,7 @@ const Index = () => {
               results={results}
               onViewPDF={handleViewPDF}
               onDownloadPDF={handleDownloadPDF}
+              parametros={currentParameters}
             />
           </div>
         );
