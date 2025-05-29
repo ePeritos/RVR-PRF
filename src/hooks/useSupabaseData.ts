@@ -50,16 +50,50 @@ export const useSupabaseData = () => {
     }));
   };
 
-  const fetchData = async () => {
+  const fetchAllData = async () => {
     try {
       setLoading(true);
-      const { data: supabaseData, error } = await supabase
-        .from('dados_caip')
-        .select('*');
+      let allData: DadosCAIP[] = [];
+      let from = 0;
+      const batchSize = 1000;
+      let hasMore = true;
 
-      if (error) throw error;
+      console.log('Iniciando busca de todos os dados da tabela dados_caip...');
 
-      const transformedData = transformData(supabaseData || []);
+      while (hasMore) {
+        const { data: batchData, error, count } = await supabase
+          .from('dados_caip')
+          .select('*', { count: 'exact' })
+          .range(from, from + batchSize - 1);
+
+        if (error) {
+          console.error('Erro na consulta:', error);
+          throw error;
+        }
+
+        if (batchData) {
+          allData = [...allData, ...batchData];
+          console.log(`Carregados ${batchData.length} registros (total: ${allData.length})`);
+          
+          // Se retornou menos que o batch size, chegamos ao fim
+          if (batchData.length < batchSize) {
+            hasMore = false;
+          } else {
+            from += batchSize;
+          }
+        } else {
+          hasMore = false;
+        }
+
+        // Log do total de registros na primeira consulta
+        if (from === 0 && count !== null) {
+          console.log(`Total de registros na tabela: ${count}`);
+        }
+      }
+
+      console.log(`Busca finalizada. Total de registros carregados: ${allData.length}`);
+      
+      const transformedData = transformData(allData);
       setData(transformedData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
@@ -70,8 +104,8 @@ export const useSupabaseData = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    fetchAllData();
   }, []);
 
-  return { data, loading, error, refetch: fetchData };
+  return { data, loading, error, refetch: fetchAllData };
 };
