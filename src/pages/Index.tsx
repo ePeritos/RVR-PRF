@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -62,8 +61,8 @@ const Index = () => {
         const fatorLocalizacao = 1.1;
         const fatorMercado = 1.05;
         const valorRvr = (parameters.valorM2 * areaImovel) * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
-        // Usando valor base para comparação já que não temos RVR anterior
-        const valorOriginal = item.rvr || 0;
+        // Since we don't have previous RVR value in the new structure, we'll use 0 as baseline
+        const valorOriginal = 0;
         const diferenca = valorRvr - valorOriginal;
         const percentual = valorOriginal ? (diferenca / valorOriginal) * 100 : 0;
         
