@@ -150,45 +150,76 @@ export const processExcelFile = async (file: File): Promise<{ success: boolean; 
     const jsonData: ExcelRow[] = XLSX.utils.sheet_to_json(worksheet);
     
     console.log('Dados extraídos da planilha:', jsonData.length, 'linhas');
+    console.log('Primeiras colunas encontradas:', Object.keys(jsonData[0] || {}));
     
     if (jsonData.length === 0) {
       return { success: false, message: 'Planilha vazia ou sem dados válidos' };
     }
     
     // Mapear e transformar os dados
-    const mappedData = jsonData.map(row => {
+    const mappedData = jsonData.map((row, index) => {
       const mappedRow: any = {};
       
       Object.keys(row).forEach(originalColumn => {
-        const dbColumn = columnMapping[originalColumn];
+        // Tentar encontrar o mapeamento exato ou com variações de espaços
+        const trimmedColumn = originalColumn.trim();
+        let dbColumn = columnMapping[originalColumn] || columnMapping[trimmedColumn];
+        
+        // Se não encontrou, tentar variações
+        if (!dbColumn) {
+          const foundKey = Object.keys(columnMapping).find(key => 
+            key.toLowerCase().trim() === trimmedColumn.toLowerCase()
+          );
+          if (foundKey) {
+            dbColumn = columnMapping[foundKey];
+          }
+        }
+        
         if (dbColumn) {
           let value = row[originalColumn];
           
           // Tratar valores numéricos
           if (dbColumn === 'rvr' || dbColumn.includes('area_')) {
-            value = value && !isNaN(Number(value)) ? Number(value) : null;
+            if (value !== null && value !== undefined && value !== '') {
+              const numValue = Number(value);
+              value = !isNaN(numValue) ? numValue : null;
+            } else {
+              value = null;
+            }
           }
           
           // Tratar strings vazias
-          if (typeof value === 'string' && value.trim() === '') {
-            value = null;
+          if (typeof value === 'string') {
+            value = value.trim();
+            if (value === '') {
+              value = null;
+            }
           }
           
           mappedRow[dbColumn] = value;
+        } else {
+          console.log(`Coluna não mapeada: "${originalColumn}"`);
         }
       });
       
+      console.log(`Linha ${index + 1} mapeada:`, Object.keys(mappedRow).length, 'campos');
       return mappedRow;
     }).filter(row => Object.keys(row).length > 0);
     
-    console.log('Dados mapeados:', mappedData.length, 'registros');
+    console.log('Dados mapeados:', mappedData.length, 'registros válidos');
     
-    // Inserir no Supabase em lotes
-    const batchSize = 100;
+    if (mappedData.length === 0) {
+      return { success: false, message: 'Nenhum dado válido encontrado após o mapeamento' };
+    }
+    
+    // Inserir no Supabase em lotes menores
+    const batchSize = 50;
     let totalInserted = 0;
     
     for (let i = 0; i < mappedData.length; i += batchSize) {
       const batch = mappedData.slice(i, i + batchSize);
+      
+      console.log(`Inserindo lote ${Math.floor(i / batchSize) + 1}:`, batch.length, 'registros');
       
       const { data, error } = await supabase
         .from('dados_caip')
@@ -196,11 +227,11 @@ export const processExcelFile = async (file: File): Promise<{ success: boolean; 
       
       if (error) {
         console.error('Erro ao inserir lote:', error);
-        throw error;
+        throw new Error(`Erro na inserção: ${error.message}`);
       }
       
       totalInserted += batch.length;
-      console.log(`Inserido lote: ${totalInserted}/${mappedData.length}`);
+      console.log(`Lote inserido com sucesso. Total: ${totalInserted}/${mappedData.length}`);
     }
     
     return { 

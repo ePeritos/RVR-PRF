@@ -61,6 +61,7 @@ export function FileUpload({ onFileUpload, uploadedFile, onDataLoaded }: FileUpl
     setIsProcessing(true);
     
     try {
+      console.log('Iniciando processamento da planilha...');
       const result = await processExcelFile(file);
       
       if (result.success) {
@@ -68,8 +69,10 @@ export function FileUpload({ onFileUpload, uploadedFile, onDataLoaded }: FileUpl
           title: "Upload concluído!",
           description: result.message,
         });
+        console.log('Upload realizado com sucesso:', result.count, 'registros');
         onDataLoaded?.();
       } else {
+        console.error('Erro no processamento:', result.message);
         toast({
           title: "Erro no upload",
           description: result.message,
@@ -77,7 +80,7 @@ export function FileUpload({ onFileUpload, uploadedFile, onDataLoaded }: FileUpl
         });
       }
     } catch (error) {
-      console.error('Erro no processamento:', error);
+      console.error('Erro inesperado no processamento:', error);
       toast({
         title: "Erro",
         description: "Erro inesperado ao processar a planilha",
