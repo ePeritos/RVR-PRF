@@ -13,6 +13,7 @@ const Index = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [filteredData, setFilteredData] = useState<DataRow[]>([]);
+  const [currentFilters, setCurrentFilters] = useState<any>({});
   const [results, setResults] = useState<any[]>([]);
   const [currentParameters, setCurrentParameters] = useState<any>(null);
   const { toast } = useToast();
@@ -31,8 +32,11 @@ const Index = () => {
   };
 
   const handleFilterChange = (filters: any) => {
+    setCurrentFilters(filters);
+    
     let filtered = supabaseData;
     
+    // Apply filters sequentially
     if (filters.anoCAIP) {
       filtered = filtered.filter(item => item['ano_caip'] === filters.anoCAIP);
     }

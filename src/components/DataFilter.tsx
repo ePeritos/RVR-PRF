@@ -9,8 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface FilterData {
   anoCAIP: string;
-  tipoUnidade: string;
   unidadeGestora: string;
+  tipoUnidade: string;
 }
 
 interface DataFilterProps {
@@ -20,8 +20,8 @@ interface DataFilterProps {
 export function DataFilter({ onFilterChange }: DataFilterProps) {
   const [filters, setFilters] = useState<FilterData>({
     anoCAIP: '',
-    tipoUnidade: '',
-    unidadeGestora: ''
+    unidadeGestora: '',
+    tipoUnidade: ''
   });
 
   const [anosDisponiveis, setAnosDisponiveis] = useState<string[]>([]);
@@ -29,51 +29,95 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
   const [unidadesGestoras, setUnidadesGestoras] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchUniqueValues = async () => {
-      try {
-        setLoading(true);
-        
-        // Buscar todos os dados para extrair valores únicos
-        const { data, error } = await supabase
-          .from('dados_caip')
-          .select('ano_caip, tipo_de_unidade, unidade_gestora');
+  // Função para buscar valores únicos considerando os filtros aplicados
+  const fetchFilteredValues = async (currentFilters: FilterData) => {
+    try {
+      setLoading(true);
+      
+      // Construir query base
+      let query = supabase.from('dados_caip').select('ano_caip, unidade_gestora, tipo_de_unidade');
 
-        if (error) {
-          console.error('Erro ao buscar dados únicos:', error);
-          return;
-        }
-
-        if (data) {
-          // Extrair valores únicos e filtrar valores válidos
-          const anosUnicos = [...new Set(data.map(item => item.ano_caip).filter(Boolean))].sort();
-          const tiposUnicos = [...new Set(data.map(item => item.tipo_de_unidade).filter(Boolean))].sort();
-          const unidadesUnicas = [...new Set(data.map(item => item.unidade_gestora).filter(Boolean))].sort();
-          
-          setAnosDisponiveis(anosUnicos);
-          setTiposUnidade(tiposUnicos);
-          setUnidadesGestoras(unidadesUnicas);
-        }
-      } catch (err) {
-        console.error('Erro ao carregar valores únicos:', err);
-      } finally {
-        setLoading(false);
+      // Aplicar filtros existentes para buscar valores relacionados
+      if (currentFilters.anoCAIP) {
+        query = query.eq('ano_caip', currentFilters.anoCAIP);
       }
-    };
+      if (currentFilters.unidadeGestora) {
+        query = query.eq('unidade_gestora', currentFilters.unidadeGestora);
+      }
+      if (currentFilters.tipoUnidade) {
+        query = query.eq('tipo_de_unidade', currentFilters.tipoUnidade);
+      }
 
-    fetchUniqueValues();
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Erro ao buscar dados únicos:', error);
+        return;
+      }
+
+      if (data) {
+        // Para anos: sempre mostrar todos os anos disponíveis
+        if (!currentFilters.anoCAIP) {
+          const { data: allData } = await supabase
+            .from('dados_caip')
+            .select('ano_caip');
+          
+          if (allData) {
+            const anosUnicos = [...new Set(allData.map(item => item.ano_caip).filter(Boolean))].sort();
+            setAnosDisponiveis(anosUnicos);
+          }
+        } else {
+          setAnosDisponiveis([currentFilters.anoCAIP]);
+        }
+
+        // Para unidades gestoras: filtrar com base no ano selecionado
+        const unidadesUnicas = [...new Set(data.map(item => item.unidade_gestora).filter(Boolean))].sort();
+        setUnidadesGestoras(unidadesUnicas);
+
+        // Para tipos de unidade: filtrar com base nos filtros aplicados
+        const tiposUnicos = [...new Set(data.map(item => item.tipo_de_unidade).filter(Boolean))].sort();
+        setTiposUnidade(tiposUnicos);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar valores únicos:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Carregar valores iniciais
+  useEffect(() => {
+    fetchFilteredValues({ anoCAIP: '', unidadeGestora: '', tipoUnidade: '' });
   }, []);
+
+  // Atualizar valores disponíveis quando filtros mudarem
+  useEffect(() => {
+    fetchFilteredValues(filters);
+  }, [filters.anoCAIP]);
 
   const handleFilterChange = (key: keyof FilterData, value: string) => {
     const newFilters = { ...filters, [key]: value };
+    
+    // Se mudou o ano, limpar outros filtros
+    if (key === 'anoCAIP') {
+      newFilters.unidadeGestora = '';
+      newFilters.tipoUnidade = '';
+    }
+    
+    // Se mudou a unidade gestora, limpar tipo de unidade
+    if (key === 'unidadeGestora') {
+      newFilters.tipoUnidade = '';
+    }
+    
     setFilters(newFilters);
     onFilterChange(newFilters);
   };
 
   const clearFilters = () => {
-    const emptyFilters = { anoCAIP: '', tipoUnidade: '', unidadeGestora: '' };
+    const emptyFilters = { anoCAIP: '', unidadeGestora: '', tipoUnidade: '' };
     setFilters(emptyFilters);
     onFilterChange(emptyFilters);
+    fetchFilteredValues(emptyFilters);
   };
 
   if (loading) {
@@ -115,7 +159,11 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
 
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">Unidade Gestora</Label>
-          <Select value={filters.unidadeGestora} onValueChange={(value) => handleFilterChange('unidadeGestora', value)}>
+          <Select 
+            value={filters.unidadeGestora} 
+            onValueChange={(value) => handleFilterChange('unidadeGestora', value)}
+            disabled={!filters.anoCAIP}
+          >
             <SelectTrigger className="bg-background border-border focus:border-primary">
               <SelectValue placeholder="Selecionar unidade gestora" />
             </SelectTrigger>
@@ -129,7 +177,11 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
 
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">Tipo de Unidade</Label>
-          <Select value={filters.tipoUnidade} onValueChange={(value) => handleFilterChange('tipoUnidade', value)}>
+          <Select 
+            value={filters.tipoUnidade} 
+            onValueChange={(value) => handleFilterChange('tipoUnidade', value)}
+            disabled={!filters.anoCAIP}
+          >
             <SelectTrigger className="bg-background border-border focus:border-primary">
               <SelectValue placeholder="Selecionar tipo" />
             </SelectTrigger>
