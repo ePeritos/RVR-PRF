@@ -211,33 +211,83 @@ export const processExcelFile = async (file: File): Promise<{ success: boolean; 
     if (mappedData.length === 0) {
       return { success: false, message: 'Nenhum dado válido encontrado após o mapeamento' };
     }
-    
-    // Inserir no Supabase em lotes menores
+
+    // Processamento em lotes para evitar sobrecarregar o banco
     const batchSize = 50;
+    let totalProcessed = 0;
+    let totalUpdated = 0;
     let totalInserted = 0;
     
     for (let i = 0; i < mappedData.length; i += batchSize) {
       const batch = mappedData.slice(i, i + batchSize);
       
-      console.log(`Inserindo lote ${Math.floor(i / batchSize) + 1}:`, batch.length, 'registros');
+      console.log(`Processando lote ${Math.floor(i / batchSize) + 1}:`, batch.length, 'registros');
       
-      const { data, error } = await supabase
-        .from('dados_caip')
-        .insert(batch);
-      
-      if (error) {
-        console.error('Erro ao inserir lote:', error);
-        throw new Error(`Erro na inserção: ${error.message}`);
+      // Processar cada registro do lote
+      for (const record of batch) {
+        // Verificar se o registro já existe usando id_caip
+        if (record.id_caip) {
+          const { data: existingData, error: fetchError } = await supabase
+            .from('dados_caip')
+            .select('id')
+            .eq('id_caip', record.id_caip)
+            .maybeSingle();
+          
+          if (fetchError) {
+            console.error(`Erro ao verificar registro existente com id_caip ${record.id_caip}:`, fetchError);
+            continue;
+          }
+          
+          if (existingData) {
+            // Atualizar registro existente
+            console.log(`Atualizando registro com id_caip: ${record.id_caip}`);
+            const { error: updateError } = await supabase
+              .from('dados_caip')
+              .update(record)
+              .eq('id_caip', record.id_caip);
+            
+            if (updateError) {
+              console.error(`Erro ao atualizar registro com id_caip ${record.id_caip}:`, updateError);
+            } else {
+              totalUpdated++;
+            }
+          } else {
+            // Inserir novo registro
+            console.log(`Inserindo novo registro com id_caip: ${record.id_caip}`);
+            const { error: insertError } = await supabase
+              .from('dados_caip')
+              .insert([record]);
+            
+            if (insertError) {
+              console.error(`Erro ao inserir registro com id_caip ${record.id_caip}:`, insertError);
+            } else {
+              totalInserted++;
+            }
+          }
+        } else {
+          // Sem id_caip, inserir como novo (isso pode criar duplicatas se não tiver id)
+          console.warn('Registro sem id_caip encontrado, inserindo como novo');
+          const { error } = await supabase
+            .from('dados_caip')
+            .insert([record]);
+          
+          if (error) {
+            console.error('Erro ao inserir registro sem id_caip:', error);
+          } else {
+            totalInserted++;
+          }
+        }
+        
+        totalProcessed++;
       }
       
-      totalInserted += batch.length;
-      console.log(`Lote inserido com sucesso. Total: ${totalInserted}/${mappedData.length}`);
+      console.log(`Lote processado. Progresso: ${totalProcessed}/${mappedData.length}`);
     }
     
     return { 
       success: true, 
-      message: `${totalInserted} registros importados com sucesso`, 
-      count: totalInserted 
+      message: `Processamento concluído: ${totalUpdated} registros atualizados e ${totalInserted} registros inseridos.`, 
+      count: totalProcessed 
     };
     
   } catch (error) {

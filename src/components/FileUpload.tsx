@@ -15,6 +15,7 @@ interface FileUploadProps {
 export function FileUpload({ onFileUpload, uploadedFile, onDataLoaded }: FileUploadProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingResult, setProcessingResult] = useState<{updated: number, inserted: number} | null>(null);
   const { toast } = useToast();
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -59,17 +60,27 @@ export function FileUpload({ onFileUpload, uploadedFile, onDataLoaded }: FileUpl
     
     onFileUpload(file);
     setIsProcessing(true);
+    setProcessingResult(null);
     
     try {
       console.log('Iniciando processamento da planilha...');
       const result = await processExcelFile(file);
       
       if (result.success) {
+        // Extrair números atualizados/inseridos da mensagem
+        const updatedMatch = result.message.match(/(\d+) registros atualizados/);
+        const insertedMatch = result.message.match(/(\d+) registros inseridos/);
+        
+        const updated = updatedMatch ? parseInt(updatedMatch[1]) : 0;
+        const inserted = insertedMatch ? parseInt(insertedMatch[1]) : 0;
+        
+        setProcessingResult({ updated, inserted });
+        
         toast({
           title: "Upload concluído!",
           description: result.message,
         });
-        console.log('Upload realizado com sucesso:', result.count, 'registros');
+        console.log('Upload realizado com sucesso:', result.message);
         onDataLoaded?.();
       } else {
         console.error('Erro no processamento:', result.message);
@@ -106,7 +117,7 @@ export function FileUpload({ onFileUpload, uploadedFile, onDataLoaded }: FileUpl
               Processando Planilha...
             </h3>
             <p className="text-muted-foreground mb-4">
-              Carregando dados no banco de dados. Aguarde...
+              Verificando e atualizando registros no banco de dados. Aguarde...
             </p>
           </div>
         ) : uploadedFile ? (
@@ -115,9 +126,24 @@ export function FileUpload({ onFileUpload, uploadedFile, onDataLoaded }: FileUpl
             <h3 className="text-lg font-semibold text-foreground mb-2">
               Planilha Carregada com Sucesso!
             </h3>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-muted-foreground mb-2">
               {uploadedFile.name}
             </p>
+            {processingResult && (
+              <div className="mt-2 mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-md">
+                <p className="text-sm font-medium">Resultado do processamento:</p>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div className="text-center">
+                    <p className="text-xl font-bold text-amber-600">{processingResult.updated}</p>
+                    <p className="text-xs text-muted-foreground">registros atualizados</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-bold text-green-600">{processingResult.inserted}</p>
+                    <p className="text-xs text-muted-foreground">registros inseridos</p>
+                  </div>
+                </div>
+              </div>
+            )}
             <p className="text-sm text-muted-foreground">
               Os dados foram importados para o banco de dados. Agora você pode continuar para a próxima etapa.
             </p>
