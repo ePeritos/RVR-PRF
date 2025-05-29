@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -19,11 +18,16 @@ const Index = () => {
   const { toast } = useToast();
 
   // Use real Supabase data
-  const { data: supabaseData, loading, error } = useSupabaseData();
+  const { data: supabaseData, loading, error, refetch } = useSupabaseData();
 
   const handleFileUpload = (file: File) => {
     setUploadedFile(file);
     console.log('File uploaded:', file.name);
+  };
+
+  const handleDataLoaded = async () => {
+    console.log('Dados carregados, atualizando lista...');
+    await refetch();
   };
 
   const handleFilterChange = (filters: any) => {
@@ -178,6 +182,7 @@ const Index = () => {
             currentStep={currentStep}
             uploadedFile={uploadedFile}
             onFileUpload={handleFileUpload}
+            onDataLoaded={handleDataLoaded}
             filteredData={filteredData.length > 0 ? filteredData : supabaseData}
             onFilterChange={handleFilterChange}
             selectedItems={selectedItems}

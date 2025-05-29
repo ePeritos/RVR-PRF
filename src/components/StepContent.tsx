@@ -20,6 +20,7 @@ interface StepContentProps {
   currentStep: number;
   uploadedFile: File | null;
   onFileUpload: (file: File) => void;
+  onDataLoaded?: () => void;
   filteredData: DataRow[];
   onFilterChange: (filters: any) => void;
   selectedItems: string[];
@@ -35,6 +36,7 @@ export const StepContent = ({
   currentStep,
   uploadedFile,
   onFileUpload,
+  onDataLoaded,
   filteredData,
   onFilterChange,
   selectedItems,
@@ -52,13 +54,17 @@ export const StepContent = ({
           <div className="space-y-6">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                Etapa 1: Upload da Base de Dados
+                Etapa 1: Upload da Base de Dados CAIP
               </h2>
               <p className="text-muted-foreground">
-                Faça o upload da planilha contendo os dados dos imóveis para avaliação RVR
+                Faça o upload da planilha XLSX contendo os dados CAIP que serão importados para o banco de dados
               </p>
             </div>
-            <FileUpload onFileUpload={onFileUpload} uploadedFile={uploadedFile} />
+            <FileUpload 
+              onFileUpload={onFileUpload} 
+              uploadedFile={uploadedFile}
+              onDataLoaded={onDataLoaded}
+            />
           </div>
         );
       
@@ -70,7 +76,7 @@ export const StepContent = ({
                 Etapa 2: Seleção de Imóveis
               </h2>
               <p className="text-muted-foreground">
-                Filtre e selecione os imóveis que serão incluídos no Relatório de Valor Referencial
+                Filtre e selecione os imóveis do banco de dados que serão incluídos no Relatório de Valor Referencial
               </p>
             </div>
             <DataFilter onFilterChange={onFilterChange} />
