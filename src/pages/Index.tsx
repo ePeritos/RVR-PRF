@@ -133,7 +133,7 @@ const Index = () => {
 
   const canProceed = () => {
     switch (currentStep) {
-      case 1: return uploadedFile !== null;
+      case 1: return true; // Always allow proceeding from step 1
       case 2: return selectedItems.length > 0;
       case 3: return true;
       default: return false;
