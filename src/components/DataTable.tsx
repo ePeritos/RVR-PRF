@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { CheckCircle, Circle } from 'lucide-react';
+import { CheckCircle, Circle, ArrowUpAZ, ArrowDownAZ } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -23,7 +23,13 @@ interface DataTableProps {
   onSelectionChange: (selectedIds: string[]) => void;
 }
 
+type SortField = keyof DataRow;
+type SortDirection = 'asc' | 'desc' | null;
+
 export function DataTable({ data, selectedItems, onSelectionChange }: DataTableProps) {
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+
   const handleSelectAll = () => {
     if (selectedItems.length === data.length) {
       onSelectionChange([]);
@@ -38,6 +44,48 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
     } else {
       onSelectionChange([...selectedItems, id]);
     }
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else if (sortDirection === 'desc') {
+        setSortDirection(null);
+        setSortField(null);
+      } else {
+        setSortDirection('asc');
+      }
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortedData = () => {
+    if (!sortField || !sortDirection) {
+      return data;
+    }
+
+    return [...data].sort((a, b) => {
+      const aValue = a[sortField];
+      const bValue = b[sortField];
+
+      // Handle numeric fields
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+
+      // Handle string fields
+      const aStr = String(aValue || '').toLowerCase();
+      const bStr = String(bValue || '').toLowerCase();
+
+      if (sortDirection === 'asc') {
+        return aStr.localeCompare(bStr, 'pt-BR');
+      } else {
+        return bStr.localeCompare(aStr, 'pt-BR');
+      }
+    });
   };
 
   const formatArea = (area: number | null | undefined) => {
@@ -57,6 +105,22 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
       default: return 'text-muted-foreground';
     }
   };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) {
+      return <ArrowUpAZ className="h-4 w-4 text-muted-foreground opacity-50" />;
+    }
+    
+    if (sortDirection === 'asc') {
+      return <ArrowUpAZ className="h-4 w-4 text-primary" />;
+    } else if (sortDirection === 'desc') {
+      return <ArrowDownAZ className="h-4 w-4 text-primary" />;
+    }
+    
+    return <ArrowUpAZ className="h-4 w-4 text-muted-foreground opacity-50" />;
+  };
+
+  const sortedData = getSortedData();
 
   return (
     <Card className="overflow-hidden bg-card border border-border">
@@ -79,18 +143,106 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
                   onCheckedChange={handleSelectAll}
                 />
               </th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Ano CAIP</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Nome da Unidade</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Unidade Gestora</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Tipo de Unidade</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Estado de Conservação</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Vida Útil (Anos)</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Área do Terreno</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Área Construída</th>
+              <th className="p-4 text-left">
+                <Button
+                  variant="ghost"
+                  className="h-auto p-0 font-medium text-foreground hover:bg-transparent"
+                  onClick={() => handleSort('ano_caip')}
+                >
+                  <span className="flex items-center gap-2">
+                    Ano CAIP
+                    <SortIcon field="ano_caip" />
+                  </span>
+                </Button>
+              </th>
+              <th className="p-4 text-left">
+                <Button
+                  variant="ghost"
+                  className="h-auto p-0 font-medium text-foreground hover:bg-transparent"
+                  onClick={() => handleSort('nome_da_unidade')}
+                >
+                  <span className="flex items-center gap-2">
+                    Nome da Unidade
+                    <SortIcon field="nome_da_unidade" />
+                  </span>
+                </Button>
+              </th>
+              <th className="p-4 text-left">
+                <Button
+                  variant="ghost"
+                  className="h-auto p-0 font-medium text-foreground hover:bg-transparent"
+                  onClick={() => handleSort('unidade_gestora')}
+                >
+                  <span className="flex items-center gap-2">
+                    Unidade Gestora
+                    <SortIcon field="unidade_gestora" />
+                  </span>
+                </Button>
+              </th>
+              <th className="p-4 text-left">
+                <Button
+                  variant="ghost"
+                  className="h-auto p-0 font-medium text-foreground hover:bg-transparent"
+                  onClick={() => handleSort('tipo_de_unidade')}
+                >
+                  <span className="flex items-center gap-2">
+                    Tipo de Unidade
+                    <SortIcon field="tipo_de_unidade" />
+                  </span>
+                </Button>
+              </th>
+              <th className="p-4 text-left">
+                <Button
+                  variant="ghost"
+                  className="h-auto p-0 font-medium text-foreground hover:bg-transparent"
+                  onClick={() => handleSort('estado_de_conservacao')}
+                >
+                  <span className="flex items-center gap-2">
+                    Estado de Conservação
+                    <SortIcon field="estado_de_conservacao" />
+                  </span>
+                </Button>
+              </th>
+              <th className="p-4 text-left">
+                <Button
+                  variant="ghost"
+                  className="h-auto p-0 font-medium text-foreground hover:bg-transparent"
+                  onClick={() => handleSort('vida_util_estimada_anos')}
+                >
+                  <span className="flex items-center gap-2">
+                    Vida Útil (Anos)
+                    <SortIcon field="vida_util_estimada_anos" />
+                  </span>
+                </Button>
+              </th>
+              <th className="p-4 text-left">
+                <Button
+                  variant="ghost"
+                  className="h-auto p-0 font-medium text-foreground hover:bg-transparent"
+                  onClick={() => handleSort('area_do_terreno_m2')}
+                >
+                  <span className="flex items-center gap-2">
+                    Área do Terreno
+                    <SortIcon field="area_do_terreno_m2" />
+                  </span>
+                </Button>
+              </th>
+              <th className="p-4 text-left">
+                <Button
+                  variant="ghost"
+                  className="h-auto p-0 font-medium text-foreground hover:bg-transparent"
+                  onClick={() => handleSort('area_construida_m2')}
+                >
+                  <span className="flex items-center gap-2">
+                    Área Construída
+                    <SortIcon field="area_construida_m2" />
+                  </span>
+                </Button>
+              </th>
             </tr>
           </thead>
           <tbody>
-            {data.map((row, index) => (
+            {sortedData.map((row, index) => (
               <tr 
                 key={row.id} 
                 className={`border-b border-border hover:bg-muted/20 transition-colors ${
