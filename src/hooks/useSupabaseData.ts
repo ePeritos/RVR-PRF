@@ -16,6 +16,12 @@ export interface DataRow {
   'area_construida_m2': number;
   'nome_da_unidade': string;
   'situacao_do_imovel': string;
+  'endereco': string;
+  'rip': string;
+  'matricula_do_imovel': string;
+  'processo_sei': string;
+  'idade_aparente_do_imovel': string;
+  'rvr': number;
 }
 
 export const useSupabaseData = () => {
@@ -35,6 +41,12 @@ export const useSupabaseData = () => {
       'area_construida_m2': item.area_construida_m2 ? Number(item.area_construida_m2) : 0,
       'nome_da_unidade': item.nome_da_unidade || '',
       'situacao_do_imovel': item.situacao_do_imovel || '',
+      'endereco': item.endereco || '',
+      'rip': item.rip || '',
+      'matricula_do_imovel': item.matricula_do_imovel || '',
+      'processo_sei': item.processo_sei || '',
+      'idade_aparente_do_imovel': item.idade_aparente_do_imovel || '',
+      'rvr': item.rvr ? Number(item.rvr) : 0,
     }));
   };
 

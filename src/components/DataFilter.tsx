@@ -1,9 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { Filter } from 'lucide-react';
+import { Filter, Search } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -11,6 +12,7 @@ interface FilterData {
   anoCAIP: string;
   unidadeGestora: string;
   tipoUnidade: string;
+  nomeUnidade: string;
 }
 
 interface DataFilterProps {
@@ -21,7 +23,8 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
   const [filters, setFilters] = useState<FilterData>({
     anoCAIP: '',
     unidadeGestora: '',
-    tipoUnidade: ''
+    tipoUnidade: '',
+    nomeUnidade: ''
   });
 
   const [anosDisponiveis, setAnosDisponiveis] = useState<string[]>([]);
@@ -29,55 +32,44 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
   const [unidadesGestoras, setUnidadesGestoras] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Função para buscar valores únicos considerando os filtros aplicados
-  const fetchFilteredValues = async (currentFilters: FilterData) => {
+  // Função para buscar todos os valores únicos independentemente
+  const fetchAllFilterValues = async () => {
     try {
       setLoading(true);
       
-      // Construir query base
-      let query = supabase.from('dados_caip').select('ano_caip, unidade_gestora, tipo_de_unidade');
-
-      // Aplicar filtros existentes para buscar valores relacionados
-      if (currentFilters.anoCAIP) {
-        query = query.eq('ano_caip', currentFilters.anoCAIP);
-      }
-      if (currentFilters.unidadeGestora) {
-        query = query.eq('unidade_gestora', currentFilters.unidadeGestora);
-      }
-      if (currentFilters.tipoUnidade) {
-        query = query.eq('tipo_de_unidade', currentFilters.tipoUnidade);
+      // Buscar todos os anos disponíveis
+      const { data: anosData } = await supabase
+        .from('dados_caip')
+        .select('ano_caip')
+        .not('ano_caip', 'is', null);
+      
+      if (anosData) {
+        const anosUnicos = [...new Set(anosData.map(item => item.ano_caip).filter(Boolean))].sort();
+        setAnosDisponiveis(anosUnicos);
       }
 
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Erro ao buscar dados únicos:', error);
-        return;
-      }
-
-      if (data) {
-        // Para anos: sempre mostrar todos os anos disponíveis
-        if (!currentFilters.anoCAIP) {
-          const { data: allData } = await supabase
-            .from('dados_caip')
-            .select('ano_caip');
-          
-          if (allData) {
-            const anosUnicos = [...new Set(allData.map(item => item.ano_caip).filter(Boolean))].sort();
-            setAnosDisponiveis(anosUnicos);
-          }
-        } else {
-          setAnosDisponiveis([currentFilters.anoCAIP]);
-        }
-
-        // Para unidades gestoras: filtrar com base no ano selecionado
-        const unidadesUnicas = [...new Set(data.map(item => item.unidade_gestora).filter(Boolean))].sort();
+      // Buscar todas as unidades gestoras disponíveis
+      const { data: unidadesData } = await supabase
+        .from('dados_caip')
+        .select('unidade_gestora')
+        .not('unidade_gestora', 'is', null);
+      
+      if (unidadesData) {
+        const unidadesUnicas = [...new Set(unidadesData.map(item => item.unidade_gestora).filter(Boolean))].sort();
         setUnidadesGestoras(unidadesUnicas);
+      }
 
-        // Para tipos de unidade: filtrar com base nos filtros aplicados
-        const tiposUnicos = [...new Set(data.map(item => item.tipo_de_unidade).filter(Boolean))].sort();
+      // Buscar todos os tipos de unidade disponíveis
+      const { data: tiposData } = await supabase
+        .from('dados_caip')
+        .select('tipo_de_unidade')
+        .not('tipo_de_unidade', 'is', null);
+      
+      if (tiposData) {
+        const tiposUnicos = [...new Set(tiposData.map(item => item.tipo_de_unidade).filter(Boolean))].sort();
         setTiposUnidade(tiposUnicos);
       }
+
     } catch (err) {
       console.error('Erro ao carregar valores únicos:', err);
     } finally {
@@ -85,39 +77,26 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
     }
   };
 
-  // Carregar valores iniciais
+  // Carregar valores únicos na inicialização
   useEffect(() => {
-    fetchFilteredValues({ anoCAIP: '', unidadeGestora: '', tipoUnidade: '' });
+    fetchAllFilterValues();
   }, []);
 
-  // Atualizar valores disponíveis quando filtros mudarem
+  // Atualizar filtros quando qualquer valor mudar
   useEffect(() => {
-    fetchFilteredValues(filters);
-  }, [filters.anoCAIP]);
+    onFilterChange(filters);
+  }, [filters, onFilterChange]);
 
   const handleFilterChange = (key: keyof FilterData, value: string) => {
-    const newFilters = { ...filters, [key]: value };
-    
-    // Se mudou o ano, limpar outros filtros
-    if (key === 'anoCAIP') {
-      newFilters.unidadeGestora = '';
-      newFilters.tipoUnidade = '';
-    }
-    
-    // Se mudou a unidade gestora, limpar tipo de unidade
-    if (key === 'unidadeGestora') {
-      newFilters.tipoUnidade = '';
-    }
-    
-    setFilters(newFilters);
-    onFilterChange(newFilters);
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
   };
 
   const clearFilters = () => {
-    const emptyFilters = { anoCAIP: '', unidadeGestora: '', tipoUnidade: '' };
+    const emptyFilters = { anoCAIP: '', unidadeGestora: '', tipoUnidade: '', nomeUnidade: '' };
     setFilters(emptyFilters);
-    onFilterChange(emptyFilters);
-    fetchFilteredValues(emptyFilters);
   };
 
   if (loading) {
@@ -142,7 +121,7 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
         <h3 className="text-lg font-semibold text-foreground">Filtros de Dados</h3>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">Ano CAIP</Label>
           <Select value={filters.anoCAIP} onValueChange={(value) => handleFilterChange('anoCAIP', value)}>
@@ -162,7 +141,6 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
           <Select 
             value={filters.unidadeGestora} 
             onValueChange={(value) => handleFilterChange('unidadeGestora', value)}
-            disabled={!filters.anoCAIP}
           >
             <SelectTrigger className="bg-background border-border focus:border-primary">
               <SelectValue placeholder="Selecionar unidade gestora" />
@@ -180,7 +158,6 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
           <Select 
             value={filters.tipoUnidade} 
             onValueChange={(value) => handleFilterChange('tipoUnidade', value)}
-            disabled={!filters.anoCAIP}
           >
             <SelectTrigger className="bg-background border-border focus:border-primary">
               <SelectValue placeholder="Selecionar tipo" />
@@ -191,6 +168,20 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-foreground">Nome da Unidade</Label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Buscar por nome da unidade..."
+              value={filters.nomeUnidade}
+              onChange={(e) => handleFilterChange('nomeUnidade', e.target.value)}
+              className="pl-10 bg-background border-border focus:border-primary"
+            />
+          </div>
         </div>
       </div>
 

@@ -49,6 +49,14 @@ const Index = () => {
       filtered = filtered.filter(item => item['tipo_de_unidade'] === filters.tipoUnidade);
     }
     
+    // Apply nome da unidade filter (partial match, case insensitive)
+    if (filters.nomeUnidade) {
+      filtered = filtered.filter(item => 
+        item['nome_da_unidade'] && 
+        item['nome_da_unidade'].toLowerCase().includes(filters.nomeUnidade.toLowerCase())
+      );
+    }
+    
     setFilteredData(filtered);
     console.log('Filters applied:', filters);
     console.log('Filtered data:', filtered);
