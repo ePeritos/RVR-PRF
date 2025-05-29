@@ -1,10 +1,11 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Filter } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FilterData {
   anoCAIP: string;
@@ -23,6 +24,46 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
     unidadeGestora: ''
   });
 
+  const [anosDisponiveis, setAnosDisponiveis] = useState<string[]>([]);
+  const [tiposUnidade, setTiposUnidade] = useState<string[]>([]);
+  const [unidadesGestoras, setUnidadesGestoras] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUniqueValues = async () => {
+      try {
+        setLoading(true);
+        
+        // Buscar todos os dados para extrair valores únicos
+        const { data, error } = await supabase
+          .from('dados_caip')
+          .select('ano_caip, tipo_de_unidade, unidade_gestora');
+
+        if (error) {
+          console.error('Erro ao buscar dados únicos:', error);
+          return;
+        }
+
+        if (data) {
+          // Extrair valores únicos e filtrar valores válidos
+          const anosUnicos = [...new Set(data.map(item => item.ano_caip).filter(Boolean))].sort();
+          const tiposUnicos = [...new Set(data.map(item => item.tipo_de_unidade).filter(Boolean))].sort();
+          const unidadesUnicas = [...new Set(data.map(item => item.unidade_gestora).filter(Boolean))].sort();
+          
+          setAnosDisponiveis(anosUnicos);
+          setTiposUnidade(tiposUnicos);
+          setUnidadesGestoras(unidadesUnicas);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar valores únicos:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUniqueValues();
+  }, []);
+
   const handleFilterChange = (key: keyof FilterData, value: string) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
@@ -35,55 +76,20 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
     onFilterChange(emptyFilters);
   };
 
-  // Anos CAIP disponíveis
-  const anosDisponiveis = ['2021', '2023', '2025'];
-
-  // Tipos de unidade comuns na base CAIP
-  const tiposUnidade = [
-    'UOP',
-    'DEL',
-    'SEDE REGIONAL',
-    'SEDE NACIONAL',
-    'UNIPRF',
-    'CANIL',
-    'HANGAR',
-    'ESTANDE DE TIROS',
-    'PONTO DE APOIO',
-    'OUTROS'
-  ];
-
-  // Unidades gestoras
-  const unidadesGestoras = [
-    'SEDE NACIONAL/DF',
-    'UNIPRF/SC',
-    'SPRF/AC',
-    'SPRF/AL',
-    'SPRF/AM',
-    'SPRF/AP',
-    'SPRF/BA',
-    'SPRF/CE',
-    'SPRF/DF',
-    'SPRF/ES',
-    'SPRF/GO',
-    'SPRF/MA',
-    'SPRF/MG',
-    'SPRF/MS',
-    'SPRF/MT',
-    'SPRF/PA',
-    'SPRF/PB',
-    'SPRF/PE',
-    'SPRF/PI',
-    'SPRF/PR',
-    'SPRF/RJ',
-    'SPRF/RN',
-    'SPRF/RO',
-    'SPRF/RR',
-    'SPRF/RS',
-    'SPRF/SC',
-    'SPRF/SE',
-    'SPRF/SP',
-    'SPRF/TO'
-  ];
+  if (loading) {
+    return (
+      <Card className="p-6 bg-card border border-border">
+        <div className="flex items-center gap-2 mb-4">
+          <Filter className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold text-foreground">Filtros de Dados</h3>
+        </div>
+        <div className="text-center py-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-sm text-muted-foreground">Carregando filtros...</p>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-6 bg-card border border-border">
