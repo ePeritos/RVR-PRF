@@ -1,42 +1,61 @@
 
-// Função auxiliar para aguardar renderização com timeout maior
-export const waitForElement = (selector: string, timeout = 10000): Promise<HTMLElement> => {
+// Função auxiliar para aguardar renderização com timeout maior e verificações mais robustas
+export const waitForElement = (selector: string, timeout = 15000): Promise<HTMLElement> => {
   return new Promise((resolve, reject) => {
+    console.log('Procurando elemento:', selector);
+    
+    // Função para verificar se o elemento está realmente pronto
+    const isElementReady = (element: HTMLElement): boolean => {
+      return element && 
+             element.offsetHeight > 0 && 
+             element.offsetWidth > 0 &&
+             element.innerHTML.trim().length > 0 &&
+             element.style.display !== 'none' &&
+             element.style.visibility !== 'hidden';
+    };
+    
     // Primeiro, tenta encontrar o elemento imediatamente
     const immediateElement = document.getElementById(selector);
-    if (immediateElement && immediateElement.offsetHeight > 0) {
+    if (immediateElement && isElementReady(immediateElement)) {
       console.log('Elemento encontrado imediatamente:', selector);
       resolve(immediateElement);
       return;
     }
 
     let attempts = 0;
-    const maxAttempts = 50; // 50 tentativas
-    const checkInterval = 200; // Verifica a cada 200ms
+    const maxAttempts = Math.floor(timeout / 300); // Verifica a cada 300ms
+    const checkInterval = 300;
 
     const checkElement = () => {
       attempts++;
       const element = document.getElementById(selector);
       
-      if (element && element.offsetHeight > 0) {
-        console.log(`Elemento encontrado após ${attempts} tentativas:`, selector);
+      console.log(`Tentativa ${attempts}: Elemento ${selector}`, {
+        found: !!element,
+        offsetHeight: element?.offsetHeight || 0,
+        offsetWidth: element?.offsetWidth || 0,
+        innerHTML: element?.innerHTML?.length || 0
+      });
+      
+      if (element && isElementReady(element)) {
+        console.log(`Elemento encontrado e pronto após ${attempts} tentativas:`, selector);
         resolve(element);
         return;
       }
 
       if (attempts >= maxAttempts) {
-        console.error(`Elemento não encontrado após ${attempts} tentativas:`, selector);
-        reject(new Error('Elemento não encontrado ou não renderizado'));
+        console.error(`Elemento não encontrado ou não está pronto após ${attempts} tentativas:`, selector);
+        reject(new Error(`Elemento ${selector} não encontrado ou não renderizado adequadamente`));
         return;
       }
 
       setTimeout(checkElement, checkInterval);
     };
 
-    // Também usa MutationObserver como backup
+    // MutationObserver como backup
     const observer = new MutationObserver(() => {
       const element = document.getElementById(selector);
-      if (element && element.offsetHeight > 0) {
+      if (element && isElementReady(element)) {
         observer.disconnect();
         console.log('Elemento encontrado via MutationObserver:', selector);
         resolve(element);
@@ -46,7 +65,8 @@ export const waitForElement = (selector: string, timeout = 10000): Promise<HTMLE
     observer.observe(document.body, {
       childList: true,
       subtree: true,
-      attributes: true
+      attributes: true,
+      attributeFilter: ['style', 'class']
     });
 
     // Inicia a verificação por polling
@@ -55,7 +75,7 @@ export const waitForElement = (selector: string, timeout = 10000): Promise<HTMLE
     // Timeout de segurança
     setTimeout(() => {
       observer.disconnect();
-      reject(new Error('Timeout ao aguardar elemento'));
+      reject(new Error(`Timeout ao aguardar elemento ${selector}`));
     }, timeout);
   });
 };

@@ -1,9 +1,10 @@
-
 import { useState } from 'react';
 import { Download, Eye, FileText } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RVRReportViewer } from './reports/RVRReportViewer';
+import { generatePDF } from '@/utils/pdfGenerator';
+import { useToast } from '@/hooks/use-toast';
 
 interface ResultRow {
   id: string;
@@ -39,6 +40,7 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
   const [selectedReport, setSelectedReport] = useState<ResultRow | null>(null);
   const [isReportViewerOpen, setIsReportViewerOpen] = useState(false);
   const [isDownloadingPDF, setIsDownloadingPDF] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const getDiferencaColor = (valor: number) => {
     if (valor > 0) return 'text-green-600 dark:text-green-400';
@@ -64,19 +66,31 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
         parametros
       };
       
-      // Primeiro, renderiza o relatório invisível
+      console.log('Iniciando download do PDF para:', reportData.id);
+      
+      // Renderiza o relatório temporariamente para captura
       setSelectedReport(reportData);
       
-      // Aguarda um pouco para garantir que o elemento seja renderizado
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Aguarda a renderização do componente
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Chama a função de download do pai
-      await onDownloadPDF(result.id);
+      // Gera o PDF usando a mesma função do visualizador
+      await generatePDF(reportData);
+      
+      toast({
+        title: "PDF Gerado",
+        description: "O relatório RVR foi baixado com sucesso.",
+      });
     } catch (error) {
       console.error('Erro ao baixar PDF:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao gerar o PDF. Tente novamente.",
+        variant: "destructive",
+      });
     } finally {
       setIsDownloadingPDF(null);
-      // Limpa o relatório se não estava aberto
+      // Limpa o relatório se não estava sendo visualizado
       if (!isReportViewerOpen) {
         setSelectedReport(null);
       }
