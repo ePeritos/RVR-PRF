@@ -1,6 +1,76 @@
 
 import { RVRReportData } from './types';
-import { waitForElement, formatTextContent } from './domHelpers';
+
+// Helper function to wait for element to be rendered
+const waitForElement = async (elementId: string, timeout = 5000): Promise<HTMLElement | null> => {
+  return new Promise((resolve) => {
+    const element = document.getElementById(elementId);
+    if (element) {
+      resolve(element);
+      return;
+    }
+
+    const observer = new MutationObserver(() => {
+      const element = document.getElementById(elementId);
+      if (element) {
+        observer.disconnect();
+        resolve(element);
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    // Timeout fallback
+    setTimeout(() => {
+      observer.disconnect();
+      resolve(null);
+    }, timeout);
+  });
+};
+
+// Helper function to format text content for clipboard
+const formatTextContent = (element: HTMLElement): string => {
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
+    {
+      acceptNode: (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          return NodeFilter.FILTER_ACCEPT;
+        }
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const tagName = (node as Element).tagName.toLowerCase();
+          if (['br', 'p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        }
+        return NodeFilter.FILTER_SKIP;
+      }
+    }
+  );
+
+  let result = '';
+  let node;
+  
+  while (node = walker.nextNode()) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent?.trim();
+      if (text) {
+        result += text + ' ';
+      }
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const tagName = (node as Element).tagName.toLowerCase();
+      if (['br', 'p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
+        result += '\n';
+      }
+    }
+  }
+
+  return result;
+};
 
 export const copyReportToClipboard = async (data: RVRReportData): Promise<void> => {
   const elementId = `rvr-report-${data.id}`;
