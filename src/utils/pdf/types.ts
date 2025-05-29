@@ -8,35 +8,31 @@ export interface RVRReportData {
   diferenca: number;
   percentual: number;
   areaImovel?: number;
+  areaConstruida?: number;
+  areaTerreno?: number;
   situacaoImovel?: string;
   unidadeGestora?: string;
   anoCAIP?: string;
+  endereco?: string;
+  rip?: string;
+  matriculaImovel?: string;
+  processoSei?: string;
+  estadoConservacao?: string;
+  idadeAparente?: number;
+  vidaUtil?: number;
+  idadePercentual?: number;
+  coeficienteK?: number;
+  custoRedicao?: number;
+  valorBenfeitoria?: number;
+  valorTerreno?: number;
+  valorDepreciacao?: number;
+  taxaDepreciacao?: number;
   parametros?: {
-    cub: number;
+    cub?: number;
+    cubM2?: number;
     valorM2: number;
     bdi: number;
+    dataReferencia?: string;
+    fonteValorTerreno?: string;
   };
-}
-
-export interface CanvasConfig {
-  scale: number;
-  useCORS: boolean;
-  allowTaint: boolean;
-  backgroundColor: string;
-  foreignObjectRendering: boolean;
-  logging: boolean;
-  removeContainer: boolean;
-  scrollX: number;
-  scrollY: number;
-  windowWidth: number;
-}
-
-export interface PDFDimensions {
-  pdfWidth: number;
-  pdfHeight: number;
-  margin: number;
-  usableWidth: number;
-  usableHeight: number;
-  scaledWidth: number;
-  scaledHeight: number;
 }

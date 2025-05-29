@@ -57,36 +57,49 @@ const Index = () => {
   const handleParameterSubmit = (parameters: any) => {
     setCurrentParameters(parameters);
     
-    // RVR calculation - using real estate evaluation parameters
+    // RVR calculation using real data from dados_caip and Ross-Heidecke
     const calculatedResults = filteredData
       .filter(item => selectedItems.includes(item.id))
       .map(item => {
-        // Area calculations
+        // Get real data from dados_caip
         const areaConstruida = item['area_construida_m2'] || 0;
         const areaTerreno = item['area_do_terreno_m2'] || 0;
+        const idadeAparente = parseInt(item['idade_aparente_do_imovel']) || 15;
+        const vidaUtil = parseInt(item['vida_util_estimada_anos']) || 80;
+        const estadoConservacao = item['estado_de_conservacao'] || 'BOM';
         
         // Benfeitoria calculation using CUB
-        const valorBenfeitoria = parameters.cubM2 * areaConstruida;
+        const custoRedicao = parameters.cubM2 * areaConstruida * (1 + parameters.bdi / 100);
         
         // Terreno calculation
         const valorTerreno = parameters.valorM2 * areaTerreno;
         
-        // Total value before depreciation
-        const valorTotal = valorBenfeitoria + valorTerreno;
+        // Ross-Heidecke depreciation calculation
+        import('../utils/rossHeideckeCalculator').then(({ calculateRossHeidecke }) => {
+          const depreciacao = calculateRossHeidecke(custoRedicao, idadeAparente, vidaUtil, estadoConservacao);
+          return depreciacao;
+        });
         
-        // Depreciation calculation (assuming 2% per year based on building age)
-        const idadeAparente = parseInt(item['idade_aparente_do_imovel']) || 0;
-        const taxaDepreciacao = Math.min(idadeAparente * 0.02, 0.6); // Max 60% depreciation
-        const valorDepreciacao = valorBenfeitoria * taxaDepreciacao;
+        // Simplified depreciation for immediate calculation (will be replaced by Ross-Heidecke)
+        const idadePercentual = (idadeAparente / vidaUtil) * 100;
+        let coeficienteK = 0.25; // Default BOM state
         
-        // Final RVR calculation
-        const fatorLocalizacao = 1.1;
-        const fatorMercado = 1.05;
-        const valorDepreciado = valorTotal - valorDepreciacao;
-        const valorRvr = valorDepreciado * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
+        if (estadoConservacao.toUpperCase().includes('BOM')) {
+          if (idadePercentual <= 20) coeficienteK = 0.13;
+          else if (idadePercentual <= 30) coeficienteK = 0.22;
+          else if (idadePercentual <= 40) coeficienteK = 0.31;
+          else coeficienteK = 0.40;
+        }
         
-        // Since we don't have previous RVR value in the new structure, we'll use 0 as baseline
-        const valorOriginal = 0;
+        const valorDepreciacao = custoRedicao * coeficienteK;
+        const valorBenfeitoria = custoRedicao - valorDepreciacao;
+        
+        // Total value calculations
+        const valorTotal = valorTerreno + valorBenfeitoria;
+        const fatorLocalizacao = 1.0;
+        const valorRvr = valorTotal * fatorLocalizacao;
+        
+        const valorOriginal = item['rvr'] || 0;
         const diferenca = valorRvr - valorOriginal;
         const percentual = valorOriginal ? (diferenca / valorOriginal) * 100 : 0;
         
@@ -100,9 +113,10 @@ const Index = () => {
           valorBenfeitoria,
           valorTerreno,
           valorTotal,
-          taxaDepreciacao: taxaDepreciacao * 100, // Convert to percentage
+          custoRedicao,
+          taxaDepreciacao: coeficienteK * 100,
           valorDepreciacao,
-          valorDepreciado,
+          valorDepreciado: valorBenfeitoria,
           valorOriginal,
           valorAvaliado: valorRvr,
           diferenca,
@@ -111,6 +125,15 @@ const Index = () => {
           situacaoImovel: item['situacao_do_imovel'] || '',
           unidadeGestora: item['unidade_gestora'],
           anoCAIP: item['ano_caip'],
+          endereco: item['endereco'] || '',
+          rip: item['rip'] || '',
+          matriculaImovel: item['matricula_do_imovel'] || '',
+          processoSei: item['processo_sei'] || '',
+          estadoConservacao,
+          idadeAparente,
+          vidaUtil,
+          idadePercentual,
+          coeficienteK,
           parametros: parameters
         };
       });

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataRow } from '@/hooks/useSupabaseData';
 
@@ -13,10 +14,12 @@ interface ParameterFormProps {
 
 export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) => {
   const [parameters, setParameters] = useState({
-    valorM2: 1500,
-    cubM2: 2000,
+    valorM2: 150,
+    cubM2: 2100,
     bdi: 25,
-    dataReferencia: new Date().toISOString().split('T')[0]
+    dataReferencia: new Date().toISOString().split('T')[0],
+    fonteValorTerreno: 'Planta Genérica de Valores do Município',
+    justificativaValores: 'Valores baseados em pesquisa de mercado local e dados oficiais do município.'
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -64,9 +67,9 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="valorM2" className="text-sm font-medium">Valor por m² (R$)</Label>
+                <Label htmlFor="valorM2" className="text-sm font-medium">Valor por m² do Terreno (R$)</Label>
                 <Input
                   id="valorM2"
                   type="number"
@@ -93,7 +96,9 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
                 />
                 <p className="text-xs text-muted-foreground">Para cálculo da benfeitoria</p>
               </div>
-              
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="bdi" className="text-sm font-medium">BDI (%)</Label>
                 <Input
@@ -108,17 +113,30 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
                   className="h-9"
                 />
               </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="dataReferencia" className="text-sm font-medium">Data de Referência</Label>
+                <Input
+                  id="dataReferencia"
+                  type="date"
+                  value={parameters.dataReferencia}
+                  onChange={(e) => setParameters({...parameters, dataReferencia: e.target.value})}
+                  required
+                  className="h-9"
+                />
+              </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="dataReferencia" className="text-sm font-medium">Data de Referência</Label>
+              <Label htmlFor="fonteValorTerreno" className="text-sm font-medium">Fonte do Valor Unitário do Terreno</Label>
               <Input
-                id="dataReferencia"
-                type="date"
-                value={parameters.dataReferencia}
-                onChange={(e) => setParameters({...parameters, dataReferencia: e.target.value})}
+                id="fonteValorTerreno"
+                type="text"
+                value={parameters.fonteValorTerreno}
+                onChange={(e) => setParameters({...parameters, fonteValorTerreno: e.target.value})}
                 required
-                className="h-9 max-w-xs"
+                className="h-9"
+                placeholder="Ex: Planta Genérica de Valores do Município"
               />
             </div>
 
