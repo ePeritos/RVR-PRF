@@ -10,6 +10,7 @@ interface DataRow {
   'ano_caip': string;
   'tipo_de_unidade': string;
   'unidade_gestora': string;
+  'nome_da_unidade': string;
   'estado_de_conservacao': string;
   'vida_util_estimada_anos': string;
   'area_do_terreno_m2': number;
@@ -79,6 +80,7 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
                 />
               </th>
               <th className="p-4 text-left text-sm font-medium text-foreground">Ano CAIP</th>
+              <th className="p-4 text-left text-sm font-medium text-foreground">Nome da Unidade</th>
               <th className="p-4 text-left text-sm font-medium text-foreground">Tipo de Unidade</th>
               <th className="p-4 text-left text-sm font-medium text-foreground">Unidade Gestora</th>
               <th className="p-4 text-left text-sm font-medium text-foreground">Estado de Conservação</th>
@@ -103,6 +105,9 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
                 </td>
                 <td className="p-4 text-sm font-medium text-foreground">
                   {row['ano_caip'] || '-'}
+                </td>
+                <td className="p-4 text-sm text-foreground">
+                  {row['nome_da_unidade'] || '-'}
                 </td>
                 <td className="p-4 text-sm text-muted-foreground">
                   {row['tipo_de_unidade'] || '-'}
