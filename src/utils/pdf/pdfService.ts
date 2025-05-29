@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { RVRReportData } from './types';
@@ -17,6 +16,271 @@ export class PDFService {
       PDFService.instance = new PDFService();
     }
     return PDFService.instance;
+  }
+
+  async generateFromData(data: RVRReportData): Promise<void> {
+    console.log('Iniciando geração de PDF para:', data.nome);
+    
+    // Cria um container temporário VISÍVEL para garantir renderização
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '210mm'; // Largura A4
+    container.style.minHeight = '297mm'; // Altura A4
+    container.style.backgroundColor = 'white';
+    container.style.padding = '20mm';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.fontSize = '12px';
+    container.style.lineHeight = '1.4';
+    container.style.zIndex = '999999';
+    container.style.boxSizing = 'border-box';
+    
+    try {
+      // Adiciona ao DOM
+      document.body.appendChild(container);
+
+      // Cria o conteúdo do relatório
+      const reportContent = this.createReportHTML(data);
+      container.innerHTML = reportContent;
+
+      console.log('Conteúdo HTML criado, aguardando renderização...');
+      
+      // Aguarda renderização completa
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      console.log('Capturando elemento para PDF...');
+      
+      // Configuração otimizada para html2canvas
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff',
+        logging: true,
+        width: container.offsetWidth,
+        height: container.offsetHeight,
+        windowWidth: container.offsetWidth,
+        windowHeight: container.offsetHeight,
+        onclone: (clonedDoc) => {
+          console.log('Clonando documento...');
+          const clonedContainer = clonedDoc.querySelector('div');
+          if (clonedContainer) {
+            (clonedContainer as HTMLElement).style.display = 'block';
+            (clonedContainer as HTMLElement).style.visibility = 'visible';
+          }
+        }
+      });
+
+      console.log('Canvas gerado:', { width: canvas.width, height: canvas.height });
+
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Canvas vazio - elemento não foi renderizado');
+      }
+
+      // Criar PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      
+      // Converter canvas para imagem
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      
+      // Calcular dimensões mantendo proporção
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      // Adicionar imagem ao PDF
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      
+      const filename = `RVR_${data.nome.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      
+      // Salvar PDF
+      pdf.save(filename);
+      console.log('PDF salvo:', filename);
+      
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      throw error;
+    } finally {
+      // Remove o container
+      if (container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+    }
+  }
+
+  private createReportHTML(data: RVRReportData): string {
+    return `
+      <div style="width: 100%; min-height: 100%; font-family: Arial, sans-serif; color: #000;">
+        <!-- Cabeçalho -->
+        <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #000;">
+          <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 10px 0; color: #000;">
+            RELATÓRIO DE REAVALIAÇÃO
+          </h1>
+          <h2 style="font-size: 18px; font-weight: normal; margin: 0 0 10px 0; color: #666;">
+            Relatório de Valor de Referência (RVR)
+          </h2>
+          <p style="font-size: 12px; margin: 0; color: #888;">
+            Data de Geração: ${new Date().toLocaleDateString('pt-BR')}
+          </p>
+        </div>
+
+        <!-- Informações da Unidade -->
+        <div style="margin-bottom: 25px;">
+          <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0; color: #000; border-bottom: 1px solid #ccc; padding-bottom: 5px;">
+            Informações da Unidade
+          </h3>
+          
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+            <tr>
+              <td style="padding: 8px; border: 1px solid #000; background-color: #f5f5f5; font-weight: bold; width: 35%;">
+                Nome da Unidade:
+              </td>
+              <td style="padding: 8px; border: 1px solid #000;">
+                ${data.nome}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid #000; background-color: #f5f5f5; font-weight: bold;">
+                Categoria:
+              </td>
+              <td style="padding: 8px; border: 1px solid #000;">
+                ${data.categoria}
+              </td>
+            </tr>
+            ${data.unidadeGestora ? `
+            <tr>
+              <td style="padding: 8px; border: 1px solid #000; background-color: #f5f5f5; font-weight: bold;">
+                Unidade Gestora:
+              </td>
+              <td style="padding: 8px; border: 1px solid #000;">
+                ${data.unidadeGestora}
+              </td>
+            </tr>
+            ` : ''}
+            ${data.anoCAIP ? `
+            <tr>
+              <td style="padding: 8px; border: 1px solid #000; background-color: #f5f5f5; font-weight: bold;">
+                Ano CAIP:
+              </td>
+              <td style="padding: 8px; border: 1px solid #000;">
+                ${data.anoCAIP}
+              </td>
+            </tr>
+            ` : ''}
+            ${data.areaImovel ? `
+            <tr>
+              <td style="padding: 8px; border: 1px solid #000; background-color: #f5f5f5; font-weight: bold;">
+                Área do Imóvel:
+              </td>
+              <td style="padding: 8px; border: 1px solid #000;">
+                ${data.areaImovel} m²
+              </td>
+            </tr>
+            ` : ''}
+            ${data.situacaoImovel ? `
+            <tr>
+              <td style="padding: 8px; border: 1px solid #000; background-color: #f5f5f5; font-weight: bold;">
+                Situação do Imóvel:
+              </td>
+              <td style="padding: 8px; border: 1px solid #000;">
+                ${data.situacaoImovel}
+              </td>
+            </tr>
+            ` : ''}
+          </table>
+        </div>
+
+        <!-- Análise Financeira -->
+        <div style="margin-bottom: 25px;">
+          <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0; color: #000; border-bottom: 1px solid #ccc; padding-bottom: 5px;">
+            Análise Financeira
+          </h3>
+          
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+            <tr>
+              <td style="padding: 8px; border: 1px solid #000; background-color: #f5f5f5; font-weight: bold; width: 35%;">
+                Valor Original (RVR):
+              </td>
+              <td style="padding: 8px; border: 1px solid #000;">
+                ${data.valorOriginal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid #000; background-color: #f5f5f5; font-weight: bold;">
+                Valor Reavaliado:
+              </td>
+              <td style="padding: 8px; border: 1px solid #000; font-weight: bold; color: #008000;">
+                ${data.valorAvaliado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid #000; background-color: #f5f5f5; font-weight: bold;">
+                Diferença:
+              </td>
+              <td style="padding: 8px; border: 1px solid #000; font-weight: bold; color: ${data.diferenca >= 0 ? '#008000' : '#cc0000'};">
+                ${data.diferenca >= 0 ? '+' : ''}${data.diferenca.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid #000; background-color: #f5f5f5; font-weight: bold;">
+                Variação Percentual:
+              </td>
+              <td style="padding: 8px; border: 1px solid #000; font-weight: bold; color: ${data.percentual >= 0 ? '#008000' : '#cc0000'};">
+                ${data.percentual >= 0 ? '+' : ''}${data.percentual.toFixed(2)}%
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        ${data.parametros ? `
+        <!-- Parâmetros Utilizados -->
+        <div style="margin-bottom: 25px;">
+          <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0; color: #000; border-bottom: 1px solid #ccc; padding-bottom: 5px;">
+            Parâmetros Utilizados
+          </h3>
+          
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+            <tr>
+              <td style="padding: 8px; border: 1px solid #000; background-color: #f5f5f5; font-weight: bold; width: 35%;">
+                CUB (Custo Unitário Básico):
+              </td>
+              <td style="padding: 8px; border: 1px solid #000;">
+                ${data.parametros.cub.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid #000; background-color: #f5f5f5; font-weight: bold;">
+                Valor por m²:
+              </td>
+              <td style="padding: 8px; border: 1px solid #000;">
+                ${data.parametros.valorM2.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid #000; background-color: #f5f5f5; font-weight: bold;">
+                BDI (%):
+              </td>
+              <td style="padding: 8px; border: 1px solid #000;">
+                ${data.parametros.bdi}%
+              </td>
+            </tr>
+          </table>
+        </div>
+        ` : ''}
+
+        <!-- Rodapé -->
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; text-align: center; font-size: 10px; color: #666;">
+          <p style="margin: 5px 0;">
+            Este relatório foi gerado automaticamente pelo Sistema de Reavaliação de Imóveis
+          </p>
+          <p style="margin: 5px 0;">
+            Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+          </p>
+        </div>
+      </div>
+    `;
   }
 
   async generateFromElement(
@@ -146,148 +410,6 @@ export class PDFService {
       console.error('Erro ao gerar PDF:', error);
       throw error;
     }
-  }
-
-  async generateFromData(data: RVRReportData): Promise<void> {
-    // Cria um container temporário para renderizar o relatório
-    const container = document.createElement('div');
-    container.style.position = 'fixed';
-    container.style.top = '-9999px';
-    container.style.left = '-9999px';
-    container.style.width = '800px';
-    container.style.zIndex = '-1';
-    container.style.backgroundColor = 'white';
-    container.style.padding = '40px';
-    container.id = `pdf-container-${Date.now()}`;
-
-    try {
-      // Adiciona ao DOM
-      document.body.appendChild(container);
-
-      // Cria o conteúdo do relatório
-      const reportContent = this.createReportHTML(data);
-      container.innerHTML = reportContent;
-
-      // Aguarda um momento para renderização
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      const filename = `RVR_${data.nome.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-      
-      await this.generateFromElement(container, { filename });
-      
-    } finally {
-      // Remove o container
-      if (container.parentNode) {
-        container.parentNode.removeChild(container);
-      }
-    }
-  }
-
-  private createReportHTML(data: RVRReportData): string {
-    return `
-      <div style="font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333;">
-        <div style="text-align: center; margin-bottom: 40px; border-bottom: 2px solid #e5e7eb; padding-bottom: 20px;">
-          <h1 style="font-size: 24px; margin: 0; color: #1f2937;">RELATÓRIO DE REAVALIAÇÃO</h1>
-          <h2 style="font-size: 18px; margin: 10px 0; color: #6b7280;">Relatório de Valor de Referência (RVR)</h2>
-          <p style="margin: 5px 0; color: #9ca3af;">Data de Geração: ${new Date().toLocaleDateString('pt-BR')}</p>
-        </div>
-
-        <div style="margin-bottom: 30px;">
-          <h3 style="font-size: 18px; margin-bottom: 15px; color: #1f2937; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px;">
-            Informações da Unidade
-          </h3>
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-            <tr>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold; width: 30%;">Nome da Unidade:</td>
-              <td style="padding: 12px; border: 1px solid #e5e7eb;">${data.nome}</td>
-            </tr>
-            <tr>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Categoria:</td>
-              <td style="padding: 12px; border: 1px solid #e5e7eb;">${data.categoria}</td>
-            </tr>
-            ${data.unidadeGestora ? `
-            <tr>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Unidade Gestora:</td>
-              <td style="padding: 12px; border: 1px solid #e5e7eb;">${data.unidadeGestora}</td>
-            </tr>
-            ` : ''}
-            ${data.anoCAIP ? `
-            <tr>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Ano CAIP:</td>
-              <td style="padding: 12px; border: 1px solid #e5e7eb;">${data.anoCAIP}</td>
-            </tr>
-            ` : ''}
-            ${data.areaImovel ? `
-            <tr>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Área do Imóvel:</td>
-              <td style="padding: 12px; border: 1px solid #e5e7eb;">${data.areaImovel} m²</td>
-            </tr>
-            ` : ''}
-            ${data.situacaoImovel ? `
-            <tr>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Situação do Imóvel:</td>
-              <td style="padding: 12px; border: 1px solid #e5e7eb;">${data.situacaoImovel}</td>
-            </tr>
-            ` : ''}
-          </table>
-        </div>
-
-        <div style="margin-bottom: 30px;">
-          <h3 style="font-size: 18px; margin-bottom: 15px; color: #1f2937; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px;">
-            Análise Financeira
-          </h3>
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-            <tr>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold; width: 30%;">Valor Original (RVR):</td>
-              <td style="padding: 12px; border: 1px solid #e5e7eb;">${data.valorOriginal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-            </tr>
-            <tr>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Valor Reavaliado:</td>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold; color: #059669;">${data.valorAvaliado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-            </tr>
-            <tr>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Diferença:</td>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold; color: ${data.diferenca >= 0 ? '#059669' : '#dc2626'};">
-                ${data.diferenca >= 0 ? '+' : ''}${data.diferenca.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Variação Percentual:</td>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold; color: ${data.percentual >= 0 ? '#059669' : '#dc2626'};">
-                ${data.percentual >= 0 ? '+' : ''}${data.percentual.toFixed(2)}%
-              </td>
-            </tr>
-          </table>
-        </div>
-
-        ${data.parametros ? `
-        <div style="margin-bottom: 30px;">
-          <h3 style="font-size: 18px; margin-bottom: 15px; color: #1f2937; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px;">
-            Parâmetros Utilizados
-          </h3>
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-            <tr>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold; width: 30%;">CUB (Custo Unitário Básico):</td>
-              <td style="padding: 12px; border: 1px solid #e5e7eb;">${data.parametros.cub.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-            </tr>
-            <tr>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Valor por m²:</td>
-              <td style="padding: 12px; border: 1px solid #e5e7eb;">${data.parametros.valorM2.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-            </tr>
-            <tr>
-              <td style="padding: 12px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">BDI (%):</td>
-              <td style="padding: 12px; border: 1px solid #e5e7eb;">${data.parametros.bdi}%</td>
-            </tr>
-          </table>
-        </div>
-        ` : ''}
-
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 12px;">
-          <p>Este relatório foi gerado automaticamente pelo Sistema de Reavaliação de Imóveis</p>
-          <p>Data: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</p>
-        </div>
-      </div>
-    `;
   }
 }
 
