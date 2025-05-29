@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Download, Eye, FileText } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -66,15 +67,9 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
         parametros
       };
       
-      console.log('Iniciando download do PDF para:', reportData.id);
+      console.log('Iniciando download direto do PDF para:', reportData.nome);
       
-      // Renderiza o relatório temporariamente para captura
-      setSelectedReport(reportData);
-      
-      // Aguarda a renderização do componente
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Gera o PDF usando a mesma função do visualizador
+      // Usa o novo serviço de PDF que não depende de elementos no DOM
       await generatePDF(reportData);
       
       toast({
@@ -90,19 +85,12 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
       });
     } finally {
       setIsDownloadingPDF(null);
-      // Limpa o relatório se não estava sendo visualizado
-      if (!isReportViewerOpen) {
-        setSelectedReport(null);
-      }
     }
   };
 
   const handleCloseReportViewer = () => {
     setIsReportViewerOpen(false);
-    // Só limpa se não está fazendo download
-    if (!isDownloadingPDF) {
-      setSelectedReport(null);
-    }
+    setSelectedReport(null);
   };
 
   return (
@@ -191,8 +179,8 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
         )}
       </Card>
 
-      {/* Visualizador do Relatório - pode estar visível ou invisível */}
-      {selectedReport && (
+      {/* Visualizador do Relatório */}
+      {selectedReport && isReportViewerOpen && (
         <RVRReportViewer
           data={selectedReport}
           isOpen={isReportViewerOpen}

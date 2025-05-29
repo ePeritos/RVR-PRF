@@ -40,12 +40,14 @@ export function RVRReportViewer({ data, isOpen, onClose }: RVRReportViewerProps)
   const handleDownloadPDF = async () => {
     setIsGeneratingPDF(true);
     try {
+      // Usa o novo serviço de PDF que não depende do elemento renderizado
       await generatePDF(data);
       toast({
         title: "PDF Gerado",
         description: "O relatório RVR foi baixado com sucesso.",
       });
     } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
       toast({
         title: "Erro",
         description: "Erro ao gerar o PDF. Tente novamente.",
