@@ -27,7 +27,6 @@ export class PDFService {
     container.style.top = '0';
     container.style.left = '0';
     container.style.width = '210mm'; // Largura A4
-    container.style.minHeight = '297mm'; // Altura A4
     container.style.backgroundColor = 'white';
     container.style.padding = '20mm';
     container.style.fontFamily = 'Arial, sans-serif';
@@ -78,20 +77,71 @@ export class PDFService {
         throw new Error('Canvas vazio - elemento não foi renderizado');
       }
 
-      // Criar PDF
+      // Criar PDF com múltiplas páginas
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = 210;
-      const pdfHeight = 297;
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 10;
       
       // Converter canvas para imagem
       const imgData = canvas.toDataURL('image/png', 1.0);
       
-      // Calcular dimensões mantendo proporção
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      // Calcular dimensões
+      const imgWidth = pageWidth - (margin * 2);
+      const imgRatio = canvas.height / canvas.width;
+      const imgHeight = imgWidth * imgRatio;
       
-      // Adicionar imagem ao PDF
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      // Altura útil da página (descontando margens)
+      const pageContentHeight = pageHeight - (margin * 2);
+      
+      // Verificar se precisa de múltiplas páginas
+      if (imgHeight <= pageContentHeight) {
+        // Cabe em uma página
+        pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
+      } else {
+        // Múltiplas páginas necessárias
+        const totalPages = Math.ceil(imgHeight / pageContentHeight);
+        console.log(`Gerando ${totalPages} páginas para o PDF`);
+        
+        for (let pageNum = 0; pageNum < totalPages; pageNum++) {
+          if (pageNum > 0) {
+            pdf.addPage();
+          }
+          
+          // Calcular a porção da imagem para esta página
+          const sourceY = (pageNum * pageContentHeight * canvas.height) / imgHeight;
+          const sourceHeight = Math.min(
+            (pageContentHeight * canvas.height) / imgHeight,
+            canvas.height - sourceY
+          );
+          
+          // Criar canvas temporário para esta página
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = canvas.width;
+          pageCanvas.height = sourceHeight;
+          const ctx = pageCanvas.getContext('2d');
+          
+          if (ctx) {
+            // Fundo branco
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+            
+            // Desenhar a porção da imagem correspondente a esta página
+            ctx.drawImage(
+              canvas,
+              0, sourceY, canvas.width, sourceHeight,
+              0, 0, pageCanvas.width, pageCanvas.height
+            );
+            
+            const pageImgData = pageCanvas.toDataURL('image/png', 1.0);
+            const pageImgHeight = (sourceHeight * imgWidth) / canvas.width;
+            
+            pdf.addImage(pageImgData, 'PNG', margin, margin, imgWidth, pageImgHeight);
+            
+            console.log(`Página ${pageNum + 1}/${totalPages} adicionada ao PDF`);
+          }
+        }
+      }
       
       const filename = `RVR_${data.nome.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
       
@@ -112,7 +162,7 @@ export class PDFService {
 
   private createReportHTML(data: RVRReportData): string {
     return `
-      <div style="width: 100%; min-height: 100%; font-family: Arial, sans-serif; color: #000;">
+      <div style="width: 100%; font-family: Arial, sans-serif; color: #000; page-break-inside: avoid;">
         <!-- Cabeçalho -->
         <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #000;">
           <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 10px 0; color: #000;">
@@ -127,7 +177,7 @@ export class PDFService {
         </div>
 
         <!-- Informações da Unidade -->
-        <div style="margin-bottom: 25px;">
+        <div style="margin-bottom: 25px; page-break-inside: avoid;">
           <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0; color: #000; border-bottom: 1px solid #ccc; padding-bottom: 5px;">
             Informações da Unidade
           </h3>
@@ -193,7 +243,7 @@ export class PDFService {
         </div>
 
         <!-- Análise Financeira -->
-        <div style="margin-bottom: 25px;">
+        <div style="margin-bottom: 25px; page-break-inside: avoid;">
           <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0; color: #000; border-bottom: 1px solid #ccc; padding-bottom: 5px;">
             Análise Financeira
           </h3>
@@ -236,7 +286,7 @@ export class PDFService {
 
         ${data.parametros ? `
         <!-- Parâmetros Utilizados -->
-        <div style="margin-bottom: 25px;">
+        <div style="margin-bottom: 25px; page-break-inside: avoid;">
           <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0; color: #000; border-bottom: 1px solid #ccc; padding-bottom: 5px;">
             Parâmetros Utilizados
           </h3>
@@ -269,6 +319,39 @@ export class PDFService {
           </table>
         </div>
         ` : ''}
+
+        <!-- Metodologia (página adicional) -->
+        <div style="margin-bottom: 25px; page-break-before: always;">
+          <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0; color: #000; border-bottom: 1px solid #ccc; padding-bottom: 5px;">
+            Metodologia de Avaliação
+          </h3>
+          
+          <p style="margin-bottom: 15px; text-align: justify; line-height: 1.6;">
+            A reavaliação foi realizada considerando os parâmetros técnicos vigentes e as condições atuais do mercado imobiliário. 
+            O método utilizado baseou-se na análise comparativa de dados e na aplicação de índices de correção apropriados.
+          </p>
+          
+          <h4 style="font-size: 14px; font-weight: bold; margin: 15px 0 10px 0; color: #000;">
+            Critérios Considerados:
+          </h4>
+          
+          <ul style="margin-left: 20px; line-height: 1.6;">
+            <li>Localização e características do imóvel</li>
+            <li>Estado de conservação</li>
+            <li>Área construída e área do terreno</li>
+            <li>Índices econômicos de correção</li>
+            <li>Comparação com valores de mercado</li>
+          </ul>
+          
+          <h4 style="font-size: 14px; font-weight: bold; margin: 15px 0 10px 0; color: #000;">
+            Considerações Finais:
+          </h4>
+          
+          <p style="margin-bottom: 15px; text-align: justify; line-height: 1.6;">
+            Este relatório apresenta o resultado da reavaliação do imóvel considerando todos os aspectos técnicos e legais pertinentes. 
+            Os valores aqui apresentados refletem as condições atuais do mercado e seguem as normas técnicas estabelecidas.
+          </p>
+        </div>
 
         <!-- Rodapé -->
         <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; text-align: center; font-size: 10px; color: #666;">
