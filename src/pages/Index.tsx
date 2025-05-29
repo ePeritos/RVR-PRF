@@ -34,15 +34,15 @@ const Index = () => {
     let filtered = supabaseData;
     
     if (filters.anoCAIP) {
-      filtered = filtered.filter(item => item['Ano CAIP'] === filters.anoCAIP);
+      filtered = filtered.filter(item => item['ano_caip'] === filters.anoCAIP);
     }
     
     if (filters.tipoUnidade) {
-      filtered = filtered.filter(item => item['Tipo de unidade'] === filters.tipoUnidade);
+      filtered = filtered.filter(item => item['tipo_de_unidade'] === filters.tipoUnidade);
     }
     
     if (filters.unidadeGestora) {
-      filtered = filtered.filter(item => item['Unidade Gestora'] === filters.unidadeGestora);
+      filtered = filtered.filter(item => item['unidade_gestora'] === filters.unidadeGestora);
     }
     
     setFilteredData(filtered);
@@ -57,25 +57,25 @@ const Index = () => {
       .filter(item => selectedItems.includes(item.id))
       .map(item => {
         // RVR calculation formula using area from spreadsheet data
-        const areaImovel = item['Área construída (m²)'] || 100;
+        const areaImovel = item['area_construida_m2'] || 100;
         const fatorLocalizacao = 1.1;
         const fatorMercado = 1.05;
         const valorRvr = (parameters.valorM2 * areaImovel) * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
-        const diferenca = valorRvr - item['RVR'];
-        const percentual = (diferenca / item['RVR']) * 100;
+        const diferenca = valorRvr - (item.rvr || 0);
+        const percentual = item.rvr ? (diferenca / item.rvr) * 100 : 0;
         
         return {
           id: item.id,
-          nome: item['Nome da unidade'],
-          categoria: item['Tipo de unidade'],
-          valorOriginal: item['RVR'],
+          nome: item['nome_da_unidade'] || 'Nome não informado',
+          categoria: item['tipo_de_unidade'],
+          valorOriginal: item.rvr || 0,
           valorAvaliado: valorRvr,
           diferenca,
           percentual,
-          areaImovel: item['Área construída (m²)'],
-          situacaoImovel: item['Situação do imóvel'],
-          unidadeGestora: item['Unidade Gestora'],
-          anoCAIP: item['Ano CAIP'],
+          areaImovel: item['area_construida_m2'],
+          situacaoImovel: item['situacao_do_imovel'] || '',
+          unidadeGestora: item['unidade_gestora'],
+          anoCAIP: item['ano_caip'],
           parametros: parameters
         };
       });

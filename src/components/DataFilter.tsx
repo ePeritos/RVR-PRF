@@ -35,10 +35,10 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
     onFilterChange(emptyFilters);
   };
 
-  // Anos ímpares disponíveis (simulando dados da planilha)
+  // Anos CAIP disponíveis
   const anosDisponiveis = ['2021', '2023', '2025'];
 
-  // Tipos de unidade da planilha
+  // Tipos de unidade comuns na base CAIP
   const tiposUnidade = [
     'UOP',
     'DEL',

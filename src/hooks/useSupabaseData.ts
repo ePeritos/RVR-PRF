@@ -7,13 +7,13 @@ type DadosCAIP = Tables<'dados_caip'>;
 
 export interface DataRow {
   id: string;
-  'Nome da unidade': string;
-  'Tipo de unidade': string;
-  'RVR': number;
-  'Ano CAIP': string;
-  'Situação do imóvel': string;
-  'Área construída (m²)'?: number;
-  'Unidade Gestora': string;
+  'ano_caip': string;
+  'tipo_de_unidade': string;
+  'unidade_gestora': string;
+  'estado_de_conservacao': string;
+  'vida_util_estimada_anos': string;
+  'area_do_terreno_m2': number;
+  'area_construida_m2': number;
 }
 
 export const useSupabaseData = () => {
@@ -24,13 +24,13 @@ export const useSupabaseData = () => {
   const transformData = (supabaseData: DadosCAIP[]): DataRow[] => {
     return supabaseData.map(item => ({
       id: item.id,
-      'Nome da unidade': item.nome_da_unidade || '',
-      'Tipo de unidade': item.tipo_de_unidade || '',
-      'RVR': Number(item.rvr) || 0,
-      'Ano CAIP': item.ano_caip || '',
-      'Situação do imóvel': item.situacao_do_imovel || '',
-      'Área construída (m²)': item.area_construida_m2 ? Number(item.area_construida_m2) : undefined,
-      'Unidade Gestora': item.unidade_gestora || '',
+      'ano_caip': item.ano_caip || '',
+      'tipo_de_unidade': item.tipo_de_unidade || '',
+      'unidade_gestora': item.unidade_gestora || '',
+      'estado_de_conservacao': item.estado_de_conservacao || '',
+      'vida_util_estimada_anos': item.vida_util_estimada_anos || '',
+      'area_do_terreno_m2': item.area_do_terreno_m2 ? Number(item.area_do_terreno_m2) : 0,
+      'area_construida_m2': item.area_construida_m2 ? Number(item.area_construida_m2) : 0,
     }));
   };
 

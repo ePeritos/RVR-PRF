@@ -7,13 +7,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 interface DataRow {
   id: string;
-  'Nome da unidade': string;
-  'Tipo de unidade': string;
-  'RVR': number;
-  'Ano CAIP': string;
-  'Situação do imóvel': string;
-  'Área construída (m²)'?: number;
-  'Unidade Gestora': string;
+  'ano_caip': string;
+  'tipo_de_unidade': string;
+  'unidade_gestora': string;
+  'estado_de_conservacao': string;
+  'vida_util_estimada_anos': string;
+  'area_do_terreno_m2': number;
+  'area_construida_m2': number;
 }
 
 interface DataTableProps {
@@ -39,12 +39,20 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'próprio': return 'text-green-600 dark:text-green-400';
-      case 'alugado': return 'text-blue-600 dark:text-blue-400';
-      case 'cedido': return 'text-yellow-600 dark:text-yellow-400';
-      case 'em desuso': return 'text-red-600 dark:text-red-400';
+  const formatArea = (area: number | null | undefined) => {
+    if (area === null || area === undefined) return '-';
+    return area.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' m²';
+  };
+
+  const getConservationColor = (estado: string) => {
+    if (!estado) return 'text-muted-foreground';
+    
+    switch (estado.toLowerCase()) {
+      case 'ótimo': return 'text-green-600 dark:text-green-400';
+      case 'bom': return 'text-blue-600 dark:text-blue-400';
+      case 'regular': return 'text-yellow-600 dark:text-yellow-400';
+      case 'ruim': return 'text-orange-600 dark:text-orange-400';
+      case 'péssimo': return 'text-red-600 dark:text-red-400';
       default: return 'text-muted-foreground';
     }
   };
@@ -53,7 +61,7 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
     <Card className="overflow-hidden bg-card border border-border">
       <div className="p-6 border-b border-border bg-muted/50">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-foreground">Dados da Planilha</h3>
+          <h3 className="text-lg font-semibold text-foreground">Dados da Base CAIP</h3>
           <div className="text-sm text-muted-foreground">
             {selectedItems.length} de {data.length} selecionados
           </div>
@@ -70,12 +78,13 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
                   onCheckedChange={handleSelectAll}
                 />
               </th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Nome da Unidade</th>
+              <th className="p-4 text-left text-sm font-medium text-foreground">Ano CAIP</th>
               <th className="p-4 text-left text-sm font-medium text-foreground">Tipo de Unidade</th>
               <th className="p-4 text-left text-sm font-medium text-foreground">Unidade Gestora</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">RVR (R$)</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Ano CAIP</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Situação do Imóvel</th>
+              <th className="p-4 text-left text-sm font-medium text-foreground">Estado de Conservação</th>
+              <th className="p-4 text-left text-sm font-medium text-foreground">Vida Útil (Anos)</th>
+              <th className="p-4 text-left text-sm font-medium text-foreground">Área do Terreno</th>
+              <th className="p-4 text-left text-sm font-medium text-foreground">Área Construída</th>
             </tr>
           </thead>
           <tbody>
@@ -92,17 +101,28 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
                     onCheckedChange={() => handleSelectItem(row.id)}
                   />
                 </td>
-                <td className="p-4 text-sm font-medium text-foreground">{row['Nome da unidade']}</td>
-                <td className="p-4 text-sm text-muted-foreground">{row['Tipo de unidade']}</td>
-                <td className="p-4 text-sm text-muted-foreground">{row['Unidade Gestora']}</td>
-                <td className="p-4 text-sm text-foreground">
-                  {row['RVR'].toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                <td className="p-4 text-sm font-medium text-foreground">
+                  {row['ano_caip'] || '-'}
                 </td>
-                <td className="p-4 text-sm text-muted-foreground">{row['Ano CAIP']}</td>
+                <td className="p-4 text-sm text-muted-foreground">
+                  {row['tipo_de_unidade'] || '-'}
+                </td>
+                <td className="p-4 text-sm text-muted-foreground">
+                  {row['unidade_gestora'] || '-'}
+                </td>
                 <td className="p-4">
-                  <span className={`text-sm font-medium ${getStatusColor(row['Situação do imóvel'])}`}>
-                    {row['Situação do imóvel']}
+                  <span className={`text-sm font-medium ${getConservationColor(row['estado_de_conservacao'])}`}>
+                    {row['estado_de_conservacao'] || '-'}
                   </span>
+                </td>
+                <td className="p-4 text-sm text-muted-foreground">
+                  {row['vida_util_estimada_anos'] || '-'}
+                </td>
+                <td className="p-4 text-sm text-foreground">
+                  {formatArea(row['area_do_terreno_m2'])}
+                </td>
+                <td className="p-4 text-sm text-foreground">
+                  {formatArea(row['area_construida_m2'])}
                 </td>
               </tr>
             ))}
