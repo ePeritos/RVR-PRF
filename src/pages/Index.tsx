@@ -37,10 +37,6 @@ const Index = () => {
     let filtered = supabaseData;
     
     // Apply filters sequentially
-    if (filters.anoCAIP) {
-      filtered = filtered.filter(item => item['ano_caip'] === filters.anoCAIP);
-    }
-    
     if (filters.unidadeGestora) {
       filtered = filtered.filter(item => item['unidade_gestora'] === filters.unidadeGestora);
     }

@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 
 interface FilterData {
-  anoCAIP: string;
   unidadeGestora: string;
   tipoUnidade: string;
   nomeUnidade: string;
@@ -21,13 +20,11 @@ interface DataFilterProps {
 
 export function DataFilter({ onFilterChange }: DataFilterProps) {
   const [filters, setFilters] = useState<FilterData>({
-    anoCAIP: '',
     unidadeGestora: '',
     tipoUnidade: '',
     nomeUnidade: ''
   });
 
-  const [anosDisponiveis, setAnosDisponiveis] = useState<string[]>([]);
   const [tiposUnidade, setTiposUnidade] = useState<string[]>([]);
   const [unidadesGestoras, setUnidadesGestoras] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,17 +33,6 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
   const fetchAllFilterValues = async () => {
     try {
       setLoading(true);
-      
-      // Buscar todos os anos disponíveis
-      const { data: anosData } = await supabase
-        .from('dados_caip')
-        .select('ano_caip')
-        .not('ano_caip', 'is', null);
-      
-      if (anosData) {
-        const anosUnicos = [...new Set(anosData.map(item => item.ano_caip).filter(Boolean))].sort();
-        setAnosDisponiveis(anosUnicos);
-      }
 
       // Buscar todas as unidades gestoras disponíveis
       const { data: unidadesData } = await supabase
@@ -95,7 +81,7 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
   };
 
   const clearFilters = () => {
-    const emptyFilters = { anoCAIP: '', unidadeGestora: '', tipoUnidade: '', nomeUnidade: '' };
+    const emptyFilters = { unidadeGestora: '', tipoUnidade: '', nomeUnidade: '' };
     setFilters(emptyFilters);
   };
 
@@ -121,21 +107,7 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
         <h3 className="text-lg font-semibold text-foreground">Filtros de Dados</h3>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">Ano CAIP</Label>
-          <Select value={filters.anoCAIP} onValueChange={(value) => handleFilterChange('anoCAIP', value)}>
-            <SelectTrigger className="bg-background border-border focus:border-primary">
-              <SelectValue placeholder="Selecionar ano" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border">
-              {anosDisponiveis.map((ano) => (
-                <SelectItem key={ano} value={ano}>{ano}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">Unidade Gestora</Label>
           <Select 
