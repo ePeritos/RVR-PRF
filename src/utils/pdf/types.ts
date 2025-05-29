@@ -1,3 +1,12 @@
+export interface PDFDimensions {
+  pdfWidth: number;
+  pdfHeight: number;
+  margin: number;
+  usableWidth: number;
+  usableHeight: number;
+  scaledWidth: number;
+  scaledHeight: number;
+}
 
 export interface RVRReportData {
   id: string;
