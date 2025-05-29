@@ -4,17 +4,7 @@ import { DataFilter } from '@/components/DataFilter';
 import { DataTable } from '@/components/DataTable';
 import { ParameterForm } from '@/components/ParameterForm';
 import { ResultsTable } from '@/components/ResultsTable';
-
-interface DataRow {
-  id: string;
-  'Nome da unidade': string;
-  'Tipo de unidade': string;
-  'RVR': number;
-  'Ano CAIP': string;
-  'Situação do imóvel': string;
-  'Área construída (m²)'?: number;
-  'Unidade Gestora': string;
-}
+import { DataRow } from '@/hooks/useSupabaseData';
 
 interface StepContentProps {
   currentStep: number;

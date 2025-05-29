@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -61,14 +62,16 @@ const Index = () => {
         const fatorLocalizacao = 1.1;
         const fatorMercado = 1.05;
         const valorRvr = (parameters.valorM2 * areaImovel) * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
-        const diferenca = valorRvr - (item.rvr || 0);
-        const percentual = item.rvr ? (diferenca / item.rvr) * 100 : 0;
+        // Usando valor base para comparação já que não temos RVR anterior
+        const valorOriginal = item.rvr || 0;
+        const diferenca = valorRvr - valorOriginal;
+        const percentual = valorOriginal ? (diferenca / valorOriginal) * 100 : 0;
         
         return {
           id: item.id,
           nome: item['nome_da_unidade'] || 'Nome não informado',
           categoria: item['tipo_de_unidade'],
-          valorOriginal: item.rvr || 0,
+          valorOriginal,
           valorAvaliado: valorRvr,
           diferenca,
           percentual,
