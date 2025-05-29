@@ -61,11 +61,17 @@ const Index = () => {
     const calculatedResults = filteredData
       .filter(item => selectedItems.includes(item.id))
       .map(item => {
-        // RVR calculation formula using area from spreadsheet data
+        // Area calculation
         const areaImovel = item['area_construida_m2'] || 100;
+        
+        // Benfeitoria calculation using CUB
+        const valorBenfeitoria = parameters.cubM2 * areaImovel;
+        
+        // RVR calculation formula
         const fatorLocalizacao = 1.1;
         const fatorMercado = 1.05;
         const valorRvr = (parameters.valorM2 * areaImovel) * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
+        
         // Since we don't have previous RVR value in the new structure, we'll use 0 as baseline
         const valorOriginal = 0;
         const diferenca = valorRvr - valorOriginal;
@@ -77,6 +83,7 @@ const Index = () => {
           categoria: item['tipo_de_unidade'],
           valorOriginal,
           valorAvaliado: valorRvr,
+          valorBenfeitoria,
           diferenca,
           percentual,
           areaImovel: item['area_construida_m2'],
