@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -6,70 +7,19 @@ import { StepContent } from '@/components/StepContent';
 import { NavigationButtons } from '@/components/NavigationButtons';
 import { generatePDF } from '@/utils/pdfGenerator';
 import { useToast } from '@/hooks/use-toast';
-
-// Mock data for demonstration - adjusted for real estate context using spreadsheet column names
-interface DataRow {
-  id: string;
-  'Nome da unidade': string;
-  'Tipo de unidade': string;
-  'RVR': number;
-  'Ano CAIP': string;
-  'Situação do imóvel': string;
-  'Área construída (m²)'?: number;
-  'Unidade Gestora': string;
-}
-
-const mockData: DataRow[] = [
-  { 
-    id: '1', 
-    'Nome da unidade': 'UOP Centro Cidade', 
-    'Tipo de unidade': 'UOP', 
-    'RVR': 450000, 
-    'Ano CAIP': '2023', 
-    'Situação do imóvel': 'próprio', 
-    'Área construída (m²)': 120,
-    'Unidade Gestora': 'SPRF/SP'
-  },
-  { 
-    id: '2', 
-    'Nome da unidade': 'Delegacia Regional Norte', 
-    'Tipo de unidade': 'DEL', 
-    'RVR': 280000, 
-    'Ano CAIP': '2021', 
-    'Situação do imóvel': 'alugado', 
-    'Área construída (m²)': 150,
-    'Unidade Gestora': 'SPRF/RJ'
-  },
-  { 
-    id: '3', 
-    'Nome da unidade': 'Sede Regional Sul', 
-    'Tipo de unidade': 'SEDE REGIONAL', 
-    'RVR': 125000, 
-    'Ano CAIP': '2025', 
-    'Situação do imóvel': 'cedido', 
-    'Área construída (m²)': 300,
-    'Unidade Gestora': 'SPRF/RS'
-  },
-  { 
-    id: '4', 
-    'Nome da unidade': 'UNIPRF Campinas', 
-    'Tipo de unidade': 'UNIPRF', 
-    'RVR': 680000, 
-    'Ano CAIP': '2023', 
-    'Situação do imóvel': 'próprio', 
-    'Área construída (m²)': 95,
-    'Unidade Gestora': 'UNIPRF/SC'
-  },
-];
+import { useSupabaseData, DataRow } from '@/hooks/useSupabaseData';
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [filteredData, setFilteredData] = useState(mockData);
+  const [filteredData, setFilteredData] = useState<DataRow[]>([]);
   const [results, setResults] = useState<any[]>([]);
   const [currentParameters, setCurrentParameters] = useState<any>(null);
   const { toast } = useToast();
+
+  // Use real Supabase data
+  const { data: supabaseData, loading, error } = useSupabaseData();
 
   const handleFileUpload = (file: File) => {
     setUploadedFile(file);
@@ -77,7 +27,7 @@ const Index = () => {
   };
 
   const handleFilterChange = (filters: any) => {
-    let filtered = mockData;
+    let filtered = supabaseData;
     
     if (filters.anoCAIP) {
       filtered = filtered.filter(item => item['Ano CAIP'] === filters.anoCAIP);
@@ -186,6 +136,36 @@ const Index = () => {
     setResults([]);
   };
 
+  // Show loading state
+  if (loading) {
+    return (
+      <ThemeProvider>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-lg">Carregando dados...</p>
+          </div>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <ThemeProvider>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-500 text-lg">Erro ao carregar dados: {error}</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Verifique se a tabela dados_caip foi criada corretamente no Supabase.
+            </p>
+          </div>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-background">
@@ -198,7 +178,7 @@ const Index = () => {
             currentStep={currentStep}
             uploadedFile={uploadedFile}
             onFileUpload={handleFileUpload}
-            filteredData={filteredData}
+            filteredData={filteredData.length > 0 ? filteredData : supabaseData}
             onFilterChange={handleFilterChange}
             selectedItems={selectedItems}
             onSelectionChange={setSelectedItems}
