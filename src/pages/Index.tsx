@@ -61,16 +61,29 @@ const Index = () => {
     const calculatedResults = filteredData
       .filter(item => selectedItems.includes(item.id))
       .map(item => {
-        // Area calculation
-        const areaImovel = item['area_construida_m2'] || 100;
+        // Area calculations
+        const areaConstruida = item['area_construida_m2'] || 0;
+        const areaTerreno = item['area_do_terreno_m2'] || 0;
         
         // Benfeitoria calculation using CUB
-        const valorBenfeitoria = parameters.cubM2 * areaImovel;
+        const valorBenfeitoria = parameters.cubM2 * areaConstruida;
         
-        // RVR calculation formula
+        // Terreno calculation
+        const valorTerreno = parameters.valorM2 * areaTerreno;
+        
+        // Total value before depreciation
+        const valorTotal = valorBenfeitoria + valorTerreno;
+        
+        // Depreciation calculation (assuming 2% per year based on building age)
+        const idadeAparente = parseInt(item['idade_aparente_do_imovel']) || 0;
+        const taxaDepreciacao = Math.min(idadeAparente * 0.02, 0.6); // Max 60% depreciation
+        const valorDepreciacao = valorBenfeitoria * taxaDepreciacao;
+        
+        // Final RVR calculation
         const fatorLocalizacao = 1.1;
         const fatorMercado = 1.05;
-        const valorRvr = (parameters.valorM2 * areaImovel) * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
+        const valorDepreciado = valorTotal - valorDepreciacao;
+        const valorRvr = valorDepreciado * fatorLocalizacao * fatorMercado * (1 + parameters.bdi / 100);
         
         // Since we don't have previous RVR value in the new structure, we'll use 0 as baseline
         const valorOriginal = 0;
@@ -80,13 +93,21 @@ const Index = () => {
         return {
           id: item.id,
           nome: item['nome_da_unidade'] || 'Nome não informado',
+          tipo: item['tipo_de_unidade'] || 'Tipo não informado',
           categoria: item['tipo_de_unidade'],
+          areaConstruida,
+          areaTerreno,
+          valorBenfeitoria,
+          valorTerreno,
+          valorTotal,
+          taxaDepreciacao: taxaDepreciacao * 100, // Convert to percentage
+          valorDepreciacao,
+          valorDepreciado,
           valorOriginal,
           valorAvaliado: valorRvr,
-          valorBenfeitoria,
           diferenca,
           percentual,
-          areaImovel: item['area_construida_m2'],
+          areaImovel: areaConstruida,
           situacaoImovel: item['situacao_do_imovel'] || '',
           unidadeGestora: item['unidade_gestora'],
           anoCAIP: item['ano_caip'],

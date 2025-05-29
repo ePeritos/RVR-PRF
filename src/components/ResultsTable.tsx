@@ -10,7 +10,16 @@ import { useToast } from '@/hooks/use-toast';
 interface ResultRow {
   id: string;
   nome: string;
+  tipo: string;
   categoria: string;
+  areaConstruida: number;
+  areaTerreno: number;
+  valorBenfeitoria: number;
+  valorTerreno: number;
+  valorTotal: number;
+  taxaDepreciacao: number;
+  valorDepreciacao: number;
+  valorDepreciado: number;
   valorOriginal: number;
   valorAvaliado: number;
   diferenca: number;
@@ -112,13 +121,16 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
           <table className="w-full">
             <thead className="bg-muted/30 border-b border-border">
               <tr>
-                <th className="p-4 text-left text-sm font-medium text-foreground">Nome</th>
-                <th className="p-4 text-left text-sm font-medium text-foreground">Categoria</th>
-                <th className="p-4 text-left text-sm font-medium text-foreground">Valor Original</th>
-                <th className="p-4 text-left text-sm font-medium text-foreground">Valor Avaliado</th>
-                <th className="p-4 text-left text-sm font-medium text-foreground">Diferença</th>
-                <th className="p-4 text-left text-sm font-medium text-foreground">%</th>
-                <th className="p-4 text-left text-sm font-medium text-foreground">Ações</th>
+                <th className="p-3 text-left text-xs font-medium text-foreground">Nome</th>
+                <th className="p-3 text-left text-xs font-medium text-foreground">Tipo</th>
+                <th className="p-3 text-left text-xs font-medium text-foreground">Área Const.</th>
+                <th className="p-3 text-left text-xs font-medium text-foreground">Área Terreno</th>
+                <th className="p-3 text-left text-xs font-medium text-foreground">Valor Benfeitoria</th>
+                <th className="p-3 text-left text-xs font-medium text-foreground">Valor Terreno</th>
+                <th className="p-3 text-left text-xs font-medium text-foreground">Depreciação</th>
+                <th className="p-3 text-left text-xs font-medium text-foreground">Valor Depreciado</th>
+                <th className="p-3 text-left text-xs font-medium text-foreground">RVR Final</th>
+                <th className="p-3 text-left text-xs font-medium text-foreground">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -129,27 +141,43 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
                     index % 2 === 0 ? 'bg-background' : 'bg-muted/10'
                   }`}
                 >
-                  <td className="p-4 text-sm font-medium text-foreground">{row.nome}</td>
-                  <td className="p-4 text-sm text-muted-foreground">{row.categoria}</td>
-                  <td className="p-4 text-sm text-foreground">
-                    {row.valorOriginal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  <td className="p-3 text-xs font-medium text-foreground max-w-32">
+                    <div className="truncate" title={row.nome}>{row.nome}</div>
                   </td>
-                  <td className="p-4 text-sm font-medium text-foreground">
-                    {row.valorAvaliado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  <td className="p-3 text-xs text-muted-foreground max-w-24">
+                    <div className="truncate" title={row.tipo}>{row.tipo}</div>
                   </td>
-                  <td className={`p-4 text-sm font-medium ${getDiferencaColor(row.diferenca)}`}>
-                    {row.diferenca > 0 ? '+' : ''}{row.diferenca.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  <td className="p-3 text-xs text-foreground text-center">
+                    {row.areaConstruida.toFixed(0)} m²
                   </td>
-                  <td className={`p-4 text-sm font-medium ${getDiferencaColor(row.diferenca)}`}>
-                    {row.percentual > 0 ? '+' : ''}{row.percentual.toFixed(2)}%
+                  <td className="p-3 text-xs text-foreground text-center">
+                    {row.areaTerreno.toFixed(0)} m²
                   </td>
-                  <td className="p-4">
-                    <div className="flex gap-2">
+                  <td className="p-3 text-xs text-foreground">
+                    {row.valorBenfeitoria.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}
+                  </td>
+                  <td className="p-3 text-xs text-foreground">
+                    {row.valorTerreno.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}
+                  </td>
+                  <td className="p-3 text-xs text-orange-600">
+                    -{row.taxaDepreciacao.toFixed(1)}%<br/>
+                    <span className="text-xs">
+                      {row.valorDepreciacao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}
+                    </span>
+                  </td>
+                  <td className="p-3 text-xs font-medium text-foreground">
+                    {row.valorDepreciado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}
+                  </td>
+                  <td className="p-3 text-xs font-bold text-green-600">
+                    {row.valorAvaliado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}
+                  </td>
+                  <td className="p-3">
+                    <div className="flex gap-1">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleViewReport(row)}
-                        className="hover-scale"
+                        className="hover-scale h-8 w-8 p-0"
                         title="Visualizar Relatório RVR"
                       >
                         <Eye className="h-3 w-3" />
@@ -159,7 +187,7 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
                         variant="outline"
                         onClick={() => handleDownloadReport(row)}
                         disabled={isDownloadingPDF === row.id}
-                        className="hover-scale"
+                        className="hover-scale h-8 w-8 p-0"
                         title="Baixar Relatório RVR"
                       >
                         <Download className="h-3 w-3" />
