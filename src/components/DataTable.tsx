@@ -81,8 +81,8 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
               </th>
               <th className="p-4 text-left text-sm font-medium text-foreground">Ano CAIP</th>
               <th className="p-4 text-left text-sm font-medium text-foreground">Nome da Unidade</th>
-              <th className="p-4 text-left text-sm font-medium text-foreground">Tipo de Unidade</th>
               <th className="p-4 text-left text-sm font-medium text-foreground">Unidade Gestora</th>
+              <th className="p-4 text-left text-sm font-medium text-foreground">Tipo de Unidade</th>
               <th className="p-4 text-left text-sm font-medium text-foreground">Estado de Conservação</th>
               <th className="p-4 text-left text-sm font-medium text-foreground">Vida Útil (Anos)</th>
               <th className="p-4 text-left text-sm font-medium text-foreground">Área do Terreno</th>
@@ -110,10 +110,10 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
                   {row['nome_da_unidade'] || '-'}
                 </td>
                 <td className="p-4 text-sm text-muted-foreground">
-                  {row['tipo_de_unidade'] || '-'}
+                  {row['unidade_gestora'] || '-'}
                 </td>
                 <td className="p-4 text-sm text-muted-foreground">
-                  {row['unidade_gestora'] || '-'}
+                  {row['tipo_de_unidade'] || '-'}
                 </td>
                 <td className="p-4">
                   <span className={`text-sm font-medium ${getConservationColor(row['estado_de_conservacao'])}`}>

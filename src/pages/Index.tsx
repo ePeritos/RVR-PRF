@@ -37,16 +37,17 @@ const Index = () => {
       filtered = filtered.filter(item => item['ano_caip'] === filters.anoCAIP);
     }
     
-    if (filters.tipoUnidade) {
-      filtered = filtered.filter(item => item['tipo_de_unidade'] === filters.tipoUnidade);
-    }
-    
     if (filters.unidadeGestora) {
       filtered = filtered.filter(item => item['unidade_gestora'] === filters.unidadeGestora);
     }
     
+    if (filters.tipoUnidade) {
+      filtered = filtered.filter(item => item['tipo_de_unidade'] === filters.tipoUnidade);
+    }
+    
     setFilteredData(filtered);
     console.log('Filters applied:', filters);
+    console.log('Filtered data:', filtered);
   };
 
   const handleParameterSubmit = (parameters: any) => {

@@ -114,6 +114,20 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
         </div>
 
         <div className="space-y-2">
+          <Label className="text-sm font-medium text-foreground">Unidade Gestora</Label>
+          <Select value={filters.unidadeGestora} onValueChange={(value) => handleFilterChange('unidadeGestora', value)}>
+            <SelectTrigger className="bg-background border-border focus:border-primary">
+              <SelectValue placeholder="Selecionar unidade gestora" />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border-border">
+              {unidadesGestoras.map((unidade) => (
+                <SelectItem key={unidade} value={unidade}>{unidade}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">Tipo de Unidade</Label>
           <Select value={filters.tipoUnidade} onValueChange={(value) => handleFilterChange('tipoUnidade', value)}>
             <SelectTrigger className="bg-background border-border focus:border-primary">
@@ -122,20 +136,6 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
             <SelectContent className="bg-popover border-border">
               {tiposUnidade.map((tipo) => (
                 <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">Unidade Gestora</Label>
-          <Select value={filters.unidadeGestora} onValueChange={(value) => handleFilterChange('unidadeGestora', value)}>
-            <SelectTrigger className="bg-background border-border focus:border-primary">
-              <SelectValue placeholder="Selecionar unidade" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border">
-              {unidadesGestoras.map((unidade) => (
-                <SelectItem key={unidade} value={unidade}>{unidade}</SelectItem>
               ))}
             </SelectContent>
           </Select>
