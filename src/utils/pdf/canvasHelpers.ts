@@ -48,8 +48,10 @@ export const createCanvasConfig = (element: HTMLElement): CanvasConfig & { width
         const htmlEl = el as HTMLElement;
         htmlEl.style.boxSizing = 'border-box';
         htmlEl.style.pageBreakInside = 'avoid';
-        htmlEl.style.webkitPrintColorAdjust = 'exact';
-        htmlEl.style.colorAdjust = 'exact';
+        
+        // Fix TypeScript errors by using proper property access
+        (htmlEl.style as any).webkitPrintColorAdjust = 'exact';
+        (htmlEl.style as any).printColorAdjust = 'exact';
         
         if (htmlEl.style.transform) {
           htmlEl.style.transform = 'none';
