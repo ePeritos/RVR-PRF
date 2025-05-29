@@ -14,6 +14,8 @@ export interface DataRow {
   'vida_util_estimada_anos': string;
   'area_do_terreno_m2': number;
   'area_construida_m2': number;
+  'nome_da_unidade': string;
+  'situacao_do_imovel': string;
 }
 
 export const useSupabaseData = () => {
@@ -31,6 +33,8 @@ export const useSupabaseData = () => {
       'vida_util_estimada_anos': item.vida_util_estimada_anos || '',
       'area_do_terreno_m2': item.area_do_terreno_m2 ? Number(item.area_do_terreno_m2) : 0,
       'area_construida_m2': item.area_construida_m2 ? Number(item.area_construida_m2) : 0,
+      'nome_da_unidade': item.nome_da_unidade || '',
+      'situacao_do_imovel': item.situacao_do_imovel || '',
     }));
   };
 
