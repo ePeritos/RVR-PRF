@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -7,8 +8,10 @@ import { NavigationButtons } from '@/components/NavigationButtons';
 import { generatePDF } from '@/utils/pdfGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { useSupabaseData, DataRow } from '@/hooks/useSupabaseData';
+import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
