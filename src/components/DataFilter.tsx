@@ -37,14 +37,22 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
     try {
       setLoading(true);
 
-      // Buscar todos os anos disponíveis
-      const { data: anosData } = await supabase
+      // Buscar todos os anos disponíveis com logs de debug
+      console.log('Buscando anos disponíveis...');
+      const { data: anosData, error: anosError } = await supabase
         .from('dados_caip')
-        .select('ano_caip')
-        .not('ano_caip', 'is', null);
+        .select('ano_caip');
+      
+      console.log('Dados brutos dos anos:', anosData);
+      console.log('Erro ao buscar anos:', anosError);
       
       if (anosData) {
-        const anosUnicos = [...new Set(anosData.map(item => item.ano_caip).filter(Boolean))].sort();
+        // Filtrar valores nulos/vazios e remover duplicatas
+        const todosAnos = anosData.map(item => item.ano_caip).filter(ano => ano && ano.trim() !== '');
+        console.log('Todos os anos após filtrar nulos:', todosAnos);
+        
+        const anosUnicos = [...new Set(todosAnos)].sort();
+        console.log('Anos únicos ordenados:', anosUnicos);
         setAnosDisponiveis(anosUnicos);
       }
 
