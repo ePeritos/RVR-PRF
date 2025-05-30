@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Header } from '@/components/Header';
+import { LogoutButton } from '@/components/LogoutButton';
 import { StepIndicator } from '@/components/StepIndicator';
 import { StepContent } from '@/components/StepContent';
 import { NavigationButtons } from '@/components/NavigationButtons';
@@ -63,7 +64,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <Header />
+      <div className="flex justify-between items-center p-4 border-b">
+        <Header />
+        <LogoutButton />
+      </div>
       
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
