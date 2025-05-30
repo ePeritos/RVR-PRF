@@ -51,11 +51,11 @@ export const StepContent = ({
       case 1:
         return (
           <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
+            <div className="text-center mb-6">
+              <h2 className="text-xl font-bold text-foreground mb-1">
                 Etapa 1: Upload da Base de Dados CAIP
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Faça o upload da planilha XLSX contendo os dados CAIP que serão importados para o banco de dados
               </p>
             </div>
@@ -69,12 +69,12 @@ export const StepContent = ({
       
       case 2:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
+          <div className="space-y-4">
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-bold text-foreground mb-1">
                 Etapa 2: Seleção de Imóveis
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Filtre e selecione os imóveis do banco de dados que serão incluídos no Relatório de Valor Referencial
               </p>
             </div>
@@ -91,11 +91,11 @@ export const StepContent = ({
         const selectedData = filteredData.filter(item => selectedItems.includes(item.id));
         return (
           <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
+            <div className="text-center mb-6">
+              <h2 className="text-xl font-bold text-foreground mb-1">
                 Etapa 3: Parâmetros RVR
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Configure os parâmetros técnicos para geração do Relatório de Valor Referencial
               </p>
             </div>
@@ -108,12 +108,12 @@ export const StepContent = ({
       
       case 4:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
+          <div className="space-y-4">
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-bold text-foreground mb-1">
                 Etapa 4: Relatório RVR
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Visualize os resultados da avaliação e gere os Relatórios de Valor Referencial em PDF
               </p>
             </div>
@@ -134,7 +134,7 @@ export const StepContent = ({
   return (
     <div className="animate-fade-in">
       {/* Botões de navegação no topo */}
-      <div className="mb-8">
+      <div className="mb-4">
         <NavigationButtons
           currentStep={currentStep}
           canProceed={canProceed}

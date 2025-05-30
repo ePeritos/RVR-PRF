@@ -241,8 +241,10 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <Header />
         
-        <main className="container mx-auto px-4 py-8">
-          <StepIndicator currentStep={currentStep} totalSteps={4} />
+        <main className="container mx-auto px-4 py-4">
+          <div className="mb-4">
+            <StepIndicator currentStep={currentStep} totalSteps={4} />
+          </div>
 
           <StepContent
             currentStep={currentStep}
