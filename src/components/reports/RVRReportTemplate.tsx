@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -22,13 +21,14 @@ interface RVRReportData {
     cub: number;
     valorM2: number;
     bdi: number;
-  };
-  // Dados do usuário responsável
-  responsavelTecnico?: {
-    nome: string;
-    cargo: string;
-    matricula: string;
-    unidadeLotacao: string;
+    responsavelTecnico?: {
+      id: string;
+      nome_completo: string;
+      numero_registro: string;
+      conselho: string;
+      formacao: string;
+      uf: string;
+    };
   };
 }
 
@@ -61,8 +61,17 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
   const valorImovel = valorTerreno + valorBenfeitoria;
   const valorAdotado = valorImovel * fatorComercializacao;
 
+  // Dados do responsável técnico selecionado
+  const responsavelTecnico = data.parametros?.responsavelTecnico;
+  const nomeResponsavel = responsavelTecnico?.nome_completo || '[Nome do Responsável Técnico]';
+  const registroResponsavel = responsavelTecnico ? 
+    `${responsavelTecnico.conselho}/${responsavelTecnico.uf} ${responsavelTecnico.numero_registro}` : 
+    'CREA/[UF] [Número]';
+  const formacaoResponsavel = responsavelTecnico?.formacao || 'Engenheiro Civil';
+
   // Extrair UF da unidade gestora ou usar dados do responsável
   const getUfFromUnidade = (unidadeGestora?: string) => {
+    if (responsavelTecnico?.uf) return responsavelTecnico.uf;
     if (!unidadeGestora) return 'XX';
     // Tentar extrair UF do final da string da unidade gestora
     const match = unidadeGestora.match(/([A-Z]{2})$/);
@@ -94,8 +103,8 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
           <div><strong>Solicitante:</strong> {solicitante}</div>
           <div><strong>Data da Vistoria:</strong> {format(currentDate, 'dd/MM/yyyy')}</div>
           <div><strong>Data-base da Avaliação:</strong> {format(currentDate, 'dd/MM/yyyy')}</div>
-          <div><strong>Responsável Técnico:</strong> {data.responsavelTecnico?.nome || '[Nome do Avaliador]'}</div>
-          <div><strong>Registro Profissional:</strong> {data.responsavelTecnico?.matricula || `CREA/${uf} [Número]`}</div>
+          <div><strong>Responsável Técnico:</strong> {nomeResponsavel}</div>
+          <div><strong>Registro Profissional:</strong> {registroResponsavel}</div>
         </div>
       </section>
 
@@ -388,9 +397,9 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
           
           <div className="mt-8 text-center">
             <div className="border-t border-black w-64 mx-auto mb-2"></div>
-            <div><strong>{data.responsavelTecnico?.nome || '[Nome do Responsável Técnico]'}</strong></div>
-            <div>{data.responsavelTecnico?.cargo || 'Engenheiro Civil'}</div>
-            <div>{data.responsavelTecnico?.matricula || `CREA/${uf} [Número]`}</div>
+            <div><strong>{nomeResponsavel}</strong></div>
+            <div>{formacaoResponsavel}</div>
+            <div>{registroResponsavel}</div>
           </div>
           
           <div className="text-right mt-8">

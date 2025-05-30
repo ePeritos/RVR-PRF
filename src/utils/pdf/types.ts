@@ -1,3 +1,4 @@
+
 export interface PDFDimensions {
   pdfWidth: number;
   pdfHeight: number;
@@ -43,5 +44,13 @@ export interface RVRReportData {
     bdi: number;
     dataReferencia?: string;
     fonteValorTerreno?: string;
+    responsavelTecnico?: {
+      id: string;
+      nome_completo: string;
+      numero_registro: string;
+      conselho: string;
+      formacao: string;
+      uf: string;
+    };
   };
 }

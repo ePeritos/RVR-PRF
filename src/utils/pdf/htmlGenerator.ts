@@ -27,6 +27,13 @@ export class HTMLGenerator {
     const valorTotal = valorTerreno + valorBenfeitoria;
     const fatorComercializacao = 1.0;
     const valorAdotado = valorTotal * fatorComercializacao;
+
+    // Dados do responsável técnico selecionado
+    const responsavelTecnico = data.parametros?.responsavelTecnico;
+    const nomeResponsavel = responsavelTecnico?.nome_completo || '[Nome do Responsável Técnico]';
+    const registroResponsavel = responsavelTecnico ? 
+      `${responsavelTecnico.conselho}/${responsavelTecnico.uf} ${responsavelTecnico.numero_registro}` : 
+      'CREA/[UF] [Número]';
     
     return `
       <div style="width: 100%; max-width: 210mm; font-family: Arial, sans-serif; color: #000; background: white; padding: 20mm; box-sizing: border-box; line-height: 1.4; font-size: 14px;">
@@ -95,7 +102,7 @@ export class HTMLGenerator {
                 Responsável Técnico:
               </td>
               <td style="padding: 6px; border: 1px solid #000;">
-                [Nome do Avaliador]
+                ${nomeResponsavel}
               </td>
             </tr>
             <tr>
@@ -103,7 +110,7 @@ export class HTMLGenerator {
                 Registro Profissional:
               </td>
               <td style="padding: 6px; border: 1px solid #000;">
-                CREA/[UF] [Número]
+                ${registroResponsavel}
               </td>
             </tr>
           </table>
@@ -322,9 +329,9 @@ export class HTMLGenerator {
             
             <div style="text-align: center; margin-top: 40px;">
               <div style="border-top: 1px solid #000; width: 300px; margin: 0 auto 10px;">
-                <p style="font-size: 12px; margin: 10px 0 5px; font-weight: bold;">[Nome do Responsável Técnico]</p>
-                <p style="font-size: 12px; margin: 0;">Engenheiro Civil</p>
-                <p style="font-size: 12px; margin: 0;">CREA/[UF] [Número]</p>
+                <p style="font-size: 12px; margin: 10px 0 5px; font-weight: bold;">${nomeResponsavel}</p>
+                <p style="font-size: 12px; margin: 0;">${responsavelTecnico?.formacao || 'Engenheiro Civil'}</p>
+                <p style="font-size: 12px; margin: 0;">${registroResponsavel}</p>
               </div>
               <p style="font-size: 12px; margin-top: 20px;">
                 [Cidade/UF], ${currentDate}
