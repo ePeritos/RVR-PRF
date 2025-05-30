@@ -65,7 +65,7 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*, responsavel_tecnico_id')
+        .select('*')
         .eq('id', user.id)
         .single();
 
@@ -81,29 +81,6 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
     }
   };
 
-  const fetchResponsavelTecnico = async (responsavelId: string) => {
-    if (!responsavelId) return null;
-    
-    try {
-      const { data, error } = await supabase
-        .from('responsaveis_tecnicos')
-        .select('*')
-        .eq('id', responsavelId)
-        .eq('ativo', true)
-        .single();
-
-      if (error) {
-        console.error('Erro ao buscar responsável técnico:', error);
-        return null;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Erro ao buscar responsável técnico:', error);
-      return null;
-    }
-  };
-
   const getDiferencaColor = (valor: number) => {
     if (valor > 0) return 'text-green-600 dark:text-green-400';
     if (valor < 0) return 'text-red-600 dark:text-red-400';
@@ -112,26 +89,16 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
 
   const handleViewReport = async (result: ResultRow) => {
     const profile = await fetchUserProfile();
-    let responsavelTecnico = null;
-    
-    if (profile?.responsavel_tecnico_id) {
-      responsavelTecnico = await fetchResponsavelTecnico(profile.responsavel_tecnico_id);
-    }
     
     const reportData = {
       ...result,
       parametros,
-      responsavelTecnico: responsavelTecnico ? {
-        nome: responsavelTecnico.nome_completo,
-        cargo: responsavelTecnico.formacao,
-        matricula: `${responsavelTecnico.conselho}/${responsavelTecnico.uf} ${responsavelTecnico.numero_registro}`,
-        unidadeLotacao: profile?.unidade_lotacao || ''
-      } : (profile ? {
+      responsavelTecnico: profile ? {
         nome: profile.nome_completo,
         cargo: profile.cargo,
         matricula: profile.matricula,
         unidadeLotacao: profile.unidade_lotacao
-      } : undefined)
+      } : undefined
     };
     
     setSelectedReport(reportData);
@@ -144,26 +111,16 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
     
     try {
       const profile = await fetchUserProfile();
-      let responsavelTecnico = null;
-      
-      if (profile?.responsavel_tecnico_id) {
-        responsavelTecnico = await fetchResponsavelTecnico(profile.responsavel_tecnico_id);
-      }
       
       const reportData = {
         ...result,
         parametros,
-        responsavelTecnico: responsavelTecnico ? {
-          nome: responsavelTecnico.nome_completo,
-          cargo: responsavelTecnico.formacao,
-          matricula: `${responsavelTecnico.conselho}/${responsavelTecnico.uf} ${responsavelTecnico.numero_registro}`,
-          unidadeLotacao: profile?.unidade_lotacao || ''
-        } : (profile ? {
+        responsavelTecnico: profile ? {
           nome: profile.nome_completo,
           cargo: profile.cargo,
           matricula: profile.matricula,
           unidadeLotacao: profile.unidade_lotacao
-        } : undefined)
+        } : undefined
       };
       
       console.log('Iniciando download direto do PDF para:', reportData.nome);

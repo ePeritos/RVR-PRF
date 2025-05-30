@@ -5,9 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { ThemeProvider } from "@/hooks/useTheme";
 import Index from "./pages/Index";
-import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -15,8 +13,6 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  
-  console.log('ProtectedRoute - user:', user, 'loading:', loading);
   
   if (loading) {
     return (
@@ -30,7 +26,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user) {
-    console.log('User not authenticated, redirecting to /auth');
     return <Navigate to="/auth" replace />;
   }
   
@@ -39,8 +34,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  
-  console.log('PublicRoute - user:', user, 'loading:', loading);
   
   if (loading) {
     return (
@@ -54,57 +47,42 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (user) {
-    console.log('User authenticated, redirecting to /');
     return <Navigate to="/" replace />;
   }
   
   return <>{children}</>;
 };
 
-const App = () => {
-  console.log('App component rendering');
-  
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AuthProvider>
-              <Routes>
-                <Route 
-                  path="/" 
-                  element={
-                    <ProtectedRoute>
-                      <Index />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/profile" 
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/auth" 
-                  element={
-                    <PublicRoute>
-                      <Auth />
-                    </PublicRoute>
-                  } 
-                />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </AuthProvider>
-          </BrowserRouter>
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  );
-};
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            <Route 
+              path="/" 
+              element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/auth" 
+              element={
+                <PublicRoute>
+                  <Auth />
+                </PublicRoute>
+              } 
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;

@@ -4,25 +4,25 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface NavigationButtonsProps {
   currentStep: number;
-  canGoNext: boolean;
-  canGoPrevious: boolean;
-  onNext: () => void;
-  onPrevious: () => void;
+  canProceed: boolean;
+  onNextStep: () => void;
+  onPrevStep: () => void;
+  onNewEvaluation: () => void;
 }
 
 export const NavigationButtons = ({
   currentStep,
-  canGoNext,
-  canGoPrevious,
-  onNext,
-  onPrevious
+  canProceed,
+  onNextStep,
+  onPrevStep,
+  onNewEvaluation
 }: NavigationButtonsProps) => {
   if (currentStep === 4) {
     return (
       <div className="flex justify-between mt-8">
         <Button 
           variant="outline" 
-          onClick={onPrevious}
+          onClick={onPrevStep}
           className="hover-scale"
         >
           <ChevronLeft className="mr-2 h-4 w-4" />
@@ -31,7 +31,7 @@ export const NavigationButtons = ({
         
         <Button 
           variant="outline" 
-          onClick={() => {/* Nova avaliação logic */}}
+          onClick={onNewEvaluation}
           className="hover-scale"
         >
           Nova Avaliação RVR
@@ -45,8 +45,8 @@ export const NavigationButtons = ({
     return (
       <div className="flex justify-end mt-8">
         <Button 
-          onClick={onNext} 
-          disabled={!canGoNext}
+          onClick={onNextStep} 
+          disabled={!canProceed}
           className="hover-scale"
         >
           Próximo
@@ -62,7 +62,7 @@ export const NavigationButtons = ({
       <div className="flex justify-start mt-8">
         <Button 
           variant="outline" 
-          onClick={onPrevious}
+          onClick={onPrevStep}
           className="hover-scale"
         >
           <ChevronLeft className="mr-2 h-4 w-4" />
@@ -77,7 +77,7 @@ export const NavigationButtons = ({
     <div className="flex justify-between mt-8">
       <Button 
         variant="outline" 
-        onClick={onPrevious}
+        onClick={onPrevStep}
         className="hover-scale"
       >
         <ChevronLeft className="mr-2 h-4 w-4" />
@@ -85,8 +85,8 @@ export const NavigationButtons = ({
       </Button>
       
       <Button 
-        onClick={onNext} 
-        disabled={!canGoNext}
+        onClick={onNextStep} 
+        disabled={!canProceed}
         className="hover-scale"
       >
         Próximo

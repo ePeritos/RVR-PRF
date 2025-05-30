@@ -8,24 +8,17 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LogoutButton } from '@/components/LogoutButton';
-import { Eye, EyeOff } from 'lucide-react';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  console.log('Auth component rendering'); // Debug log
-
   const handleSignInWithGoogle = async () => {
     try {
       setLoading(true);
-      console.log('Attempting Google sign in');
-      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -33,12 +26,8 @@ const Auth = () => {
         }
       });
       
-      if (error) {
-        console.error('Google sign in error:', error);
-        throw error;
-      }
+      if (error) throw error;
     } catch (error: any) {
-      console.error('Google sign in catch error:', error);
       toast({
         title: "Erro ao fazer login",
         description: error.message,
@@ -53,24 +42,17 @@ const Auth = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      console.log('Attempting email sign in with:', email);
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
-      if (error) {
-        console.error('Email sign in error:', error);
-        throw error;
-      }
+      if (error) throw error;
       
-      console.log('Sign in successful:', data);
       if (data.user) {
         navigate('/');
       }
     } catch (error: any) {
-      console.error('Email sign in catch error:', error);
       toast({
         title: "Erro ao fazer login",
         description: error.message,
@@ -85,25 +67,18 @@ const Auth = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      console.log('Attempting sign up with:', email);
-      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
       
-      if (error) {
-        console.error('Sign up error:', error);
-        throw error;
-      }
+      if (error) throw error;
       
-      console.log('Sign up successful:', data);
       toast({
         title: "Conta criada com sucesso!",
         description: "Verifique seu email para confirmar a conta.",
       });
     } catch (error: any) {
-      console.error('Sign up catch error:', error);
       toast({
         title: "Erro ao criar conta",
         description: error.message,
@@ -116,10 +91,6 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="absolute top-4 right-4">
-        <LogoutButton />
-      </div>
-      
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Sistema RVR</CardTitle>
@@ -176,27 +147,13 @@ const Auth = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password">Senha</Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="pr-10"
-                      />
-                      <button
-                        type="button"
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-gray-400" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-gray-400" />
-                        )}
-                      </button>
-                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Entrando..." : "Entrar"}
@@ -219,29 +176,15 @@ const Auth = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Senha</Label>
-                    <div className="relative">
-                      <Input
-                        id="signup-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Mínimo 6 caracteres"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        minLength={6}
-                        className="pr-10"
-                      />
-                      <button
-                        type="button"
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-gray-400" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-gray-400" />
-                        )}
-                      </button>
-                    </div>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="Mínimo 6 caracteres"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Criando conta..." : "Criar Conta"}
