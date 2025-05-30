@@ -15,7 +15,7 @@ export const Header = () => {
               Sistema RVR
             </h1>
             <span className="text-sm text-muted-foreground">
-              Relatório de Valor Referencial
+              para geração do Relatório de Valor Referencial
             </span>
           </div>
           
