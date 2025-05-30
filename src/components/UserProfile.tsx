@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
@@ -126,6 +126,10 @@ export const UserProfile = () => {
     }
   };
 
+  const handleEditProfile = () => {
+    setOpen(true);
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -157,126 +161,127 @@ export const UserProfile = () => {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
-          <User className="h-4 w-4" />
-          <span className="hidden sm:inline-block">
-            {profile.nome_completo || user?.email}
-          </span>
-          <ChevronDown className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <div className="px-2 py-1.5">
-          <p className="text-sm font-medium">{profile.nome_completo || 'Usuário'}</p>
-          <p className="text-xs text-muted-foreground">{user?.email}</p>
-        </div>
-        <DropdownMenuSeparator />
-        
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              <Settings className="h-4 w-4 mr-2" />
-              Editar Perfil
-            </DropdownMenuItem>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Perfil do Usuário</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSave} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="nome_completo">Nome Completo</Label>
-                <Input
-                  id="nome_completo"
-                  value={profile.nome_completo}
-                  onChange={(e) => setProfile(prev => ({ ...prev, nome_completo: e.target.value }))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cargo">Cargo</Label>
-                <Input
-                  id="cargo"
-                  value={profile.cargo}
-                  onChange={(e) => setProfile(prev => ({ ...prev, cargo: e.target.value }))}
-                  placeholder="Ex: Engenheiro Civil"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="matricula">Matrícula</Label>
-                <Input
-                  id="matricula"
-                  value={profile.matricula}
-                  onChange={(e) => setProfile(prev => ({ ...prev, matricula: e.target.value }))}
-                  placeholder="Ex: CREA/XX 123456"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="unidade_lotacao">Unidade de Lotação</Label>
-                <Select
-                  value={profile.unidade_lotacao}
-                  onValueChange={(value) => setProfile(prev => ({ ...prev, unidade_lotacao: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={loadingUnidades ? "Carregando..." : "Selecione uma unidade"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {unidadesGestoras.map((unidade) => (
-                      <SelectItem key={unidade} value={unidade}>
-                        {unidade}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="responsavel_tecnico_id">Responsável Técnico (Opcional)</Label>
-                <Select
-                  value={profile.responsavel_tecnico_id}
-                  onValueChange={(value) => setProfile(prev => ({ ...prev, responsavel_tecnico_id: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={loadingResponsaveis ? "Carregando..." : "Selecione um responsável técnico"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Nenhum (usar dados do perfil)</SelectItem>
-                    {responsaveisTecnicos.map((responsavel) => (
-                      <SelectItem key={responsavel.id} value={responsavel.id}>
-                        {responsavel.nome_completo} - {responsavel.conselho}/{responsavel.uf}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="telefone">Telefone</Label>
-                <Input
-                  id="telefone"
-                  value={profile.telefone}
-                  onChange={(e) => setProfile(prev => ({ ...prev, telefone: e.target.value }))}
-                  placeholder="Ex: (11) 99999-9999"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button type="submit" disabled={loading} className="flex-1">
-                  {loading ? "Salvando..." : "Salvar"}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                  Cancelar
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-        
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={signOut} className="text-red-600">
-          <LogOut className="h-4 w-4 mr-2" />
-          Sair
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            <span className="hidden sm:inline-block">
+              {profile.nome_completo || user?.email}
+            </span>
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <div className="px-2 py-1.5">
+            <p className="text-sm font-medium">{profile.nome_completo || 'Usuário'}</p>
+            <p className="text-xs text-muted-foreground">{user?.email}</p>
+          </div>
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuItem onClick={handleEditProfile}>
+            <Settings className="h-4 w-4 mr-2" />
+            Editar Perfil
+          </DropdownMenuItem>
+          
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={signOut} className="text-red-600">
+            <LogOut className="h-4 w-4 mr-2" />
+            Sair
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Perfil do Usuário</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSave} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="nome_completo">Nome Completo</Label>
+              <Input
+                id="nome_completo"
+                value={profile.nome_completo}
+                onChange={(e) => setProfile(prev => ({ ...prev, nome_completo: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cargo">Cargo</Label>
+              <Input
+                id="cargo"
+                value={profile.cargo}
+                onChange={(e) => setProfile(prev => ({ ...prev, cargo: e.target.value }))}
+                placeholder="Ex: Engenheiro Civil"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="matricula">Matrícula</Label>
+              <Input
+                id="matricula"
+                value={profile.matricula}
+                onChange={(e) => setProfile(prev => ({ ...prev, matricula: e.target.value }))}
+                placeholder="Ex: CREA/XX 123456"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="unidade_lotacao">Unidade de Lotação</Label>
+              <Select
+                value={profile.unidade_lotacao}
+                onValueChange={(value) => setProfile(prev => ({ ...prev, unidade_lotacao: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={loadingUnidades ? "Carregando..." : "Selecione uma unidade"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {unidadesGestoras.map((unidade) => (
+                    <SelectItem key={unidade} value={unidade}>
+                      {unidade}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="responsavel_tecnico_id">Responsável Técnico (Opcional)</Label>
+              <Select
+                value={profile.responsavel_tecnico_id}
+                onValueChange={(value) => setProfile(prev => ({ ...prev, responsavel_tecnico_id: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={loadingResponsaveis ? "Carregando..." : "Selecione um responsável técnico"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhum (usar dados do perfil)</SelectItem>
+                  {responsaveisTecnicos.map((responsavel) => (
+                    <SelectItem key={responsavel.id} value={responsavel.id}>
+                      {responsavel.nome_completo} - {responsavel.conselho}/{responsavel.uf}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="telefone">Telefone</Label>
+              <Input
+                id="telefone"
+                value={profile.telefone}
+                onChange={(e) => setProfile(prev => ({ ...prev, telefone: e.target.value }))}
+                placeholder="Ex: (11) 99999-9999"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={loading} className="flex-1">
+                {loading ? "Salvando..." : "Salvar"}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Cancelar
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
