@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,13 +30,42 @@ export const UserProfile = () => {
   });
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [unidadesGestoras, setUnidadesGestoras] = useState<string[]>([]);
+  const [loadingUnidades, setLoadingUnidades] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchUnidadesGestoras();
     }
   }, [user]);
+
+  const fetchUnidadesGestoras = async () => {
+    try {
+      setLoadingUnidades(true);
+      const { data, error } = await supabase
+        .from('dados_caip')
+        .select('unidade_gestora')
+        .not('unidade_gestora', 'is', null)
+        .order('unidade_gestora');
+
+      if (error) throw error;
+
+      // Extrair valores únicos e filtrar vazios
+      const unidadesUnicas = [...new Set(
+        data
+          .map(item => item.unidade_gestora)
+          .filter(unidade => unidade && unidade.trim() !== '')
+      )].sort();
+
+      setUnidadesGestoras(unidadesUnicas);
+    } catch (error: any) {
+      console.error('Erro ao carregar unidades gestoras:', error);
+    } finally {
+      setLoadingUnidades(false);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -122,6 +152,7 @@ export const UserProfile = () => {
                 id="cargo"
                 value={profile.cargo}
                 onChange={(e) => setProfile(prev => ({ ...prev, cargo: e.target.value }))}
+                placeholder="Ex: Engenheiro Civil"
               />
             </div>
             <div className="space-y-2">
@@ -130,15 +161,26 @@ export const UserProfile = () => {
                 id="matricula"
                 value={profile.matricula}
                 onChange={(e) => setProfile(prev => ({ ...prev, matricula: e.target.value }))}
+                placeholder="Ex: CREA/XX 123456"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="unidade_lotacao">Unidade de Lotação</Label>
-              <Input
-                id="unidade_lotacao"
+              <Select
                 value={profile.unidade_lotacao}
-                onChange={(e) => setProfile(prev => ({ ...prev, unidade_lotacao: e.target.value }))}
-              />
+                onValueChange={(value) => setProfile(prev => ({ ...prev, unidade_lotacao: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={loadingUnidades ? "Carregando..." : "Selecione uma unidade"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {unidadesGestoras.map((unidade) => (
+                    <SelectItem key={unidade} value={unidade}>
+                      {unidade}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="telefone">Telefone</Label>
@@ -146,6 +188,7 @@ export const UserProfile = () => {
                 id="telefone"
                 value={profile.telefone}
                 onChange={(e) => setProfile(prev => ({ ...prev, telefone: e.target.value }))}
+                placeholder="Ex: (11) 99999-9999"
               />
             </div>
             <div className="flex gap-2">

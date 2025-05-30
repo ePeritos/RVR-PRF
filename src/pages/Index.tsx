@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -9,6 +8,7 @@ import { generatePDF } from '@/utils/pdfGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { useSupabaseData, DataRow } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   const { user } = useAuth();
@@ -23,6 +23,28 @@ const Index = () => {
 
   // Use real Supabase data
   const { data: supabaseData, loading, error, refetch } = useSupabaseData();
+
+  const fetchUserProfile = async () => {
+    if (!user) return null;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erro ao buscar perfil:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Erro ao buscar perfil:', error);
+      return null;
+    }
+  };
 
   const handleFileUpload = (file: File) => {
     setUploadedFile(file);
@@ -165,7 +187,19 @@ const Index = () => {
     try {
       const resultData = results.find(result => result.id === id);
       if (resultData) {
-        await generatePDF(resultData);
+        const profile = await fetchUserProfile();
+        
+        const reportData = {
+          ...resultData,
+          responsavelTecnico: profile ? {
+            nome: profile.nome_completo,
+            cargo: profile.cargo,
+            matricula: profile.matricula,
+            unidadeLotacao: profile.unidade_lotacao
+          } : undefined
+        };
+        
+        await generatePDF(reportData);
         toast({
           title: "PDF Gerado",
           description: "O relatório RVR foi baixado com sucesso.",

@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { RVRReportViewer } from './reports/RVRReportViewer';
 import { generatePDF } from '@/utils/pdfGenerator';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ResultRow {
   id: string;
@@ -28,6 +30,9 @@ interface ResultRow {
   situacaoImovel?: string;
   unidadeGestora?: string;
   anoCAIP?: string;
+  endereco?: string;
+  rip?: string;
+  matriculaImovel?: string;
   parametros?: {
     cub: number;
     valorM2: number;
@@ -47,10 +52,34 @@ interface ResultsTableProps {
 }
 
 export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: ResultsTableProps) {
+  const { user } = useAuth();
   const [selectedReport, setSelectedReport] = useState<ResultRow | null>(null);
   const [isReportViewerOpen, setIsReportViewerOpen] = useState(false);
   const [isDownloadingPDF, setIsDownloadingPDF] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const { toast } = useToast();
+
+  const fetchUserProfile = async () => {
+    if (!user) return null;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erro ao buscar perfil:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Erro ao buscar perfil:', error);
+      return null;
+    }
+  };
 
   const getDiferencaColor = (valor: number) => {
     if (valor > 0) return 'text-green-600 dark:text-green-400';
@@ -58,12 +87,22 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
     return 'text-muted-foreground';
   };
 
-  const handleViewReport = (result: ResultRow) => {
+  const handleViewReport = async (result: ResultRow) => {
+    const profile = await fetchUserProfile();
+    
     const reportData = {
       ...result,
-      parametros
+      parametros,
+      responsavelTecnico: profile ? {
+        nome: profile.nome_completo,
+        cargo: profile.cargo,
+        matricula: profile.matricula,
+        unidadeLotacao: profile.unidade_lotacao
+      } : undefined
     };
+    
     setSelectedReport(reportData);
+    setUserProfile(profile);
     setIsReportViewerOpen(true);
   };
 
@@ -71,9 +110,17 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
     setIsDownloadingPDF(result.id);
     
     try {
+      const profile = await fetchUserProfile();
+      
       const reportData = {
         ...result,
-        parametros
+        parametros,
+        responsavelTecnico: profile ? {
+          nome: profile.nome_completo,
+          cargo: profile.cargo,
+          matricula: profile.matricula,
+          unidadeLotacao: profile.unidade_lotacao
+        } : undefined
       };
       
       console.log('Iniciando download direto do PDF para:', reportData.nome);
@@ -100,6 +147,7 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
   const handleCloseReportViewer = () => {
     setIsReportViewerOpen(false);
     setSelectedReport(null);
+    setUserProfile(null);
   };
 
   return (

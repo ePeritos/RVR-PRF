@@ -15,10 +15,20 @@ interface RVRReportData {
   situacaoImovel?: string;
   unidadeGestora?: string;
   anoCAIP?: string;
+  endereco?: string;
+  rip?: string;
+  matriculaImovel?: string;
   parametros?: {
     cub: number;
     valorM2: number;
     bdi: number;
+  };
+  // Dados do usuário responsável
+  responsavelTecnico?: {
+    nome: string;
+    cargo: string;
+    matricula: string;
+    unidadeLotacao: string;
   };
 }
 
@@ -51,13 +61,24 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
   const valorImovel = valorTerreno + valorBenfeitoria;
   const valorAdotado = valorImovel * fatorComercializacao;
 
+  // Extrair UF da unidade gestora ou usar dados do responsável
+  const getUfFromUnidade = (unidadeGestora?: string) => {
+    if (!unidadeGestora) return 'XX';
+    // Tentar extrair UF do final da string da unidade gestora
+    const match = unidadeGestora.match(/([A-Z]{2})$/);
+    return match ? match[1] : 'XX';
+  };
+
+  const uf = getUfFromUnidade(data.unidadeGestora);
+  const solicitante = data.unidadeGestora || 'PRF/XX';
+
   return (
     <div className={`bg-white text-black p-8 max-w-5xl mx-auto text-sm leading-relaxed ${className}`} id={`rvr-report-${data.id}`}>
       {/* Cabeçalho Oficial */}
       <div className="text-center mb-8">
         <div className="text-xs mb-2">MINISTÉRIO DA JUSTIÇA E SEGURANÇA PÚBLICA</div>
         <div className="text-xs mb-2">POLÍCIA RODOVIÁRIA FEDERAL</div>
-        <div className="text-xs mb-6">SUPERINTENDÊNCIA REGIONAL NO ESTADO DE [UF]</div>
+        <div className="text-xs mb-6">SUPERINTENDÊNCIA REGIONAL NO ESTADO DE {uf}</div>
         
         <h1 className="text-lg font-bold mb-4">RELATÓRIO DE VALOR DE REFERÊNCIA (RVR)</h1>
         <div className="text-sm">Nº {reportNumber}</div>
@@ -67,14 +88,14 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
       <section className="mb-6">
         <h2 className="text-base font-bold mb-3 bg-gray-100 p-2">I. DADOS GERAIS</h2>
         <div className="grid grid-cols-2 gap-4 text-xs">
-          <div><strong>Endereço:</strong> [Endereço do imóvel]</div>
-          <div><strong>Município/UF:</strong> [Município/UF]</div>
+          <div><strong>Endereço:</strong> {data.endereco || '[Endereço do imóvel]'}</div>
+          <div><strong>Município/UF:</strong> [Município/{uf}]</div>
           <div><strong>Finalidade:</strong> Avaliação para fins de conhecimento patrimonial</div>
-          <div><strong>Solicitante:</strong> Superintendência Regional da PRF/[UF]</div>
+          <div><strong>Solicitante:</strong> {solicitante}</div>
           <div><strong>Data da Vistoria:</strong> {format(currentDate, 'dd/MM/yyyy')}</div>
           <div><strong>Data-base da Avaliação:</strong> {format(currentDate, 'dd/MM/yyyy')}</div>
-          <div><strong>Responsável Técnico:</strong> [Nome do Avaliador]</div>
-          <div><strong>Registro Profissional:</strong> CREA/[UF] [Número]</div>
+          <div><strong>Responsável Técnico:</strong> {data.responsavelTecnico?.nome || '[Nome do Avaliador]'}</div>
+          <div><strong>Registro Profissional:</strong> {data.responsavelTecnico?.matricula || `CREA/${uf} [Número]`}</div>
         </div>
       </section>
 
@@ -132,10 +153,10 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
         <h2 className="text-base font-bold mb-3 bg-gray-100 p-2">III. IDENTIFICAÇÃO E CARACTERIZAÇÃO DO IMÓVEL</h2>
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div><strong>Tipo:</strong> {data.categoria}</div>
-          <div><strong>RIP:</strong> [Número RIP]</div>
-          <div><strong>Matrícula:</strong> [Número da Matrícula]</div>
+          <div><strong>RIP:</strong> {data.rip || '[Número RIP]'}</div>
+          <div><strong>Matrícula:</strong> {data.matriculaImovel || '[Número da Matrícula]'}</div>
           <div><strong>Cartório:</strong> [Nome do Cartório]</div>
-          <div><strong>Endereço Completo:</strong> [Endereço detalhado]</div>
+          <div><strong>Endereço Completo:</strong> {data.endereco || '[Endereço detalhado]'}</div>
           <div><strong>CEP:</strong> [CEP]</div>
           <div><strong>Área do Terreno:</strong> {areaTerreno.toLocaleString('pt-BR')} m²</div>
           <div><strong>Área Construída:</strong> {areaBenfeitoria.toLocaleString('pt-BR')} m²</div>
@@ -189,7 +210,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
           <p>6.2. Os valores de referência utilizados têm as seguintes fontes e datas-base:</p>
           <ul className="list-disc list-inside ml-4 space-y-1">
             <li>Valor unitário do terreno: {valorUnitarioTerreno.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: [Fonte] - Data-base: {format(currentDate, 'MM/yyyy')}</li>
-            <li>CUB/m²: {cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: SINDUSCON/[UF] - Data-base: {format(currentDate, 'MM/yyyy')}</li>
+            <li>CUB/m²: {cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: SINDUSCON/{uf} - Data-base: {format(currentDate, 'MM/yyyy')}</li>
           </ul>
           <p>6.3. A avaliação refere-se ao imóvel nas condições em que se encontra na data da vistoria.</p>
           <p>6.4. Este relatório destina-se exclusivamente à finalidade declarada no item I.</p>
@@ -367,13 +388,13 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
           
           <div className="mt-8 text-center">
             <div className="border-t border-black w-64 mx-auto mb-2"></div>
-            <div><strong>[Nome do Responsável Técnico]</strong></div>
-            <div>Engenheiro Civil</div>
-            <div>CREA/[UF] [Número]</div>
+            <div><strong>{data.responsavelTecnico?.nome || '[Nome do Responsável Técnico]'}</strong></div>
+            <div>{data.responsavelTecnico?.cargo || 'Engenheiro Civil'}</div>
+            <div>{data.responsavelTecnico?.matricula || `CREA/${uf} [Número]`}</div>
           </div>
           
           <div className="text-right mt-8">
-            <div>[Cidade/UF], {format(currentDate, 'dd \'de\' MMMM \'de\' yyyy', { locale: ptBR })}</div>
+            <div>[Cidade/{uf}], {format(currentDate, 'dd \'de\' MMMM \'de\' yyyy', { locale: ptBR })}</div>
           </div>
         </div>
       </section>
@@ -382,7 +403,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
       <div className="border-t border-gray-400 pt-4 mt-8">
         <div className="text-center text-xs text-gray-600">
           <p>Relatório de Valor de Referência (RVR) nº {reportNumber}</p>
-          <p>Polícia Rodoviária Federal - Superintendência Regional no Estado de [UF]</p>
+          <p>Polícia Rodoviária Federal - Superintendência Regional no Estado de {uf}</p>
           <p>Gerado automaticamente em {format(currentDate, 'dd/MM/yyyy \'às\' HH:mm', { locale: ptBR })}</p>
         </div>
       </div>
