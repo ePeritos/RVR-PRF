@@ -16,9 +16,13 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  console.log('Auth component rendering'); // Debug log
+
   const handleSignInWithGoogle = async () => {
     try {
       setLoading(true);
+      console.log('Attempting Google sign in');
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -26,8 +30,12 @@ const Auth = () => {
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Google sign in error:', error);
+        throw error;
+      }
     } catch (error: any) {
+      console.error('Google sign in catch error:', error);
       toast({
         title: "Erro ao fazer login",
         description: error.message,
@@ -42,17 +50,24 @@ const Auth = () => {
     e.preventDefault();
     try {
       setLoading(true);
+      console.log('Attempting email sign in with:', email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Email sign in error:', error);
+        throw error;
+      }
       
+      console.log('Sign in successful:', data);
       if (data.user) {
         navigate('/');
       }
     } catch (error: any) {
+      console.error('Email sign in catch error:', error);
       toast({
         title: "Erro ao fazer login",
         description: error.message,
@@ -67,18 +82,25 @@ const Auth = () => {
     e.preventDefault();
     try {
       setLoading(true);
+      console.log('Attempting sign up with:', email);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Sign up error:', error);
+        throw error;
+      }
       
+      console.log('Sign up successful:', data);
       toast({
         title: "Conta criada com sucesso!",
         description: "Verifique seu email para confirmar a conta.",
       });
     } catch (error: any) {
+      console.error('Sign up catch error:', error);
       toast({
         title: "Erro ao criar conta",
         description: error.message,
