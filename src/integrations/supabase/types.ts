@@ -413,6 +413,7 @@ export type Database = {
           id: string
           matricula: string | null
           nome_completo: string
+          responsavel_tecnico_id: string | null
           telefone: string | null
           unidade_lotacao: string | null
           updated_at: string
@@ -424,6 +425,7 @@ export type Database = {
           id: string
           matricula?: string | null
           nome_completo: string
+          responsavel_tecnico_id?: string | null
           telefone?: string | null
           unidade_lotacao?: string | null
           updated_at?: string
@@ -435,8 +437,53 @@ export type Database = {
           id?: string
           matricula?: string | null
           nome_completo?: string
+          responsavel_tecnico_id?: string | null
           telefone?: string | null
           unidade_lotacao?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_responsavel_tecnico_id_fkey"
+            columns: ["responsavel_tecnico_id"]
+            isOneToOne: false
+            referencedRelation: "responsaveis_tecnicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      responsaveis_tecnicos: {
+        Row: {
+          ativo: boolean
+          conselho: string
+          created_at: string
+          formacao: string
+          id: string
+          nome_completo: string
+          numero_registro: string
+          uf: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          conselho: string
+          created_at?: string
+          formacao: string
+          id?: string
+          nome_completo: string
+          numero_registro: string
+          uf: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          conselho?: string
+          created_at?: string
+          formacao?: string
+          id?: string
+          nome_completo?: string
+          numero_registro?: string
+          uf?: string
           updated_at?: string
         }
         Relationships: []

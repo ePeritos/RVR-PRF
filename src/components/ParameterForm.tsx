@@ -1,11 +1,22 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataRow } from '@/hooks/useSupabaseData';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface ResponsavelTecnico {
+  id: string;
+  nome_completo: string;
+  numero_registro: string;
+  conselho: string;
+  formacao: string;
+  uf: string;
+}
 
 interface ParameterFormProps {
   onSubmit: (parameters: any) => void;
@@ -13,18 +24,72 @@ interface ParameterFormProps {
 }
 
 export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) => {
+  const [responsaveisTecnicos, setResponsaveisTecnicos] = useState<ResponsavelTecnico[]>([]);
+  const [loadingResponsaveis, setLoadingResponsaveis] = useState(true);
+  const { toast } = useToast();
+  
   const [parameters, setParameters] = useState({
     valorM2: 150,
     cubM2: 2100,
     bdi: 25,
     dataReferencia: new Date().toISOString().split('T')[0],
     fonteValorTerreno: 'Planta Genérica de Valores do Município',
-    justificativaValores: 'Valores baseados em pesquisa de mercado local e dados oficiais do município.'
+    justificativaValores: 'Valores baseados em pesquisa de mercado local e dados oficiais do município.',
+    responsavelTecnicoId: ''
   });
+
+  useEffect(() => {
+    fetchResponsaveisTecnicos();
+  }, []);
+
+  const fetchResponsaveisTecnicos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('responsaveis_tecnicos')
+        .select('*')
+        .eq('ativo', true)
+        .order('nome_completo');
+
+      if (error) {
+        console.error('Erro ao buscar responsáveis técnicos:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar responsáveis técnicos.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setResponsaveisTecnicos(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar responsáveis técnicos:', error);
+    } finally {
+      setLoadingResponsaveis(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(parameters);
+    
+    if (!parameters.responsavelTecnicoId) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, selecione um responsável técnico.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const responsavelSelecionado = responsaveisTecnicos.find(
+      resp => resp.id === parameters.responsavelTecnicoId
+    );
+
+    const parametersWithResponsavel = {
+      ...parameters,
+      responsavelTecnico: responsavelSelecionado
+    };
+
+    onSubmit(parametersWithResponsavel);
   };
 
   const totalArea = selectedData.reduce((sum, item) => sum + (item.area_construida_m2 || 0), 0);
@@ -67,6 +132,38 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="responsavelTecnico" className="text-sm font-medium">
+                Responsável Técnico *
+              </Label>
+              <Select
+                value={parameters.responsavelTecnicoId}
+                onValueChange={(value) => setParameters({...parameters, responsavelTecnicoId: value})}
+                disabled={loadingResponsaveis}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder={loadingResponsaveis ? "Carregando..." : "Selecione o responsável técnico"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {responsaveisTecnicos.map((responsavel) => (
+                    <SelectItem key={responsavel.id} value={responsavel.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{responsavel.nome_completo}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {responsavel.conselho} - {responsavel.numero_registro} ({responsavel.uf})
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {responsaveisTecnicos.length === 0 && !loadingResponsaveis && (
+                <p className="text-xs text-orange-600">
+                  Nenhum responsável técnico cadastrado. Cadastre um responsável técnico primeiro.
+                </p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="valorM2" className="text-sm font-medium">Valor por m² do Terreno (R$)</Label>

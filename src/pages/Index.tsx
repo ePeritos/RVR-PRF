@@ -167,7 +167,8 @@ const Index = () => {
           vidaUtil,
           idadePercentual,
           coeficienteK,
-          parametros: parameters
+          parametros: parameters,
+          responsavelTecnico: parameters.responsavelTecnico
         };
       });
     
