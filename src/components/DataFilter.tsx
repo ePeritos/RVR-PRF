@@ -32,37 +32,59 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
   const [unidadesGestoras, setUnidadesGestoras] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Função para buscar todos os valores únicos independentemente
+  // Função para buscar todos os valores únicos com paginação
   const fetchAllFilterValues = async () => {
     try {
       setLoading(true);
 
-      // Buscar todos os anos disponíveis com logs detalhados
-      console.log('🔍 Buscando anos disponíveis...');
-      const { data: anosData, error: anosError } = await supabase
-        .from('dados_caip')
-        .select('ano_caip');
+      // Buscar todos os anos disponíveis com paginação
+      console.log('🔍 Buscando TODOS os anos disponíveis...');
+      let allAnosData: any[] = [];
+      let from = 0;
+      const batchSize = 1000;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data: batchData, error } = await supabase
+          .from('dados_caip')
+          .select('ano_caip')
+          .range(from, from + batchSize - 1);
+
+        if (error) {
+          console.error('❌ Erro na consulta de anos:', error);
+          break;
+        }
+
+        if (batchData) {
+          allAnosData = [...allAnosData, ...batchData];
+          console.log(`📊 Carregados ${batchData.length} registros de anos (total: ${allAnosData.length})`);
+          
+          if (batchData.length < batchSize) {
+            hasMore = false;
+          } else {
+            from += batchSize;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+
+      console.log(`✅ Total final de registros de anos carregados: ${allAnosData.length}`);
       
-      console.log('📊 Total de registros retornados:', anosData?.length);
-      console.log('❌ Erro ao buscar anos:', anosError);
-      
-      if (anosData) {
-        // Log dos primeiros registros para debug
-        console.log('📝 Primeiros 10 registros:', anosData.slice(0, 10));
-        
+      if (allAnosData.length > 0) {
         // Criar um objeto para contar ocorrências de cada ano
         const contadorAnos: { [key: string]: number } = {};
-        anosData.forEach(item => {
+        allAnosData.forEach(item => {
           const ano = item.ano_caip;
           if (ano && ano.trim() !== '') {
             contadorAnos[ano] = (contadorAnos[ano] || 0) + 1;
           }
         });
         
-        console.log('📈 Contador de anos encontrados:', contadorAnos);
+        console.log('📈 Contador de TODOS os anos encontrados:', contadorAnos);
         
         // Filtrar valores nulos/vazios e remover duplicatas
-        const todosAnos = anosData
+        const todosAnos = allAnosData
           .map(item => item.ano_caip)
           .filter(ano => ano && ano.trim() !== '');
         
@@ -72,31 +94,67 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
         console.log('🎯 Anos únicos ordenados final:', anosUnicos);
         
         // Verificar especificamente se 2025 existe
-        const tem2025 = anosData.some(item => item.ano_caip === '2025');
-        console.log('🔎 Existe ano 2025 na base?', tem2025);
+        const tem2025 = allAnosData.some(item => item.ano_caip === '2025');
+        console.log('🔎 Existe ano 2025 na base completa?', tem2025);
         
         setAnosDisponiveis(anosUnicos);
       }
 
-      // Buscar todas as unidades gestoras disponíveis
-      const { data: unidadesData } = await supabase
-        .from('dados_caip')
-        .select('unidade_gestora')
-        .not('unidade_gestora', 'is', null);
+      // Buscar todas as unidades gestoras disponíveis com paginação
+      let allUnidadesData: any[] = [];
+      from = 0;
+      hasMore = true;
+
+      while (hasMore) {
+        const { data: batchData } = await supabase
+          .from('dados_caip')
+          .select('unidade_gestora')
+          .not('unidade_gestora', 'is', null)
+          .range(from, from + batchSize - 1);
+
+        if (batchData) {
+          allUnidadesData = [...allUnidadesData, ...batchData];
+          if (batchData.length < batchSize) {
+            hasMore = false;
+          } else {
+            from += batchSize;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
       
-      if (unidadesData) {
-        const unidadesUnicas = [...new Set(unidadesData.map(item => item.unidade_gestora).filter(Boolean))].sort();
+      if (allUnidadesData.length > 0) {
+        const unidadesUnicas = [...new Set(allUnidadesData.map(item => item.unidade_gestora).filter(Boolean))].sort();
         setUnidadesGestoras(unidadesUnicas);
       }
 
-      // Buscar todos os tipos de unidade disponíveis
-      const { data: tiposData } = await supabase
-        .from('dados_caip')
-        .select('tipo_de_unidade')
-        .not('tipo_de_unidade', 'is', null);
+      // Buscar todos os tipos de unidade disponíveis com paginação
+      let allTiposData: any[] = [];
+      from = 0;
+      hasMore = true;
+
+      while (hasMore) {
+        const { data: batchData } = await supabase
+          .from('dados_caip')
+          .select('tipo_de_unidade')
+          .not('tipo_de_unidade', 'is', null)
+          .range(from, from + batchSize - 1);
+
+        if (batchData) {
+          allTiposData = [...allTiposData, ...batchData];
+          if (batchData.length < batchSize) {
+            hasMore = false;
+          } else {
+            from += batchSize;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
       
-      if (tiposData) {
-        const tiposUnicos = [...new Set(tiposData.map(item => item.tipo_de_unidade).filter(Boolean))].sort();
+      if (allTiposData.length > 0) {
+        const tiposUnicos = [...new Set(allTiposData.map(item => item.tipo_de_unidade).filter(Boolean))].sort();
         setTiposUnidade(tiposUnicos);
       }
 
