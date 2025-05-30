@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
 import { User, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Profile {
   nome_completo: string;
@@ -16,11 +17,15 @@ interface Profile {
 
 interface UserProfileDropdownProps {
   profile: Profile;
-  onEditProfile: () => void;
 }
 
-export const UserProfileDropdown = ({ profile, onEditProfile }: UserProfileDropdownProps) => {
+export const UserProfileDropdown = ({ profile }: UserProfileDropdownProps) => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleEditProfile = () => {
+    navigate('/profile');
+  };
 
   return (
     <DropdownMenu>
@@ -40,7 +45,7 @@ export const UserProfileDropdown = ({ profile, onEditProfile }: UserProfileDropd
         </div>
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem onClick={onEditProfile}>
+        <DropdownMenuItem onClick={handleEditProfile}>
           <Settings className="h-4 w-4 mr-2" />
           Editar Perfil
         </DropdownMenuItem>
