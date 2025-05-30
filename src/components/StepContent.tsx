@@ -5,6 +5,7 @@ import { DataTable } from '@/components/DataTable';
 import { ParameterForm } from '@/components/ParameterForm';
 import { ResultsTable } from '@/components/ResultsTable';
 import { DataRow } from '@/hooks/useSupabaseData';
+import { NavigationButtons } from '@/components/NavigationButtons';
 
 interface StepContentProps {
   currentStep: number;
@@ -20,6 +21,10 @@ interface StepContentProps {
   onViewPDF: (id: string) => void;
   onDownloadPDF: (id: string) => void;
   currentParameters: any;
+  canProceed: boolean;
+  onNextStep: () => void;
+  onPrevStep: () => void;
+  onNewEvaluation: () => void;
 }
 
 export const StepContent = ({
@@ -35,7 +40,11 @@ export const StepContent = ({
   results,
   onViewPDF,
   onDownloadPDF,
-  currentParameters
+  currentParameters,
+  canProceed,
+  onNextStep,
+  onPrevStep,
+  onNewEvaluation
 }: StepContentProps) => {
   const renderStep = () => {
     switch (currentStep) {
@@ -124,6 +133,18 @@ export const StepContent = ({
 
   return (
     <div className="animate-fade-in">
+      {/* Botões de navegação no topo */}
+      <div className="mb-8">
+        <NavigationButtons
+          currentStep={currentStep}
+          canProceed={canProceed}
+          onNextStep={onNextStep}
+          onPrevStep={onPrevStep}
+          onNewEvaluation={onNewEvaluation}
+        />
+      </div>
+
+      {/* Conteúdo da etapa */}
       {renderStep()}
     </div>
   );
