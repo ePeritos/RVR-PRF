@@ -45,10 +45,10 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
   const areaTerreno = 1200; // m² - substituir por dado real
   const valorUnitarioTerreno = data.parametros?.valorM2 || 150; // R$/m²
   const areaBenfeitoria = data.areaImovel || 300; // m²
-  const cubValor = data.parametros?.cub || 2100; // R$/m²
+  const cubValor = data.parametros?.cub || 2500; // R$/m²
   const bdiPercentual = data.parametros?.bdi || 25; // %
   const idadeAparente = 15; // anos
-  const vidaUtil = 80; // anos
+  const vidaUtil = 60; // anos
   const fatorComercializacao = 1.0;
   const coeficienteK = 0.25; // Ross-Heidecke
   
@@ -99,7 +99,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div><strong>Endereço:</strong> {data.endereco || '[Endereço do imóvel]'}</div>
           <div><strong>Município/UF:</strong> [Município/{uf}]</div>
-          <div><strong>Finalidade:</strong> Avaliação para fins de conhecimento patrimonial</div>
+          <div><strong>Finalidade:</strong> Avaliação para fins de gestão patrimonial</div>
           <div><strong>Solicitante:</strong> {solicitante}</div>
           <div><strong>Data da Vistoria:</strong> {format(currentDate, 'dd/MM/yyyy')}</div>
           <div><strong>Data-base da Avaliação:</strong> {format(currentDate, 'dd/MM/yyyy')}</div>
@@ -381,11 +381,9 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
       <section className="mb-6">
         <h2 className="text-base font-bold mb-3 bg-gray-100 p-2">VIII. ANEXOS</h2>
         <div className="text-xs space-y-1">
-          <div>• Plantas e croquis do imóvel</div>
           <div>• Fotografias do imóvel</div>
           <div>• Documentação consultada</div>
           <div>• Planilhas de cálculo</div>
-          <div>• Referências de mercado utilizadas</div>
         </div>
       </section>
 
