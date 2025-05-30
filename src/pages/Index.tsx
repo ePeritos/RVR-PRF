@@ -68,7 +68,6 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <StepIndicator 
-            steps={steps} 
             currentStep={currentStep} 
             onStepClick={setCurrentStep}
           />
@@ -98,7 +97,6 @@ const Index = () => {
           
           <NavigationButtons
             currentStep={currentStep}
-            totalSteps={steps.length}
             canGoNext={canGoNext()}
             canGoPrevious={canGoPrevious()}
             onNext={handleNext}

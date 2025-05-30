@@ -413,6 +413,7 @@ export type Database = {
           id: string
           matricula: string | null
           nome_completo: string
+          responsavel_tecnico_id: string | null
           telefone: string | null
           unidade_lotacao: string | null
           updated_at: string
@@ -424,6 +425,7 @@ export type Database = {
           id: string
           matricula?: string | null
           nome_completo: string
+          responsavel_tecnico_id?: string | null
           telefone?: string | null
           unidade_lotacao?: string | null
           updated_at?: string
@@ -435,11 +437,20 @@ export type Database = {
           id?: string
           matricula?: string | null
           nome_completo?: string
+          responsavel_tecnico_id?: string | null
           telefone?: string | null
           unidade_lotacao?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_responsavel_tecnico_id_fkey"
+            columns: ["responsavel_tecnico_id"]
+            isOneToOne: false
+            referencedRelation: "responsaveis_tecnicos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       responsaveis_tecnicos: {
         Row: {

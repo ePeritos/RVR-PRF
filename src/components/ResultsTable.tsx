@@ -65,7 +65,7 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('*, responsavel_tecnico_id')
         .eq('id', user.id)
         .single();
 
