@@ -8,23 +8,38 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useProfile } from '@/hooks/useProfile';
 import { useUnidadesGestoras } from '@/hooks/useUnidadesGestoras';
 import { useResponsaveisTecnicos } from '@/hooks/useResponsaveisTecnicos';
-import { User, Save } from 'lucide-react';
-import { Header } from '@/components/Header';
+import { User, Save, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
+  const navigate = useNavigate();
   const { profile, setProfile, loading, saveProfile } = useProfile();
   const { unidadesGestoras, loading: loadingUnidades } = useUnidadesGestoras();
   const { responsaveisTecnicos, loading: loadingResponsaveis } = useResponsaveisTecnicos();
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    await saveProfile(profile);
+    const success = await saveProfile(profile);
+    if (success) {
+      navigate('/');
+    }
+  };
+
+  const handleGoBack = () => {
+    navigate('/');
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="p-4 border-b">
-        <Header />
+      <div className="p-4 border-b bg-white/80 backdrop-blur-sm">
+        <div className="container mx-auto flex items-center justify-between">
+          <Button variant="ghost" onClick={handleGoBack} className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
+          </Button>
+          <h1 className="text-xl font-semibold">Sistema RVR</h1>
+          <div></div>
+        </div>
       </div>
       
       <main className="container mx-auto px-4 py-8">
@@ -90,8 +105,8 @@ const Profile = () => {
                 <div className="space-y-2">
                   <Label htmlFor="responsavel_tecnico_id">Responsável Técnico (Opcional)</Label>
                   <Select
-                    value={profile.responsavel_tecnico_id}
-                    onValueChange={(value) => setProfile({ ...profile, responsavel_tecnico_id: value })}
+                    value={profile.responsavel_tecnico_id || ""}
+                    onValueChange={(value) => setProfile({ ...profile, responsavel_tecnico_id: value || undefined })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={loadingResponsaveis ? "Carregando..." : "Selecione um responsável técnico"} />
