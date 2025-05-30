@@ -37,22 +37,44 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
     try {
       setLoading(true);
 
-      // Buscar todos os anos disponíveis com logs de debug
-      console.log('Buscando anos disponíveis...');
+      // Buscar todos os anos disponíveis com logs detalhados
+      console.log('🔍 Buscando anos disponíveis...');
       const { data: anosData, error: anosError } = await supabase
         .from('dados_caip')
         .select('ano_caip');
       
-      console.log('Dados brutos dos anos:', anosData);
-      console.log('Erro ao buscar anos:', anosError);
+      console.log('📊 Total de registros retornados:', anosData?.length);
+      console.log('❌ Erro ao buscar anos:', anosError);
       
       if (anosData) {
+        // Log dos primeiros registros para debug
+        console.log('📝 Primeiros 10 registros:', anosData.slice(0, 10));
+        
+        // Criar um objeto para contar ocorrências de cada ano
+        const contadorAnos: { [key: string]: number } = {};
+        anosData.forEach(item => {
+          const ano = item.ano_caip;
+          if (ano && ano.trim() !== '') {
+            contadorAnos[ano] = (contadorAnos[ano] || 0) + 1;
+          }
+        });
+        
+        console.log('📈 Contador de anos encontrados:', contadorAnos);
+        
         // Filtrar valores nulos/vazios e remover duplicatas
-        const todosAnos = anosData.map(item => item.ano_caip).filter(ano => ano && ano.trim() !== '');
-        console.log('Todos os anos após filtrar nulos:', todosAnos);
+        const todosAnos = anosData
+          .map(item => item.ano_caip)
+          .filter(ano => ano && ano.trim() !== '');
+        
+        console.log('✅ Total de anos válidos após filtrar nulos:', todosAnos.length);
         
         const anosUnicos = [...new Set(todosAnos)].sort();
-        console.log('Anos únicos ordenados:', anosUnicos);
+        console.log('🎯 Anos únicos ordenados final:', anosUnicos);
+        
+        // Verificar especificamente se 2025 existe
+        const tem2025 = anosData.some(item => item.ano_caip === '2025');
+        console.log('🔎 Existe ano 2025 na base?', tem2025);
+        
         setAnosDisponiveis(anosUnicos);
       }
 
@@ -79,7 +101,7 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
       }
 
     } catch (err) {
-      console.error('Erro ao carregar valores únicos:', err);
+      console.error('💥 Erro ao carregar valores únicos:', err);
     } finally {
       setLoading(false);
     }
