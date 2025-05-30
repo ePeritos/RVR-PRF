@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +16,16 @@ interface Profile {
   matricula: string;
   unidade_lotacao: string;
   telefone: string;
+  responsavel_tecnico_id?: string;
+}
+
+interface ResponsavelTecnico {
+  id: string;
+  nome_completo: string;
+  formacao: string;
+  conselho: string;
+  numero_registro: string;
+  uf: string;
 }
 
 export const UserProfile = () => {
@@ -26,20 +35,42 @@ export const UserProfile = () => {
     cargo: '',
     matricula: '',
     unidade_lotacao: '',
-    telefone: ''
+    telefone: '',
+    responsavel_tecnico_id: ''
   });
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [unidadesGestoras, setUnidadesGestoras] = useState<string[]>([]);
+  const [responsaveisTecnicos, setResponsaveisTecnicos] = useState<ResponsavelTecnico[]>([]);
   const [loadingUnidades, setLoadingUnidades] = useState(false);
+  const [loadingResponsaveis, setLoadingResponsaveis] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
       fetchProfile();
       fetchUnidadesGestoras();
+      fetchResponsaveisTecnicos();
     }
   }, [user]);
+
+  const fetchResponsaveisTecnicos = async () => {
+    try {
+      setLoadingResponsaveis(true);
+      const { data, error } = await supabase
+        .from('responsaveis_tecnicos')
+        .select('*')
+        .eq('ativo', true)
+        .order('nome_completo');
+
+      if (error) throw error;
+      setResponsaveisTecnicos(data || []);
+    } catch (error: any) {
+      console.error('Erro ao carregar responsáveis técnicos:', error);
+    } finally {
+      setLoadingResponsaveis(false);
+    }
+  };
 
   const fetchUnidadesGestoras = async () => {
     try {
@@ -85,7 +116,8 @@ export const UserProfile = () => {
           cargo: data.cargo || '',
           matricula: data.matricula || '',
           unidade_lotacao: data.unidade_lotacao || '',
-          telefone: data.telefone || ''
+          telefone: data.telefone || '',
+          responsavel_tecnico_id: data.responsavel_tecnico_id || ''
         });
       }
     } catch (error: any) {
@@ -177,6 +209,25 @@ export const UserProfile = () => {
                   {unidadesGestoras.map((unidade) => (
                     <SelectItem key={unidade} value={unidade}>
                       {unidade}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="responsavel_tecnico_id">Responsável Técnico (Opcional)</Label>
+              <Select
+                value={profile.responsavel_tecnico_id}
+                onValueChange={(value) => setProfile(prev => ({ ...prev, responsavel_tecnico_id: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={loadingResponsaveis ? "Carregando..." : "Selecione um responsável técnico"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhum (usar dados do perfil)</SelectItem>
+                  {responsaveisTecnicos.map((responsavel) => (
+                    <SelectItem key={responsavel.id} value={responsavel.id}>
+                      {responsavel.nome_completo} - {responsavel.conselho}/{responsavel.uf}
                     </SelectItem>
                   ))}
                 </SelectContent>

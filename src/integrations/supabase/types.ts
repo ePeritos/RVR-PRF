@@ -441,6 +441,42 @@ export type Database = {
         }
         Relationships: []
       }
+      responsaveis_tecnicos: {
+        Row: {
+          ativo: boolean
+          conselho: string
+          created_at: string
+          formacao: string
+          id: string
+          nome_completo: string
+          numero_registro: string
+          uf: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          conselho: string
+          created_at?: string
+          formacao: string
+          id?: string
+          nome_completo: string
+          numero_registro: string
+          uf: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          conselho?: string
+          created_at?: string
+          formacao?: string
+          id?: string
+          nome_completo?: string
+          numero_registro?: string
+          uf?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
