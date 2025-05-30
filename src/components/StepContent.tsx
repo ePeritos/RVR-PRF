@@ -5,46 +5,33 @@ import { DataTable } from '@/components/DataTable';
 import { ParameterForm } from '@/components/ParameterForm';
 import { ResultsTable } from '@/components/ResultsTable';
 import { DataRow } from '@/hooks/useSupabaseData';
-import { NavigationButtons } from '@/components/NavigationButtons';
 
 interface StepContentProps {
   currentStep: number;
-  uploadedFile: File | null;
-  onFileUpload: (file: File) => void;
-  onDataLoaded?: () => void;
-  filteredData: DataRow[];
-  onFilterChange: (filters: any) => void;
-  selectedItems: string[];
-  onSelectionChange: (items: string[]) => void;
-  onParameterSubmit: (parameters: any) => void;
+  uploadedData: any[];
+  setUploadedData: (data: any[]) => void;
+  filteredData: any[];
+  setFilteredData: (data: any[]) => void;
+  parameters: any;
+  setParameters: (params: any) => void;
   results: any[];
-  onViewPDF: (id: string) => void;
-  onDownloadPDF: (id: string) => void;
-  currentParameters: any;
-  canProceed: boolean;
-  onNextStep: () => void;
-  onPrevStep: () => void;
-  onNewEvaluation: () => void;
+  setResults: (results: any[]) => void;
+  supabaseData: DataRow[] | undefined;
+  supabaseLoading: boolean;
 }
 
 export const StepContent = ({
   currentStep,
-  uploadedFile,
-  onFileUpload,
-  onDataLoaded,
+  uploadedData,
+  setUploadedData,
   filteredData,
-  onFilterChange,
-  selectedItems,
-  onSelectionChange,
-  onParameterSubmit,
+  setFilteredData,
+  parameters,
+  setParameters,
   results,
-  onViewPDF,
-  onDownloadPDF,
-  currentParameters,
-  canProceed,
-  onNextStep,
-  onPrevStep,
-  onNewEvaluation
+  setResults,
+  supabaseData,
+  supabaseLoading
 }: StepContentProps) => {
   const renderStep = () => {
     switch (currentStep) {
@@ -60,9 +47,9 @@ export const StepContent = ({
               </p>
             </div>
             <FileUpload 
-              onFileUpload={onFileUpload} 
-              uploadedFile={uploadedFile}
-              onDataLoaded={onDataLoaded}
+              onFileUpload={(file: File) => {/* Handle file upload */}} 
+              uploadedFile={null}
+              onDataLoaded={() => {/* Handle data loaded */}}
             />
           </div>
         );
@@ -78,17 +65,16 @@ export const StepContent = ({
                 Filtre e selecione os imóveis do banco de dados que serão incluídos no Relatório de Valor Referencial
               </p>
             </div>
-            <DataFilter onFilterChange={onFilterChange} />
+            <DataFilter onFilterChange={(filters) => {/* Handle filter change */}} />
             <DataTable 
               data={filteredData} 
-              selectedItems={selectedItems}
-              onSelectionChange={onSelectionChange}
+              selectedItems={[]}
+              onSelectionChange={(items) => {/* Handle selection change */}}
             />
           </div>
         );
       
       case 3:
-        const selectedData = filteredData.filter(item => selectedItems.includes(item.id));
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
@@ -100,8 +86,8 @@ export const StepContent = ({
               </p>
             </div>
             <ParameterForm 
-              onSubmit={onParameterSubmit} 
-              selectedData={selectedData}
+              onSubmit={(params) => setParameters(params)} 
+              selectedData={filteredData}
             />
           </div>
         );
@@ -119,9 +105,9 @@ export const StepContent = ({
             </div>
             <ResultsTable 
               results={results}
-              onViewPDF={onViewPDF}
-              onDownloadPDF={onDownloadPDF}
-              parametros={currentParameters}
+              onViewPDF={(id) => {/* Handle view PDF */}}
+              onDownloadPDF={(id) => {/* Handle download PDF */}}
+              parametros={parameters}
             />
           </div>
         );
@@ -133,18 +119,6 @@ export const StepContent = ({
 
   return (
     <div className="animate-fade-in">
-      {/* Botões de navegação no topo */}
-      <div className="mb-4">
-        <NavigationButtons
-          currentStep={currentStep}
-          canProceed={canProceed}
-          onNextStep={onNextStep}
-          onPrevStep={onPrevStep}
-          onNewEvaluation={onNewEvaluation}
-        />
-      </div>
-
-      {/* Conteúdo da etapa */}
       {renderStep()}
     </div>
   );
