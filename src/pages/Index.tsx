@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -9,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useSupabaseData, DataRow } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { calculateRossHeidecke } from '@/utils/rossHeideckeCalculator';
 
 const Index = () => {
   const { user } = useAuth();
@@ -107,25 +109,15 @@ const Index = () => {
         // Terreno calculation
         const valorTerreno = parameters.valorM2 * areaTerreno;
         
-        // Ross-Heidecke depreciation calculation
-        import('../utils/rossHeideckeCalculator').then(({ calculateRossHeidecke }) => {
-          const depreciacao = calculateRossHeidecke(custoRedicao, idadeAparente, vidaUtil, estadoConservacao);
-          return depreciacao;
-        });
+        // Ross-Heidecke depreciation calculation using real data
+        const rossHeideckeResult = calculateRossHeidecke(
+          custoRedicao,
+          idadeAparente,
+          vidaUtil,
+          estadoConservacao
+        );
         
-        // Simplified depreciation for immediate calculation (will be replaced by Ross-Heidecke)
-        const idadePercentual = (idadeAparente / vidaUtil) * 100;
-        let coeficienteK = 0.25; // Default BOM state
-        
-        if (estadoConservacao.toUpperCase().includes('BOM')) {
-          if (idadePercentual <= 20) coeficienteK = 0.13;
-          else if (idadePercentual <= 30) coeficienteK = 0.22;
-          else if (idadePercentual <= 40) coeficienteK = 0.31;
-          else coeficienteK = 0.40;
-        }
-        
-        const valorDepreciacao = custoRedicao * coeficienteK;
-        const valorBenfeitoria = custoRedicao - valorDepreciacao;
+        const valorBenfeitoria = rossHeideckeResult.valorDepreciado;
         
         // Total value calculations
         const valorTotal = valorTerreno + valorBenfeitoria;
@@ -147,9 +139,9 @@ const Index = () => {
           valorTerreno,
           valorTotal,
           custoRedicao,
-          taxaDepreciacao: coeficienteK * 100,
-          valorDepreciacao,
-          valorDepreciado: valorBenfeitoria,
+          taxaDepreciacao: rossHeideckeResult.coeficiente * 100,
+          valorDepreciacao: rossHeideckeResult.depreciacao,
+          valorDepreciado: rossHeideckeResult.valorDepreciado,
           valorOriginal,
           valorAvaliado: valorRvr,
           diferenca,
@@ -165,8 +157,8 @@ const Index = () => {
           estadoConservacao,
           idadeAparente,
           vidaUtil,
-          idadePercentual,
-          coeficienteK,
+          idadePercentual: rossHeideckeResult.idadePercentual,
+          coeficienteK: rossHeideckeResult.coeficiente,
           parametros: parameters,
           responsavelTecnico: parameters.responsavelTecnico
         };

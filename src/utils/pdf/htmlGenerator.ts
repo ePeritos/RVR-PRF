@@ -7,7 +7,7 @@ export class HTMLGenerator {
     const currentTime = new Date().toLocaleTimeString('pt-BR');
     const reportNumber = `${data.id}/2025`;
     
-    // Dados dos cálculos
+    // Usar os dados calculados reais que vêm dos resultados
     const areaTerreno = data.areaTerreno || 0;
     const areaConstruida = data.areaConstruida || 0;
     const valorUnitarioTerreno = data.parametros?.valorM2 || 150;
@@ -19,14 +19,14 @@ export class HTMLGenerator {
     const coeficienteK = data.coeficienteK || 0.25;
     const idadePercentual = data.idadePercentual || 18.75;
     
-    // Cálculos
-    const valorTerreno = areaTerreno * valorUnitarioTerreno;
-    const custoRedicao = areaConstruida * cubValor * (1 + (bdiPercentual / 100));
-    const depreciacao = custoRedicao * coeficienteK;
-    const valorBenfeitoria = custoRedicao - depreciacao;
-    const valorTotal = valorTerreno + valorBenfeitoria;
+    // Usar os valores calculados reais do sistema
+    const valorTerreno = data.valorTerreno || (areaTerreno * valorUnitarioTerreno);
+    const custoRedicao = data.custoRedicao || (areaConstruida * cubValor * (1 + (bdiPercentual / 100)));
+    const depreciacao = data.valorDepreciacao || (custoRedicao * coeficienteK);
+    const valorBenfeitoria = data.valorBenfeitoria || (custoRedicao - depreciacao);
+    const valorTotal = data.valorTotal || (valorTerreno + valorBenfeitoria);
     const fatorComercializacao = 1.0;
-    const valorAdotado = valorTotal * fatorComercializacao;
+    const valorAdotado = data.valorAvaliado || (valorTotal * fatorComercializacao);
 
     // Dados do responsável técnico selecionado
     const responsavelTecnico = data.parametros?.responsavelTecnico;
@@ -159,7 +159,7 @@ export class HTMLGenerator {
               <tr style="background-color: #f0f0f0; font-weight: bold;">
                 <td style="padding: 8px; border: 1px solid #000;">VALOR ADOTADO</td>
                 <td style="padding: 8px; border: 1px solid #000; text-align: right; color: #008000; font-size: 14px;">
-                  ${data.valorAvaliado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}
+                  ${valorAdotado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}
                 </td>
               </tr>
               <tr>
@@ -313,7 +313,7 @@ export class HTMLGenerator {
               <div style="margin-left: 15px;">
                 <p style="margin: 0 0 5px 0;">Fator de Comercialização: ${fatorComercializacao.toFixed(2)}</p>
                 <p style="margin: 0 0 5px 0;">Valor Adotado = ${valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })} × ${fatorComercializacao.toFixed(2)}</p>
-                <p style="margin: 0 0 15px 0; font-weight: bold; color: #008000; font-size: 14px;"><strong>Valor Adotado = ${data.valorAvaliado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}</strong></p>
+                <p style="margin: 0 0 15px 0; font-weight: bold; color: #008000; font-size: 14px;"><strong>Valor Adotado = ${valorAdotado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}</strong></p>
               </div>
             </div>
           </div>
