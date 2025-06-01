@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Download, Eye, FileText } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -123,6 +124,7 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
       };
       
       console.log('Iniciando download direto do PDF para:', reportData.nome);
+      console.log('Dados do relatório:', reportData);
       
       // Usa o novo serviço de PDF que não depende de elementos no DOM
       await generatePDF(reportData);

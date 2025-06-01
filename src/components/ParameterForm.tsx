@@ -44,6 +44,7 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
 
   const fetchResponsaveisTecnicos = async () => {
     try {
+      setLoadingResponsaveis(true);
       const { data, error } = await supabase
         .from('responsaveis_tecnicos')
         .select('*')
@@ -60,6 +61,7 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
         return;
       }
 
+      console.log('Responsáveis técnicos carregados:', data);
       setResponsaveisTecnicos(data || []);
       
       // Automatically select "Thaise Bernardo Bessa" if found
@@ -71,7 +73,7 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
           responsavelTecnicoId: thaise.id
         }));
       } else {
-        console.log('Thaise não encontrada nos responsáveis técnicos disponíveis');
+        console.log('Thaise não encontrada. Responsáveis disponíveis:', data?.map(r => r.nome_completo));
       }
     } catch (error) {
       console.error('Erro ao buscar responsáveis técnicos:', error);
@@ -101,7 +103,7 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
       responsavelTecnico: responsavelSelecionado
     };
 
-    console.log('Parâmetros sendo enviados:', parametersWithResponsavel);
+    console.log('Parâmetros finais sendo enviados:', parametersWithResponsavel);
     onSubmit(parametersWithResponsavel);
   };
 
@@ -126,7 +128,8 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
               <div key={item.id} className="p-3 border rounded-md bg-muted/30">
                 <h4 className="font-medium text-sm truncate">{item.nome_da_unidade || 'Nome não informado'}</h4>
                 <p className="text-xs text-muted-foreground">{item.tipo_de_unidade}</p>
-                <p className="text-xs font-medium">Área: {item.area_construida_m2 || 0} m²</p>
+                <p className="text-xs font-medium">Área Construída: {item.area_construida_m2 || 0} m²</p>
+                <p className="text-xs font-medium">Área Terreno: {item.area_do_terreno_m2 || 0} m²</p>
                 <p className="text-xs text-green-600">
                   Benfeitoria: R$ {((item.area_construida_m2 || 0) * parameters.cubM2).toLocaleString('pt-BR')}
                 </p>
@@ -152,7 +155,7 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
               <Select
                 value={parameters.responsavelTecnicoId}
                 onValueChange={(value) => {
-                  console.log('Responsável técnico selecionado:', value);
+                  console.log('Responsável técnico selecionado manualmente:', value);
                   setParameters({...parameters, responsavelTecnicoId: value});
                 }}
                 disabled={loadingResponsaveis}

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -96,6 +97,8 @@ const Index = () => {
     const calculatedResults = filteredData
       .filter(item => selectedItems.includes(item.id))
       .map(item => {
+        console.log('Processando item:', item.nome_da_unidade, item);
+        
         // Get real data from dados_caip
         const areaConstruida = item['area_construida_m2'] || 0;
         const areaTerreno = item['area_do_terreno_m2'] || 0;
@@ -103,18 +106,31 @@ const Index = () => {
         const vidaUtil = item['vida_util_estimada_anos'] || 80;
         const estadoConservacao = item['estado_de_conservacao'] || 'BOM';
         
+        console.log('Dados do item:', {
+          areaConstruida,
+          areaTerreno,
+          idadeAparente,
+          vidaUtil,
+          estadoConservacao
+        });
+        
         // Use parameters from form for calculations
         const valorM2 = parameters.valorM2 || 150;
         const cubM2 = parameters.cubM2 || 2100;
         const bdi = parameters.bdi || 25;
         
-        console.log('Usando parâmetros para cálculo:', { valorM2, cubM2, bdi });
+        console.log('Parâmetros usados no cálculo:', { valorM2, cubM2, bdi });
         
         // Benfeitoria calculation using CUB
         const custoRedicao = cubM2 * areaConstruida * (1 + bdi / 100);
         
         // Terreno calculation
         const valorTerreno = valorM2 * areaTerreno;
+        
+        console.log('Cálculos intermediários:', {
+          custoRedicao,
+          valorTerreno
+        });
         
         // Ross-Heidecke depreciation calculation using real data
         const rossHeideckeResult = calculateRossHeidecke(
@@ -135,7 +151,7 @@ const Index = () => {
         const diferenca = valorRvr - valorOriginal;
         const percentual = valorOriginal ? (diferenca / valorOriginal) * 100 : 0;
         
-        return {
+        const resultado = {
           id: item.id,
           nome: item['nome_da_unidade'] || 'Nome não informado',
           tipo: item['tipo_de_unidade'] || 'Tipo não informado',
@@ -177,9 +193,12 @@ const Index = () => {
           },
           responsavelTecnico: parameters.responsavelTecnico
         };
+        
+        console.log('Resultado calculado:', resultado);
+        return resultado;
       });
     
-    console.log('Resultados calculados com parâmetros:', calculatedResults);
+    console.log('Todos os resultados calculados:', calculatedResults);
     setResults(calculatedResults);
     setCurrentStep(4);
   };
