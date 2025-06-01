@@ -9,8 +9,10 @@ import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { useRVRApplication } from '@/hooks/useRVRApplication';
 import { PDFHandler } from '@/components/PDFHandler';
 import { AppStateHandler } from '@/components/AppStateHandler';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
+  const isMobile = useIsMobile();
   const { data: supabaseData, loading, error, refetch } = useSupabaseData();
   const {
     currentStep,
@@ -55,7 +57,7 @@ const Index = () => {
         <div className="min-h-screen bg-background">
           <Header />
           
-          <main className="container mx-auto px-4 py-4">
+          <main className={`container mx-auto ${isMobile ? 'px-2 py-2' : 'px-4 py-4'}`}>
             <div className="mb-6">
               <ProgressIndicator 
                 currentStep={currentStep}
