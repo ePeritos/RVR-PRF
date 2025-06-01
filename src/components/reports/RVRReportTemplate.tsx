@@ -452,7 +452,10 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
             <div>{registroResponsavel}</div>
           </div>             
         </div>
+
+        
       </section>
+      
 
       {/* Rodapé */}
       <div className="border-t border-gray-400 pt-4 mt-8">
