@@ -98,7 +98,6 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
         <h2 className="text-base font-bold mb-3 bg-gray-100 p-2">I. DADOS GERAIS</h2>
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div><strong>Endereço:</strong> {data.endereco || '[Endereço do imóvel]'}</div>
-          <div><strong>Município/UF:</strong> [Município/{uf}]</div>
           <div><strong>Finalidade:</strong> Avaliação para fins de gestão patrimonial</div>
           <div><strong>Solicitante:</strong> {solicitante}</div>
           <div><strong>Data da Vistoria:</strong> {format(currentDate, 'dd/MM/yyyy')}</div>
