@@ -2,11 +2,10 @@
 import { FileUpload } from '@/components/FileUpload';
 import { DataFilter } from '@/components/DataFilter';
 import { DataTable } from '@/components/DataTable';
-import { EnhancedParameterForm } from '@/components/EnhancedParameterForm';
+import { ParameterForm } from '@/components/ParameterForm';
 import { ResultsTable } from '@/components/ResultsTable';
 import { DataRow } from '@/hooks/useSupabaseData';
 import { NavigationButtons } from '@/components/NavigationButtons';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface StepContentProps {
   currentStep: number;
@@ -47,18 +46,16 @@ export const StepContent = ({
   onPrevStep,
   onNewEvaluation
 }: StepContentProps) => {
-  const isMobile = useIsMobile();
-
   const renderStep = () => {
     switch (currentStep) {
       case 1:
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className={`font-bold text-foreground mb-1 ${isMobile ? 'text-lg' : 'text-xl'}`}>
+              <h2 className="text-xl font-bold text-foreground mb-1">
                 Etapa 1: Upload da Base de Dados CAIP
               </h2>
-              <p className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>
+              <p className="text-sm text-muted-foreground">
                 Faça o upload da planilha XLSX contendo os dados CAIP que serão importados para o banco de dados
               </p>
             </div>
@@ -74,10 +71,10 @@ export const StepContent = ({
         return (
           <div className="space-y-4">
             <div className="text-center mb-4">
-              <h2 className={`font-bold text-foreground mb-1 ${isMobile ? 'text-lg' : 'text-xl'}`}>
+              <h2 className="text-xl font-bold text-foreground mb-1">
                 Etapa 2: Seleção de Imóveis
               </h2>
-              <p className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>
+              <p className="text-sm text-muted-foreground">
                 Filtre e selecione os imóveis do banco de dados que serão incluídos no Relatório de Valor Referencial
               </p>
             </div>
@@ -95,16 +92,16 @@ export const StepContent = ({
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className={`font-bold text-foreground mb-1 ${isMobile ? 'text-lg' : 'text-xl'}`}>
+              <h2 className="text-xl font-bold text-foreground mb-1">
                 Etapa 3: Parâmetros RVR
               </h2>
-              <p className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>
+              <p className="text-sm text-muted-foreground">
                 Configure os parâmetros técnicos para geração do Relatório de Valor Referencial
               </p>
             </div>
-            <EnhancedParameterForm 
-              onParametersChange={onParameterSubmit}
-              initialParameters={currentParameters}
+            <ParameterForm 
+              onSubmit={onParameterSubmit} 
+              selectedData={selectedData}
             />
           </div>
         );
@@ -113,10 +110,10 @@ export const StepContent = ({
         return (
           <div className="space-y-4">
             <div className="text-center mb-4">
-              <h2 className={`font-bold text-foreground mb-1 ${isMobile ? 'text-lg' : 'text-xl'}`}>
+              <h2 className="text-xl font-bold text-foreground mb-1">
                 Etapa 4: Relatório RVR
               </h2>
-              <p className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>
+              <p className="text-sm text-muted-foreground">
                 Visualize os resultados da avaliação e gere os Relatórios de Valor Referencial em PDF
               </p>
             </div>
@@ -136,18 +133,16 @@ export const StepContent = ({
 
   return (
     <div className="animate-fade-in">
-      {/* Botões de navegação no topo - ocultos em mobile */}
-      {!isMobile && (
-        <div className="mb-4">
-          <NavigationButtons
-            currentStep={currentStep}
-            canProceed={canProceed}
-            onNextStep={onNextStep}
-            onPrevStep={onPrevStep}
-            onNewEvaluation={onNewEvaluation}
-          />
-        </div>
-      )}
+      {/* Botões de navegação no topo */}
+      <div className="mb-4">
+        <NavigationButtons
+          currentStep={currentStep}
+          canProceed={canProceed}
+          onNextStep={onNextStep}
+          onPrevStep={onPrevStep}
+          onNewEvaluation={onNewEvaluation}
+        />
+      </div>
 
       {/* Conteúdo da etapa */}
       {renderStep()}
