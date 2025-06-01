@@ -89,55 +89,57 @@ const Index = () => {
   };
 
   const handleParameterSubmit = (parameters: any) => {
-    console.log('Parâmetros recebidos no Index:', parameters);
+    console.log('Parâmetros recebidos no Index - ANTES dos cálculos:', parameters);
     setCurrentParameters(parameters);
+    
+    // FORÇAR o uso dos parâmetros exatos do formulário
+    const PARAMETROS_FORMULARIO = {
+      valorM2: Number(parameters.valorM2),
+      cubM2: Number(parameters.cubM2), 
+      bdi: Number(parameters.bdi),
+      dataReferencia: parameters.dataReferencia,
+      fonteValorTerreno: parameters.fonteValorTerreno,
+      responsavelTecnico: parameters.responsavelTecnico
+    };
+    
+    console.log('PARÂMETROS FORÇADOS que serão usados nos cálculos:', PARAMETROS_FORMULARIO);
     
     // RVR calculation using real data from dados_caip and Ross-Heidecke
     const calculatedResults = filteredData
       .filter(item => selectedItems.includes(item.id))
       .map(item => {
-        console.log('Processando item:', item.nome_da_unidade, item);
+        console.log('Processando item:', item.nome_da_unidade);
         
         // Get real data from dados_caip
-        const areaConstruida = item['area_construida_m2'] || 0;
-        const areaTerreno = item['area_do_terreno_m2'] || 0;
-        const idadeAparente = item['idade_aparente_do_imovel'] || 15;
-        const vidaUtil = item['vida_util_estimada_anos'] || 80;
+        const areaConstruida = Number(item['area_construida_m2']) || 0;
+        const areaTerreno = Number(item['area_do_terreno_m2']) || 0;
+        const idadeAparente = Number(item['idade_aparente_do_imovel']) || 15;
+        const vidaUtil = Number(item['vida_util_estimada_anos']) || 80;
         const estadoConservacao = item['estado_de_conservacao'] || 'BOM';
         
-        console.log('Dados do item:', {
+        // USAR PARÂMETROS FORÇADOS
+        const valorM2 = PARAMETROS_FORMULARIO.valorM2;
+        const cubM2 = PARAMETROS_FORMULARIO.cubM2;
+        const bdi = PARAMETROS_FORMULARIO.bdi;
+        
+        console.log('VERIFICAÇÃO - Parâmetros sendo aplicados:', { 
+          valorM2, 
+          cubM2, 
+          bdi,
           areaConstruida,
-          areaTerreno,
-          idadeAparente,
-          vidaUtil,
-          estadoConservacao
+          areaTerreno
         });
         
-        // Use parameters from form for calculations - GARANTINDO que os valores do formulário sejam usados
-        const valorM2 = parameters.valorM2;
-        const cubM2 = parameters.cubM2;
-        const bdi = parameters.bdi;
+        // Cálculos usando os parâmetros FORÇADOS
+        const custoRedicao = areaConstruida * cubM2 * (1 + (bdi / 100));
+        const valorTerreno = areaTerreno * valorM2;
         
-        console.log('Parâmetros sendo usados nos cálculos:', { 
-          valorM2: valorM2,
-          cubM2: cubM2, 
-          bdi: bdi,
-          dataReferencia: parameters.dataReferencia,
-          fonteValorTerreno: parameters.fonteValorTerreno
+        console.log('Cálculos com parâmetros forçados:', {
+          custoRedicao: `${areaConstruida} * ${cubM2} * ${(1 + bdi/100)} = ${custoRedicao}`,
+          valorTerreno: `${areaTerreno} * ${valorM2} = ${valorTerreno}`
         });
         
-        // Benfeitoria calculation using CUB from form
-        const custoRedicao = cubM2 * areaConstruida * (1 + bdi / 100);
-        
-        // Terreno calculation using valor from form
-        const valorTerreno = valorM2 * areaTerreno;
-        
-        console.log('Cálculos intermediários:', {
-          custoRedicao,
-          valorTerreno
-        });
-        
-        // Ross-Heidecke depreciation calculation using real data
+        // Ross-Heidecke depreciation calculation
         const rossHeideckeResult = calculateRossHeidecke(
           custoRedicao,
           idadeAparente,
@@ -146,13 +148,11 @@ const Index = () => {
         );
         
         const valorBenfeitoria = rossHeideckeResult.valorDepreciado;
-        
-        // Total value calculations
         const valorTotal = valorTerreno + valorBenfeitoria;
         const fatorLocalizacao = 1.0;
         const valorRvr = valorTotal * fatorLocalizacao;
         
-        const valorOriginal = item['rvr'] || 0;
+        const valorOriginal = Number(item['rvr']) || 0;
         const diferenca = valorRvr - valorOriginal;
         const percentual = valorOriginal ? (diferenca / valorOriginal) * 100 : 0;
         
@@ -187,24 +187,27 @@ const Index = () => {
           vidaUtil,
           idadePercentual: rossHeideckeResult.idadePercentual,
           coeficienteK: rossHeideckeResult.coeficiente,
+          // GARANTIR que os parâmetros corretos sejam passados
           parametros: {
-            cub: cubM2,
-            valorM2: valorM2,
-            bdi: bdi,
-            cubM2: cubM2,
-            dataReferencia: parameters.dataReferencia,
-            fonteValorTerreno: parameters.fonteValorTerreno,
-            responsavelTecnico: parameters.responsavelTecnico
+            ...PARAMETROS_FORMULARIO,
+            cub: cubM2, // manter compatibilidade
+            cubM2: cubM2
           },
           responsavelTecnico: parameters.responsavelTecnico
         };
         
-        console.log('Resultado calculado com parâmetros corretos:', resultado);
-        console.log('Verificação - CUB usado:', cubM2, 'Valor M2 usado:', valorM2, 'BDI usado:', bdi);
+        console.log('Resultado final calculado:', {
+          nome: resultado.nome,
+          parametros: resultado.parametros,
+          valorTerreno: resultado.valorTerreno,
+          custoRedicao: resultado.custoRedicao,
+          valorRvr: resultado.valorAvaliado
+        });
+        
         return resultado;
       });
     
-    console.log('Todos os resultados calculados:', calculatedResults);
+    console.log('TODOS os resultados calculados com parâmetros corretos:', calculatedResults);
     setResults(calculatedResults);
     setCurrentStep(4);
   };
@@ -222,6 +225,14 @@ const Index = () => {
       if (resultData) {
         const profile = await fetchUserProfile();
         
+        console.log('DADOS SENDO ENVIADOS PARA O PDF:', {
+          resultData: resultData,
+          parametros: resultData.parametros,
+          valorM2: resultData.parametros?.valorM2,
+          cubM2: resultData.parametros?.cubM2,
+          bdi: resultData.parametros?.bdi
+        });
+        
         const reportData = {
           ...resultData,
           responsavelTecnico: profile ? {
@@ -232,7 +243,6 @@ const Index = () => {
           } : undefined
         };
         
-        console.log('Dados sendo enviados para o PDF:', reportData);
         await generatePDF(reportData);
         toast({
           title: "PDF Gerado",

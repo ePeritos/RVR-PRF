@@ -1,18 +1,29 @@
-
 import { RVRReportData } from './types';
 
 export class HTMLGenerator {
   static createReportHTML(data: RVRReportData): string {
+    console.log('HTMLGenerator - Dados recebidos para o PDF:', data);
+    console.log('HTMLGenerator - Parâmetros específicos:', data.parametros);
+    
     const currentDate = new Date().toLocaleDateString('pt-BR');
     const currentTime = new Date().toLocaleTimeString('pt-BR');
     const reportNumber = `${data.id}/2025`;
     
+    // FORÇAR o uso dos parâmetros do formulário - NÃO usar valores padrão
+    const valorUnitarioTerreno = data.parametros?.valorM2 || 0;
+    const cubValor = data.parametros?.cubM2 || data.parametros?.cub || 0;
+    const bdiPercentual = data.parametros?.bdi || 0;
+    
+    console.log('HTMLGenerator - Parâmetros que serão exibidos no PDF:', {
+      valorUnitarioTerreno,
+      cubValor,
+      bdiPercentual,
+      fonte: data.parametros?.fonteValorTerreno
+    });
+    
     // Usar os dados reais da tabela dados_caip
     const areaTerreno = data.areaTerreno || 0;
     const areaConstruida = data.areaConstruida || 0;
-    const valorUnitarioTerreno = data.parametros?.valorM2 || 150;
-    const cubValor = data.parametros?.cubM2 || 2100;
-    const bdiPercentual = data.parametros?.bdi || 25;
     const idadeAparente = data.idadeAparente || 15;
     const vidaUtil = data.vidaUtil || 80;
     const estadoConservacao = data.estadoConservacao || 'BOM';
@@ -27,6 +38,17 @@ export class HTMLGenerator {
     const valorTotal = data.valorTotal || (valorTerreno + valorBenfeitoria);
     const fatorComercializacao = 1.0;
     const valorAdotado = data.valorAvaliado || (valorTotal * fatorComercializacao);
+
+    console.log('HTMLGenerator - Verificação final dos cálculos:', {
+      areaTerreno,
+      valorUnitarioTerreno,
+      valorTerreno,
+      areaConstruida,
+      cubValor,
+      custoRedicao,
+      valorTotal: valorTotal,
+      valorAdotado
+    });
 
     // Extrair UF do endereço
     const extrairUfDoEndereco = (endereco?: string) => {
@@ -263,8 +285,8 @@ export class HTMLGenerator {
           <div style="margin-bottom: 15px; font-size: 12px;">
             <p style="margin: 0 0 10px 0;"><strong>4.2. Os valores de referência utilizados têm as seguintes fontes e datas-base:</strong></p>
             <ul style="margin: 0 0 15px 20px; line-height: 1.5;">
-              <li>Valor unitário do terreno: ${valorUnitarioTerreno.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: ${data.parametros?.fonteValorTerreno || '[Fonte]'} - Data-base: ${data.parametros?.dataReferencia ? new Date(data.parametros.dataReferencia).toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' }) : '05/2025'}</li>
-              <li>CUB/m²: ${cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: SINDUSCON/${uf} - Data-base: ${data.parametros?.dataReferencia ? new Date(data.parametros.dataReferencia).toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' }) : '05/2025'}</li>
+              <li><strong>Valor unitário do terreno: ${valorUnitarioTerreno.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m²</strong> - Fonte: ${data.parametros?.fonteValorTerreno || '[Fonte]'} - Data-base: ${data.parametros?.dataReferencia ? new Date(data.parametros.dataReferencia).toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' }) : '06/2025'}</li>
+              <li><strong>CUB/m²: ${cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m²</strong> - Fonte: SINDUSCON/${uf} - Data-base: ${data.parametros?.dataReferencia ? new Date(data.parametros.dataReferencia).toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' }) : '06/2025'}</li>
             </ul>
           </div>
 
@@ -290,7 +312,7 @@ export class HTMLGenerator {
         <!-- Nova página para Memorial de Cálculo -->
         <div style="page-break-before: always;">
           
-          <!-- V. MEMORIAL DE CÁLCULO -->
+          <!-- VI. MEMORIAL DE CÁLCULO -->
           <div style="margin-bottom: 25px;">
             <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0; color: #000; background-color: #f0f0f0; padding: 8px;">
               V. MEMORIAL DE CÁLCULO
@@ -317,8 +339,8 @@ export class HTMLGenerator {
               <div style="margin-left: 15px;">
                 <p style="margin: 0 0 5px 0; font-weight: bold;">B.1. Custo de Reedição (CR)</p>
                 <p style="margin: 0 0 5px 0;">Área da Benfeitoria: ${areaConstruida.toLocaleString('pt-BR')} m²</p>
-                <p style="margin: 0 0 5px 0;">CUB/m²: ${cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m²</p>
-                <p style="margin: 0 0 5px 0;">BDI: ${bdiPercentual}%</p>
+                <p style="margin: 0 0 5px 0;"><strong>CUB/m²: ${cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m²</strong></p>
+                <p style="margin: 0 0 5px 0;"><strong>BDI: ${bdiPercentual}%</strong></p>
                 <p style="margin: 0 0 8px 0;">Cálculo: CR = ${areaConstruida.toLocaleString('pt-BR')} × ${cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} × ${(1 + bdiPercentual/100).toFixed(2)} = <strong>${custoRedicao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}</strong></p>
                 
                 <p style="margin: 0 0 5px 0; font-weight: bold;">B.2. Depreciação (D) - Ross-Heidecke</p>
@@ -354,7 +376,7 @@ export class HTMLGenerator {
             </div>
           </div>
 
-          <!-- VI. RESPONSABILIDADE TÉCNICA -->
+          <!-- VII. RESPONSABILIDADE TÉCNICA -->
           <div style="margin-bottom: 30px;">
             <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0; color: #000; background-color: #f0f0f0; padding: 8px;">
               VI. RESPONSABILIDADE TÉCNICA
