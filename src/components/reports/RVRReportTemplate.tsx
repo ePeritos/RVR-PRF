@@ -393,7 +393,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
           <p>Declaro que o presente trabalho foi realizado com a observância dos preceitos da legislação e normas técnicas pertinentes.</p>
 
            <div className="text-right mt-8">
-            <div>[Cidade/{uf}], {format(currentDate, 'dd \'de\' MMMM \'de\' yyyy', { locale: ptBR })}</div>
+            <div>{format(currentDate, 'dd \'de\' MMMM \'de\' yyyy', { locale: ptBR })}</div>
           </div>
           
           <div className="mt-8 text-center">
