@@ -4,18 +4,7 @@ import { CheckCircle, Circle, ArrowUpAZ, ArrowDownAZ } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-
-interface DataRow {
-  id: string;
-  'ano_caip': string;
-  'tipo_de_unidade': string;
-  'unidade_gestora': string;
-  'nome_da_unidade': string;
-  'estado_de_conservacao': string;
-  'vida_util_estimada_anos': string;
-  'area_do_terreno_m2': number;
-  'area_construida_m2': number;
-}
+import { DataRow } from '@/hooks/useSupabaseData';
 
 interface DataTableProps {
   data: DataRow[];
