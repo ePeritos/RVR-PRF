@@ -89,6 +89,7 @@ const Index = () => {
   };
 
   const handleParameterSubmit = (parameters: any) => {
+    console.log('Parâmetros recebidos no Index:', parameters);
     setCurrentParameters(parameters);
     
     // RVR calculation using real data from dados_caip and Ross-Heidecke
@@ -102,11 +103,18 @@ const Index = () => {
         const vidaUtil = item['vida_util_estimada_anos'] || 80;
         const estadoConservacao = item['estado_de_conservacao'] || 'BOM';
         
+        // Use parameters from form for calculations
+        const valorM2 = parameters.valorM2 || 150;
+        const cubM2 = parameters.cubM2 || 2100;
+        const bdi = parameters.bdi || 25;
+        
+        console.log('Usando parâmetros para cálculo:', { valorM2, cubM2, bdi });
+        
         // Benfeitoria calculation using CUB
-        const custoRedicao = parameters.cubM2 * areaConstruida * (1 + parameters.bdi / 100);
+        const custoRedicao = cubM2 * areaConstruida * (1 + bdi / 100);
         
         // Terreno calculation
-        const valorTerreno = parameters.valorM2 * areaTerreno;
+        const valorTerreno = valorM2 * areaTerreno;
         
         // Ross-Heidecke depreciation calculation using real data
         const rossHeideckeResult = calculateRossHeidecke(
@@ -158,14 +166,22 @@ const Index = () => {
           vidaUtil,
           idadePercentual: rossHeideckeResult.idadePercentual,
           coeficienteK: rossHeideckeResult.coeficiente,
-          parametros: parameters,
+          parametros: {
+            cub: cubM2,
+            valorM2: valorM2,
+            bdi: bdi,
+            cubM2: cubM2,
+            dataReferencia: parameters.dataReferencia,
+            fonteValorTerreno: parameters.fonteValorTerreno,
+            responsavelTecnico: parameters.responsavelTecnico
+          },
           responsavelTecnico: parameters.responsavelTecnico
         };
       });
     
+    console.log('Resultados calculados com parâmetros:', calculatedResults);
     setResults(calculatedResults);
     setCurrentStep(4);
-    console.log('RVR Parameters submitted:', parameters);
   };
 
   const handleViewPDF = (id: string) => {
@@ -191,6 +207,7 @@ const Index = () => {
           } : undefined
         };
         
+        console.log('Dados sendo enviados para o PDF:', reportData);
         await generatePDF(reportData);
         toast({
           title: "PDF Gerado",

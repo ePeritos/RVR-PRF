@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -64,10 +65,13 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
       // Automatically select "Thaise Bernardo Bessa" if found
       const thaise = data?.find(resp => resp.nome_completo === 'Thaise Bernardo Bessa');
       if (thaise) {
+        console.log('Thaise encontrada, selecionando automaticamente:', thaise);
         setParameters(prev => ({
           ...prev,
           responsavelTecnicoId: thaise.id
         }));
+      } else {
+        console.log('Thaise não encontrada nos responsáveis técnicos disponíveis');
       }
     } catch (error) {
       console.error('Erro ao buscar responsáveis técnicos:', error);
@@ -97,6 +101,7 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
       responsavelTecnico: responsavelSelecionado
     };
 
+    console.log('Parâmetros sendo enviados:', parametersWithResponsavel);
     onSubmit(parametersWithResponsavel);
   };
 
@@ -146,7 +151,10 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
               </Label>
               <Select
                 value={parameters.responsavelTecnicoId}
-                onValueChange={(value) => setParameters({...parameters, responsavelTecnicoId: value})}
+                onValueChange={(value) => {
+                  console.log('Responsável técnico selecionado:', value);
+                  setParameters({...parameters, responsavelTecnicoId: value});
+                }}
                 disabled={loadingResponsaveis}
               >
                 <SelectTrigger className="h-9">
