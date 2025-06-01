@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -99,8 +98,8 @@ const Index = () => {
         // Get real data from dados_caip
         const areaConstruida = item['area_construida_m2'] || 0;
         const areaTerreno = item['area_do_terreno_m2'] || 0;
-        const idadeAparente = parseInt(item['idade_aparente_do_imovel']) || 15;
-        const vidaUtil = parseInt(item['vida_util_estimada_anos']) || 80;
+        const idadeAparente = item['idade_aparente_do_imovel'] || 15;
+        const vidaUtil = item['vida_util_estimada_anos'] || 80;
         const estadoConservacao = item['estado_de_conservacao'] || 'BOM';
         
         // Benfeitoria calculation using CUB
