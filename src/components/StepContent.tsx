@@ -2,7 +2,7 @@
 import { FileUpload } from '@/components/FileUpload';
 import { DataFilter } from '@/components/DataFilter';
 import { DataTable } from '@/components/DataTable';
-import { ParameterForm } from '@/components/ParameterForm';
+import { EnhancedParameterForm } from '@/components/EnhancedParameterForm';
 import { ResultsTable } from '@/components/ResultsTable';
 import { DataRow } from '@/hooks/useSupabaseData';
 import { NavigationButtons } from '@/components/NavigationButtons';
@@ -99,9 +99,9 @@ export const StepContent = ({
                 Configure os parâmetros técnicos para geração do Relatório de Valor Referencial
               </p>
             </div>
-            <ParameterForm 
-              onSubmit={onParameterSubmit} 
-              selectedData={selectedData}
+            <EnhancedParameterForm 
+              onParametersChange={onParameterSubmit}
+              initialParameters={currentParameters}
             />
           </div>
         );

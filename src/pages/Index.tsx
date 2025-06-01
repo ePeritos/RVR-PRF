@@ -1,13 +1,17 @@
+
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
 import { StepIndicator } from '@/components/StepIndicator';
 import { StepContent } from '@/components/StepContent';
 import { NavigationButtons } from '@/components/NavigationButtons';
+import { ProgressIndicator } from '@/components/ProgressIndicator';
+import { ExportOptions } from '@/components/ExportOptions';
 import { generatePDF } from '@/utils/pdfGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { useSupabaseData, DataRow } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
+import { useAvaliacoes } from '@/hooks/useAvaliacoes';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateRossHeidecke } from '@/utils/rossHeideckeCalculator';
 
@@ -20,10 +24,13 @@ const Index = () => {
   const [currentFilters, setCurrentFilters] = useState<any>({});
   const [results, setResults] = useState<any[]>([]);
   const [currentParameters, setCurrentParameters] = useState<any>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processedItems, setProcessedItems] = useState(0);
   const { toast } = useToast();
 
   // Use real Supabase data
   const { data: supabaseData, loading, error, refetch } = useSupabaseData();
+  const { salvarAvaliacao } = useAvaliacoes();
 
   const fetchUserProfile = async () => {
     if (!user) return null;
@@ -88,9 +95,11 @@ const Index = () => {
     console.log('Filtered data:', filtered);
   };
 
-  const handleParameterSubmit = (parameters: any) => {
+  const handleParameterSubmit = async (parameters: any) => {
     console.log('Parâmetros recebidos no Index - ANTES dos cálculos:', parameters);
     setCurrentParameters(parameters);
+    setIsProcessing(true);
+    setProcessedItems(0);
     
     // FORÇAR o uso dos parâmetros exatos do formulário
     const PARAMETROS_FORMULARIO = {
@@ -105,110 +114,133 @@ const Index = () => {
     console.log('PARÂMETROS FORÇADOS que serão usados nos cálculos:', PARAMETROS_FORMULARIO);
     
     // RVR calculation using real data from dados_caip and Ross-Heidecke
-    const calculatedResults = filteredData
-      .filter(item => selectedItems.includes(item.id))
-      .map(item => {
-        console.log('Processando item:', item.nome_da_unidade);
-        
-        // Get real data from dados_caip
-        const areaConstruida = Number(item['area_construida_m2']) || 0;
-        const areaTerreno = Number(item['area_do_terreno_m2']) || 0;
-        const idadeAparente = Number(item['idade_aparente_do_imovel']) || 15;
-        const vidaUtil = Number(item['vida_util_estimada_anos']) || 80;
-        const estadoConservacao = item['estado_de_conservacao'] || 'BOM';
-        
-        // USAR PARÂMETROS FORÇADOS
-        const valorM2 = PARAMETROS_FORMULARIO.valorM2;
-        const cubM2 = PARAMETROS_FORMULARIO.cubM2;
-        const bdi = PARAMETROS_FORMULARIO.bdi;
-        
-        console.log('VERIFICAÇÃO - Parâmetros sendo aplicados:', { 
-          valorM2, 
-          cubM2, 
-          bdi,
-          areaConstruida,
-          areaTerreno
-        });
-        
-        // Cálculos usando os parâmetros FORÇADOS
-        const custoRedicao = areaConstruida * cubM2 * (1 + (bdi / 100));
-        const valorTerreno = areaTerreno * valorM2;
-        
-        console.log('Cálculos com parâmetros forçados:', {
-          custoRedicao: `${areaConstruida} * ${cubM2} * ${(1 + bdi/100)} = ${custoRedicao}`,
-          valorTerreno: `${areaTerreno} * ${valorM2} = ${valorTerreno}`
-        });
-        
-        // Ross-Heidecke depreciation calculation
-        const rossHeideckeResult = calculateRossHeidecke(
-          custoRedicao,
-          idadeAparente,
-          vidaUtil,
-          estadoConservacao
-        );
-        
-        const valorBenfeitoria = rossHeideckeResult.valorDepreciado;
-        const valorTotal = valorTerreno + valorBenfeitoria;
-        const fatorLocalizacao = 1.0;
-        const valorRvr = valorTotal * fatorLocalizacao;
-        
-        const valorOriginal = Number(item['rvr']) || 0;
-        const diferenca = valorRvr - valorOriginal;
-        const percentual = valorOriginal ? (diferenca / valorOriginal) * 100 : 0;
-        
-        const resultado = {
-          id: item.id,
-          nome: item['nome_da_unidade'] || 'Nome não informado',
-          tipo: item['tipo_de_unidade'] || 'Tipo não informado',
-          categoria: item['tipo_de_unidade'],
-          areaConstruida,
-          areaTerreno,
-          valorBenfeitoria,
-          valorTerreno,
-          valorTotal,
-          custoRedicao,
-          taxaDepreciacao: rossHeideckeResult.coeficiente * 100,
-          valorDepreciacao: rossHeideckeResult.depreciacao,
-          valorDepreciado: rossHeideckeResult.valorDepreciado,
-          valorOriginal,
-          valorAvaliado: valorRvr,
-          diferenca,
-          percentual,
-          areaImovel: areaConstruida,
-          situacaoImovel: item['situacao_do_imovel'] || '',
-          unidadeGestora: item['unidade_gestora'],
-          anoCAIP: item['ano_caip'],
-          endereco: item['endereco'] || '',
-          rip: item['rip'] || '',
-          matriculaImovel: item['matricula_do_imovel'] || '',
-          processoSei: item['processo_sei'] || '',
-          estadoConservacao,
-          idadeAparente,
-          vidaUtil,
-          idadePercentual: rossHeideckeResult.idadePercentual,
-          coeficienteK: rossHeideckeResult.coeficiente,
-          // GARANTIR que os parâmetros corretos sejam passados
-          parametros: {
-            ...PARAMETROS_FORMULARIO,
-            cub: cubM2, // manter compatibilidade
-            cubM2: cubM2
-          },
-          responsavelTecnico: parameters.responsavelTecnico
-        };
-        
-        console.log('Resultado final calculado:', {
-          nome: resultado.nome,
-          parametros: resultado.parametros,
-          valorTerreno: resultado.valorTerreno,
-          custoRedicao: resultado.custoRedicao,
-          valorRvr: resultado.valorAvaliado
-        });
-        
-        return resultado;
+    const selectedData = filteredData.filter(item => selectedItems.includes(item.id));
+    const calculatedResults = [];
+    
+    for (let i = 0; i < selectedData.length; i++) {
+      const item = selectedData[i];
+      console.log('Processando item:', item.nome_da_unidade);
+      
+      // Get real data from dados_caip
+      const areaConstruida = Number(item['area_construida_m2']) || 0;
+      const areaTerreno = Number(item['area_do_terreno_m2']) || 0;
+      const idadeAparente = Number(item['idade_aparente_do_imovel']) || 15;
+      const vidaUtil = Number(item['vida_util_estimada_anos']) || 80;
+      const estadoConservacao = item['estado_de_conservacao'] || 'BOM';
+      
+      // USAR PARÂMETROS FORÇADOS
+      const valorM2 = PARAMETROS_FORMULARIO.valorM2;
+      const cubM2 = PARAMETROS_FORMULARIO.cubM2;
+      const bdi = PARAMETROS_FORMULARIO.bdi;
+      
+      console.log('VERIFICAÇÃO - Parâmetros sendo aplicados:', { 
+        valorM2, 
+        cubM2, 
+        bdi,
+        areaConstruida,
+        areaTerreno
       });
+      
+      // Cálculos usando os parâmetros FORÇADOS
+      const custoRedicao = areaConstruida * cubM2 * (1 + (bdi / 100));
+      const valorTerreno = areaTerreno * valorM2;
+      
+      console.log('Cálculos com parâmetros forçados:', {
+        custoRedicao: `${areaConstruida} * ${cubM2} * ${(1 + bdi/100)} = ${custoRedicao}`,
+        valorTerreno: `${areaTerreno} * ${valorM2} = ${valorTerreno}`
+      });
+      
+      // Ross-Heidecke depreciation calculation
+      const rossHeideckeResult = calculateRossHeidecke(
+        custoRedicao,
+        idadeAparente,
+        vidaUtil,
+        estadoConservacao
+      );
+      
+      const valorBenfeitoria = rossHeideckeResult.valorDepreciado;
+      const valorTotal = valorTerreno + valorBenfeitoria;
+      const fatorLocalizacao = 1.0;
+      const valorRvr = valorTotal * fatorLocalizacao;
+      
+      const valorOriginal = Number(item['rvr']) || 0;
+      const diferenca = valorRvr - valorOriginal;
+      const percentual = valorOriginal ? (diferenca / valorOriginal) * 100 : 0;
+      
+      const resultado = {
+        id: item.id,
+        nome: item['nome_da_unidade'] || 'Nome não informado',
+        tipo: item['tipo_de_unidade'] || 'Tipo não informado',
+        categoria: item['tipo_de_unidade'],
+        areaConstruida,
+        areaTerreno,
+        valorBenfeitoria,
+        valorTerreno,
+        valorTotal,
+        custoRedicao,
+        taxaDepreciacao: rossHeideckeResult.coeficiente * 100,
+        valorDepreciacao: rossHeideckeResult.depreciacao,
+        valorDepreciado: rossHeideckeResult.valorDepreciado,
+        valorOriginal,
+        valorAvaliado: valorRvr,
+        diferenca,
+        percentual,
+        areaImovel: areaConstruida,
+        situacaoImovel: item['situacao_do_imovel'] || '',
+        unidadeGestora: item['unidade_gestora'],
+        anoCAIP: item['ano_caip'],
+        endereco: item['endereco'] || '',
+        rip: item['rip'] || '',
+        matriculaImovel: item['matricula_do_imovel'] || '',
+        processoSei: item['processo_sei'] || '',
+        estadoConservacao,
+        idadeAparente,
+        vidaUtil,
+        idadePercentual: rossHeideckeResult.idadePercentual,
+        coeficienteK: rossHeideckeResult.coeficiente,
+        // GARANTIR que os parâmetros corretos sejam passados
+        parametros: {
+          ...PARAMETROS_FORMULARIO,
+          cub: cubM2, // manter compatibilidade
+          cubM2: cubM2
+        },
+        responsavelTecnico: parameters.responsavelTecnico
+      };
+      
+      calculatedResults.push(resultado);
+      setProcessedItems(i + 1);
+      
+      // Simular delay para mostrar progresso
+      if (i < selectedData.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
     
     console.log('TODOS os resultados calculados com parâmetros corretos:', calculatedResults);
     setResults(calculatedResults);
+    setIsProcessing(false);
+    
+    // Salvar no histórico de avaliações
+    try {
+      await salvarAvaliacao(
+        `Avaliação RVR - ${new Date().toLocaleDateString()}`,
+        PARAMETROS_FORMULARIO,
+        calculatedResults
+      );
+      
+      toast({
+        title: "Avaliação Concluída",
+        description: "Os resultados foram calculados e salvos no histórico.",
+      });
+    } catch (error) {
+      console.error('Erro ao salvar avaliação:', error);
+      toast({
+        title: "Aviso",
+        description: "Avaliação concluída, mas não foi possível salvar no histórico.",
+        variant: "destructive",
+      });
+    }
+    
     setCurrentStep(4);
   };
 
@@ -285,6 +317,8 @@ const Index = () => {
     setUploadedFile(null);
     setSelectedItems([]);
     setResults([]);
+    setProcessedItems(0);
+    setIsProcessing(false);
   };
 
   // Show loading state
@@ -317,14 +351,28 @@ const Index = () => {
     );
   }
 
+  const stepLabels = [
+    'Upload dos Dados',
+    'Seleção de Imóveis', 
+    'Parâmetros RVR',
+    'Relatório Final'
+  ];
+
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-background">
         <Header />
         
         <main className="container mx-auto px-4 py-4">
-          <div className="mb-4">
-            <StepIndicator currentStep={currentStep} totalSteps={4} />
+          <div className="mb-6">
+            <ProgressIndicator 
+              currentStep={currentStep}
+              totalSteps={4}
+              processedItems={currentStep === 3 && isProcessing ? processedItems : undefined}
+              totalItems={currentStep === 3 && isProcessing ? selectedItems.length : undefined}
+              isProcessing={isProcessing}
+              stepLabels={stepLabels}
+            />
           </div>
 
           <StepContent
@@ -346,6 +394,13 @@ const Index = () => {
             onPrevStep={prevStep}
             onNewEvaluation={handleNewEvaluation}
           />
+
+          {/* Opções de exportação na etapa final */}
+          {currentStep === 4 && results.length > 0 && (
+            <div className="mt-6 flex justify-center">
+              <ExportOptions data={results} fileName="relatorio_rvr_completo" />
+            </div>
+          )}
 
           <NavigationButtons
             currentStep={currentStep}
