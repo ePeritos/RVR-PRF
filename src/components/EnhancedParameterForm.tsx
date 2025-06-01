@@ -75,7 +75,7 @@ export function EnhancedParameterForm({ onParametersChange, initialParameters }:
     }
 
     await salvarTemplate(templateName, templateDescription, parameters);
-    setTemplateeName('');
+    setTemplateName('');
     setTemplateDescription('');
     setShowSaveDialog(false);
   };
