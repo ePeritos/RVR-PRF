@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -225,7 +224,9 @@ const Index = () => {
       await salvarAvaliacao(
         `Avaliação RVR - ${new Date().toLocaleDateString()}`,
         PARAMETROS_FORMULARIO,
-        calculatedResults
+        calculatedResults,
+        calculatedResults.length,
+        calculatedResults.reduce((sum, result) => sum + result.valorAvaliado, 0)
       );
       
       toast({
