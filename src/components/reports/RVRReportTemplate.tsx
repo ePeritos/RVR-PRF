@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -11,6 +12,8 @@ interface RVRReportData {
   diferenca: number;
   percentual: number;
   areaImovel?: number;
+  areaConstruida?: number;
+  areaTerreno?: number;
   situacaoImovel?: string;
   unidadeGestora?: string;
   anoCAIP?: string;
@@ -18,9 +21,12 @@ interface RVRReportData {
   rip?: string;
   matriculaImovel?: string;
   parametros?: {
-    cub: number;
+    cub?: number;
+    cubM2?: number;
     valorM2: number;
     bdi: number;
+    dataReferencia?: string;
+    fonteValorTerreno?: string;
     responsavelTecnico?: {
       id: string;
       nome_completo: string;
@@ -30,6 +36,17 @@ interface RVRReportData {
       uf: string;
     };
   };
+  responsavelTecnico?: {
+    id: string;
+    nome_completo: string;
+    numero_registro: string;
+    conselho: string;
+    formacao: string;
+    uf: string;
+  };
+  idadeAparente?: number;
+  vidaUtil?: number;
+  estadoConservacao?: string;
 }
 
 interface RVRReportTemplateProps {
@@ -41,16 +58,23 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
   const currentDate = new Date();
   const reportNumber = `${data.id}/2025`;
   
-  // Dados calculados para o Memorial de Cálculo
-  const areaTerreno = 1200; // m² - substituir por dado real
-  const valorUnitarioTerreno = data.parametros?.valorM2 || 150; // R$/m²
-  const areaBenfeitoria = data.areaImovel || 300; // m²
-  const cubValor = data.parametros?.cub || 2500; // R$/m²
-  const bdiPercentual = data.parametros?.bdi || 25; // %
-  const idadeAparente = 15; // anos
-  const vidaUtil = 60; // anos
+  // Use parâmetros corretos do formulário
+  const areaTerreno = data.areaTerreno || 1200; // m² - usar dado real
+  const valorUnitarioTerreno = data.parametros?.valorM2 || 150; // R$/m² - DO FORMULÁRIO
+  const areaBenfeitoria = data.areaConstruida || data.areaImovel || 300; // m²
+  const cubValor = data.parametros?.cubM2 || data.parametros?.cub || 2100; // R$/m² - DO FORMULÁRIO
+  const bdiPercentual = data.parametros?.bdi || 25; // % - DO FORMULÁRIO
+  const idadeAparente = data.idadeAparente || 15; // anos
+  const vidaUtil = data.vidaUtil || 60; // anos
   const fatorComercializacao = 1.0;
   const coeficienteK = 0.25; // Ross-Heidecke
+  
+  console.log('RVRReportTemplate - Parâmetros recebidos:', {
+    valorUnitarioTerreno,
+    cubValor,
+    bdiPercentual,
+    fonte: data.parametros
+  });
   
   // Cálculos do Memorial
   const valorTerreno = areaTerreno * valorUnitarioTerreno;
@@ -61,8 +85,8 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
   const valorImovel = valorTerreno + valorBenfeitoria;
   const valorAdotado = valorImovel * fatorComercializacao;
 
-  // Dados do responsável técnico selecionado
-  const responsavelTecnico = data.parametros?.responsavelTecnico;
+  // Dados do responsável técnico
+  const responsavelTecnico = data.parametros?.responsavelTecnico || data.responsavelTecnico;
   const nomeResponsavel = responsavelTecnico?.nome_completo || '[Nome do Responsável Técnico]';
   const registroResponsavel = responsavelTecnico ? 
     `${responsavelTecnico.conselho}/${responsavelTecnico.uf} ${responsavelTecnico.numero_registro}` : 
@@ -80,6 +104,9 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
 
   const uf = getUfFromUnidade(data.unidadeGestora);
   const solicitante = data.unidadeGestora || 'PRF/XX';
+
+  // Data de referência dos parâmetros
+  const dataReferencia = data.parametros?.dataReferencia ? new Date(data.parametros.dataReferencia) : currentDate;
 
   return (
     <div className={`bg-white text-black p-8 max-w-5xl mx-auto text-sm leading-relaxed ${className}`} id={`rvr-report-${data.id}`}>
@@ -101,7 +128,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
           <div><strong>Finalidade:</strong> Avaliação para fins de gestão patrimonial</div>
           <div><strong>Solicitante:</strong> {solicitante}</div>
           <div><strong>Data da Vistoria:</strong> {format(currentDate, 'dd/MM/yyyy')}</div>
-          <div><strong>Data-base da Avaliação:</strong> {format(currentDate, 'dd/MM/yyyy')}</div>
+          <div><strong>Data-base da Avaliação:</strong> {format(dataReferencia, 'dd/MM/yyyy')}</div>
           <div><strong>Responsável Técnico:</strong> {nomeResponsavel}</div>
           <div><strong>Registro Profissional:</strong> {registroResponsavel}</div>
         </div>
@@ -237,8 +264,8 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
             
             <p><strong>Passo 1: Identificação do Valor Unitário do Terreno</strong></p>
             <ul className="list-disc list-inside ml-4">
-              <li>Fonte: [Fonte do valor unitário]</li>
-              <li>Data-Base da Fonte: {format(currentDate, 'MM/yyyy')}</li>
+              <li>Fonte: {data.parametros?.fonteValorTerreno || '[Fonte do valor unitário]'}</li>
+              <li>Data-Base da Fonte: {format(dataReferencia, 'MM/yyyy')}</li>
               <li>Valor Unitário (VU<sub>terreno</sub>): {valorUnitarioTerreno.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m²</li>
             </ul>
             
@@ -276,7 +303,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
               <ul className="list-disc list-inside ml-4">
                 <li>Padrão Construtivo: Médio</li>
                 <li>Fonte: SINDUSCON/[UF]</li>
-                <li>Data-Base do CUB: {format(currentDate, 'MM/yyyy')}</li>
+                <li>Data-Base do CUB: {format(dataReferencia, 'MM/yyyy')}</li>
                 <li>Valor do CUB/m²: {cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m²</li>
               </ul>
               

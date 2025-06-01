@@ -65,7 +65,7 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
       setResponsaveisTecnicos(data || []);
       
       // Automatically select "Thaise Bernardo Bessa" if found
-      const thaise = data?.find(resp => resp.nome_completo === 'Thaise Bernardo Bessa');
+      const thaise = data?.find(resp => resp.nome_completo.toLowerCase().includes('thaise'));
       if (thaise) {
         console.log('Thaise encontrada, selecionando automaticamente:', thaise);
         setParameters(prev => ({
@@ -103,7 +103,7 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
       responsavelTecnico: responsavelSelecionado
     };
 
-    console.log('Parâmetros finais sendo enviados:', parametersWithResponsavel);
+    console.log('Parâmetros finais sendo enviados do ParameterForm:', parametersWithResponsavel);
     onSubmit(parametersWithResponsavel);
   };
 

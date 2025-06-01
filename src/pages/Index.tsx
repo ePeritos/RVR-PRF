@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
@@ -114,17 +113,23 @@ const Index = () => {
           estadoConservacao
         });
         
-        // Use parameters from form for calculations
-        const valorM2 = parameters.valorM2 || 150;
-        const cubM2 = parameters.cubM2 || 2100;
-        const bdi = parameters.bdi || 25;
+        // Use parameters from form for calculations - GARANTINDO que os valores do formulário sejam usados
+        const valorM2 = parameters.valorM2;
+        const cubM2 = parameters.cubM2;
+        const bdi = parameters.bdi;
         
-        console.log('Parâmetros usados no cálculo:', { valorM2, cubM2, bdi });
+        console.log('Parâmetros sendo usados nos cálculos:', { 
+          valorM2: valorM2,
+          cubM2: cubM2, 
+          bdi: bdi,
+          dataReferencia: parameters.dataReferencia,
+          fonteValorTerreno: parameters.fonteValorTerreno
+        });
         
-        // Benfeitoria calculation using CUB
+        // Benfeitoria calculation using CUB from form
         const custoRedicao = cubM2 * areaConstruida * (1 + bdi / 100);
         
-        // Terreno calculation
+        // Terreno calculation using valor from form
         const valorTerreno = valorM2 * areaTerreno;
         
         console.log('Cálculos intermediários:', {
@@ -194,7 +199,8 @@ const Index = () => {
           responsavelTecnico: parameters.responsavelTecnico
         };
         
-        console.log('Resultado calculado:', resultado);
+        console.log('Resultado calculado com parâmetros corretos:', resultado);
+        console.log('Verificação - CUB usado:', cubM2, 'Valor M2 usado:', valorM2, 'BDI usado:', bdi);
         return resultado;
       });
     
