@@ -56,7 +56,7 @@ export const NavigationButtons = ({
     );
   }
 
-  // Na etapa 3, não mostra o botão "Próximo" pois será substituído pelo "Gerar Relatório RVR"
+  // Na etapa 3, não mostra o botão "Próximo" pois será controlado pelo formulário
   if (currentStep === 3) {
     return (
       <div className="flex justify-start mt-8">
