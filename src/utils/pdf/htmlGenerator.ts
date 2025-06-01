@@ -1,3 +1,4 @@
+
 import { RVRReportData } from './types';
 
 export class HTMLGenerator {
@@ -9,17 +10,26 @@ export class HTMLGenerator {
     const currentTime = new Date().toLocaleTimeString('pt-BR');
     const reportNumber = `${data.id}/2025`;
     
-    // FORÇAR o uso dos parâmetros do formulário - NÃO usar valores padrão
-    const valorUnitarioTerreno = data.parametros?.valorM2 || 0;
-    const cubValor = data.parametros?.cubM2 || data.parametros?.cub || 0;
-    const bdiPercentual = data.parametros?.bdi || 0;
+    // USAR SEMPRE os parâmetros do formulário - NUNCA valores padrão
+    const valorUnitarioTerreno = data.parametros?.valorM2;
+    const cubValor = data.parametros?.cubM2 || data.parametros?.cub;
+    const bdiPercentual = data.parametros?.bdi;
     
-    console.log('HTMLGenerator - Parâmetros que serão exibidos no PDF:', {
+    console.log('HTMLGenerator - Verificação dos parâmetros extraídos:', {
       valorUnitarioTerreno,
       cubValor,
       bdiPercentual,
-      fonte: data.parametros?.fonteValorTerreno
+      fonteParametros: data.parametros
     });
+    
+    // Validar se os parâmetros estão presentes
+    if (!valorUnitarioTerreno || !cubValor || bdiPercentual === undefined) {
+      console.error('ERRO: Parâmetros obrigatórios não encontrados:', {
+        valorUnitarioTerreno,
+        cubValor,
+        bdiPercentual
+      });
+    }
     
     // Usar os dados reais da tabela dados_caip
     const areaTerreno = data.areaTerreno || 0;
@@ -30,7 +40,7 @@ export class HTMLGenerator {
     const coeficienteK = data.coeficienteK || 0.25;
     const idadePercentual = data.idadePercentual || 18.75;
     
-    // Usar os valores calculados reais do sistema
+    // Usar os valores calculados reais do sistema (que já usam os parâmetros corretos)
     const valorTerreno = data.valorTerreno || (areaTerreno * valorUnitarioTerreno);
     const custoRedicao = data.custoRedicao || (areaConstruida * cubValor * (1 + (bdiPercentual / 100)));
     const depreciacao = data.valorDepreciacao || (custoRedicao * coeficienteK);
@@ -39,14 +49,15 @@ export class HTMLGenerator {
     const fatorComercializacao = 1.0;
     const valorAdotado = data.valorAvaliado || (valorTotal * fatorComercializacao);
 
-    console.log('HTMLGenerator - Verificação final dos cálculos:', {
+    console.log('HTMLGenerator - Cálculos finais para o PDF:', {
       areaTerreno,
       valorUnitarioTerreno,
       valorTerreno,
       areaConstruida,
       cubValor,
+      bdiPercentual,
       custoRedicao,
-      valorTotal: valorTotal,
+      valorTotal,
       valorAdotado
     });
 

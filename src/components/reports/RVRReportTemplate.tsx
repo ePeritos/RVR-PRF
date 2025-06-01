@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -58,25 +57,42 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
   const currentDate = new Date();
   const reportNumber = `${data.id}/2025`;
   
-  // Use parâmetros corretos do formulário
-  const areaTerreno = data.areaTerreno || 1200; // m² - usar dado real
-  const valorUnitarioTerreno = data.parametros?.valorM2 || 150; // R$/m² - DO FORMULÁRIO
-  const areaBenfeitoria = data.areaConstruida || data.areaImovel || 300; // m²
-  const cubValor = data.parametros?.cubM2 || data.parametros?.cub || 2100; // R$/m² - DO FORMULÁRIO
-  const bdiPercentual = data.parametros?.bdi || 25; // % - DO FORMULÁRIO
-  const idadeAparente = data.idadeAparente || 15; // anos
-  const vidaUtil = data.vidaUtil || 60; // anos
+  // USAR SEMPRE os parâmetros do formulário - NUNCA valores fixos/padrão
+  const areaTerreno = data.areaTerreno || 0;
+  const valorUnitarioTerreno = data.parametros?.valorM2; // SEM VALOR PADRÃO
+  const areaBenfeitoria = data.areaConstruida || data.areaImovel || 0;
+  const cubValor = data.parametros?.cubM2 || data.parametros?.cub; // SEM VALOR PADRÃO
+  const bdiPercentual = data.parametros?.bdi; // SEM VALOR PADRÃO
+  const idadeAparente = data.idadeAparente || 15;
+  const vidaUtil = data.vidaUtil || 60;
   const fatorComercializacao = 1.0;
-  const coeficienteK = 0.25; // Ross-Heidecke
+  const coeficienteK = 0.25;
   
-  console.log('RVRReportTemplate - Parâmetros recebidos:', {
+  console.log('RVRReportTemplate - Parâmetros recebidos (SEM valores padrão):', {
     valorUnitarioTerreno,
     cubValor,
     bdiPercentual,
     fonte: data.parametros
   });
+
+  // Validar se os parâmetros obrigatórios estão presentes
+  if (!valorUnitarioTerreno || !cubValor || bdiPercentual === undefined) {
+    console.error('ERRO: Parâmetros obrigatórios não encontrados no RVRReportTemplate:', {
+      valorUnitarioTerreno,
+      cubValor,
+      bdiPercentual
+    });
+    return (
+      <div className={`bg-white text-black p-8 max-w-5xl mx-auto text-sm leading-relaxed ${className}`}>
+        <div className="text-red-500 text-center">
+          <h2>Erro: Parâmetros não encontrados</h2>
+          <p>Os parâmetros necessários (Valor M², CUB, BDI) não foram fornecidos.</p>
+        </div>
+      </div>
+    );
+  }
   
-  // Cálculos do Memorial
+  // Cálculos do Memorial USANDO os parâmetros do formulário
   const valorTerreno = areaTerreno * valorUnitarioTerreno;
   const custoRedicao = areaBenfeitoria * cubValor * (1 + (bdiPercentual / 100));
   const idadePercentual = (idadeAparente / vidaUtil) * 100;
@@ -84,6 +100,12 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
   const valorBenfeitoria = custoRedicao - depreciacao;
   const valorImovel = valorTerreno + valorBenfeitoria;
   const valorAdotado = valorImovel * fatorComercializacao;
+
+  console.log('RVRReportTemplate - Cálculos realizados:', {
+    valorTerreno: `${areaTerreno} * ${valorUnitarioTerreno} = ${valorTerreno}`,
+    custoRedicao: `${areaBenfeitoria} * ${cubValor} * ${(1 + bdiPercentual/100)} = ${custoRedicao}`,
+    valorTotal: valorImovel
+  });
 
   // Dados do responsável técnico
   const responsavelTecnico = data.parametros?.responsavelTecnico || data.responsavelTecnico;
