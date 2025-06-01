@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { TooltipField } from './TooltipField';
 import { useTemplates } from '@/hooks/useTemplates';
-import { Save, Upload, Star, Trash2, Eye } from 'lucide-react';
+import { Save, Upload, Star, Trash2, Eye, Calculator } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ParameterFormProps {
@@ -46,22 +46,36 @@ export function EnhancedParameterForm({ onParametersChange, initialParameters }:
     const templatePadrao = templates.find(t => t.is_default);
     if (templatePadrao && !initialParameters) {
       setParameters(templatePadrao.parametros);
-      onParametersChange(templatePadrao.parametros);
     }
-  }, [templates, initialParameters, onParametersChange]);
-
-  useEffect(() => {
-    onParametersChange(parameters);
-  }, [parameters, onParametersChange]);
+  }, [templates, initialParameters]);
 
   const handleParameterChange = (key: string, value: any) => {
     const newParameters = { ...parameters, [key]: value };
     setParameters(newParameters);
-    
-    // Preview em tempo real
-    if (previewMode) {
-      onParametersChange(newParameters);
+  };
+
+  const handleSubmitParameters = () => {
+    // Validação básica
+    if (!parameters.cub || !parameters.valorM2 || !parameters.bdi) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      });
+      return;
     }
+
+    if (!parameters.responsavelTecnico.trim()) {
+      toast({
+        title: "Erro",
+        description: "O campo Responsável Técnico é obrigatório.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Só agora chama a função que vai processar os dados
+    onParametersChange(parameters);
   };
 
   const handleSaveTemplate = async () => {
@@ -82,7 +96,6 @@ export function EnhancedParameterForm({ onParametersChange, initialParameters }:
 
   const handleLoadTemplate = (template: any) => {
     setParameters(template.parametros);
-    onParametersChange(template.parametros);
     setShowTemplatesDialog(false);
     
     toast({
@@ -308,6 +321,18 @@ export function EnhancedParameterForm({ onParametersChange, initialParameters }:
               </CardContent>
             </Card>
           )}
+
+          {/* Botão para processar */}
+          <div className="flex justify-center pt-4">
+            <Button 
+              onClick={handleSubmitParameters}
+              size="lg"
+              className="px-8"
+            >
+              <Calculator className="h-5 w-5 mr-2" />
+              Processar Avaliação RVR
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
