@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Download, Eye, FileText } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -94,10 +93,10 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
       ...result,
       parametros,
       responsavelTecnico: profile ? {
-        nome: profile.nome_completo,
+        nome_completo: profile.nome_completo,
         cargo: profile.cargo,
         matricula: profile.matricula,
-        unidadeLotacao: profile.unidade_lotacao
+        unidade_lotacao: profile.unidade_lotacao
       } : undefined
     };
     
@@ -116,10 +115,10 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
         ...result,
         parametros,
         responsavelTecnico: profile ? {
-          nome: profile.nome_completo,
+          nome_completo: profile.nome_completo,
           cargo: profile.cargo,
           matricula: profile.matricula,
-          unidadeLotacao: profile.unidade_lotacao
+          unidade_lotacao: profile.unidade_lotacao
         } : undefined
       };
       
