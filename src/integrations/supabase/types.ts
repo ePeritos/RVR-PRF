@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      avaliacoes_historico: {
+        Row: {
+          created_at: string
+          id: string
+          nome_avaliacao: string
+          parametros: Json
+          resultados: Json
+          total_imoveis: number
+          updated_at: string
+          user_id: string
+          valor_total_avaliado: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome_avaliacao: string
+          parametros: Json
+          resultados: Json
+          total_imoveis?: number
+          updated_at?: string
+          user_id: string
+          valor_total_avaliado?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome_avaliacao?: string
+          parametros?: Json
+          resultados?: Json
+          total_imoveis?: number
+          updated_at?: string
+          user_id?: string
+          valor_total_avaliado?: number | null
+        }
+        Relationships: []
+      }
       dados_caip: {
         Row: {
           abastecimento_de_agua: string | null
@@ -485,6 +521,39 @@ export type Database = {
           numero_registro?: string
           uf?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      templates_parametros: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          is_default: boolean | null
+          nome_template: string
+          parametros: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          is_default?: boolean | null
+          nome_template: string
+          parametros: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          is_default?: boolean | null
+          nome_template?: string
+          parametros?: Json
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

@@ -124,15 +124,17 @@ export const UserProfile = () => {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1 sm:gap-2">
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
-            <User className="h-4 w-4 mr-1" />
-            {profile.nome_completo || user?.email}
+          <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
+            <User className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+            <span className="hidden sm:inline truncate max-w-24 lg:max-w-none">
+              {profile.nome_completo || user?.email}
+            </span>
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md mx-2">
           <DialogHeader>
             <DialogTitle>Perfil do Usuário</DialogTitle>
           </DialogHeader>
@@ -203,8 +205,9 @@ export const UserProfile = () => {
         </DialogContent>
       </Dialog>
       
-      <Button variant="ghost" size="sm" onClick={signOut}>
-        Sair
+      <Button variant="ghost" size="sm" onClick={signOut} className="text-xs sm:text-sm px-2 sm:px-3">
+        <span className="hidden sm:inline">Sair</span>
+        <span className="sm:hidden">X</span>
       </Button>
     </div>
   );

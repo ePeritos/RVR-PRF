@@ -291,7 +291,7 @@ const Index = () => {
   if (loading) {
     return (
       <ThemeProvider>
-        <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center px-4">
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
             <p className="mt-4 text-lg">Carregando dados...</p>
@@ -305,7 +305,7 @@ const Index = () => {
   if (error) {
     return (
       <ThemeProvider>
-        <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center px-4">
           <div className="text-center">
             <p className="text-red-500 text-lg">Erro ao carregar dados: {error}</p>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -322,7 +322,7 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <Header />
         
-        <main className="container mx-auto px-4 py-4">
+        <main className="container mx-auto px-2 sm:px-4 py-4">
           <div className="mb-4">
             <StepIndicator currentStep={currentStep} totalSteps={4} />
           </div>

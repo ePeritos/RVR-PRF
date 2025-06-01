@@ -50,9 +50,9 @@ export const StepContent = ({
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 px-4">
             <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-foreground mb-1">
+              <h2 className="text-lg sm:text-xl font-bold text-foreground mb-1">
                 Etapa 1: Upload da Base de Dados CAIP
               </h2>
               <p className="text-sm text-muted-foreground">
@@ -69,9 +69,9 @@ export const StepContent = ({
       
       case 2:
         return (
-          <div className="space-y-4">
+          <div className="space-y-4 px-4">
             <div className="text-center mb-4">
-              <h2 className="text-xl font-bold text-foreground mb-1">
+              <h2 className="text-lg sm:text-xl font-bold text-foreground mb-1">
                 Etapa 2: Seleção de Imóveis
               </h2>
               <p className="text-sm text-muted-foreground">
@@ -79,20 +79,22 @@ export const StepContent = ({
               </p>
             </div>
             <DataFilter onFilterChange={onFilterChange} />
-            <DataTable 
-              data={filteredData} 
-              selectedItems={selectedItems}
-              onSelectionChange={onSelectionChange}
-            />
+            <div className="overflow-x-auto">
+              <DataTable 
+                data={filteredData} 
+                selectedItems={selectedItems}
+                onSelectionChange={onSelectionChange}
+              />
+            </div>
           </div>
         );
       
       case 3:
         const selectedData = filteredData.filter(item => selectedItems.includes(item.id));
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 px-4">
             <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-foreground mb-1">
+              <h2 className="text-lg sm:text-xl font-bold text-foreground mb-1">
                 Etapa 3: Parâmetros RVR
               </h2>
               <p className="text-sm text-muted-foreground">
@@ -108,21 +110,23 @@ export const StepContent = ({
       
       case 4:
         return (
-          <div className="space-y-4">
+          <div className="space-y-4 px-4">
             <div className="text-center mb-4">
-              <h2 className="text-xl font-bold text-foreground mb-1">
+              <h2 className="text-lg sm:text-xl font-bold text-foreground mb-1">
                 Etapa 4: Relatório RVR
               </h2>
               <p className="text-sm text-muted-foreground">
                 Visualize os resultados da avaliação e gere os Relatórios de Valor Referencial em PDF
               </p>
             </div>
-            <ResultsTable 
-              results={results}
-              onViewPDF={onViewPDF}
-              onDownloadPDF={onDownloadPDF}
-              parametros={currentParameters}
-            />
+            <div className="overflow-x-auto">
+              <ResultsTable 
+                results={results}
+                onViewPDF={onViewPDF}
+                onDownloadPDF={onDownloadPDF}
+                parametros={currentParameters}
+              />
+            </div>
           </div>
         );
       
