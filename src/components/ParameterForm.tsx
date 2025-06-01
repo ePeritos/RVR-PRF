@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,6 +60,15 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
       }
 
       setResponsaveisTecnicos(data || []);
+      
+      // Automatically select "Thaise Bernardo Bessa" if found
+      const thaise = data?.find(resp => resp.nome_completo === 'Thaise Bernardo Bessa');
+      if (thaise) {
+        setParameters(prev => ({
+          ...prev,
+          responsavelTecnicoId: thaise.id
+        }));
+      }
     } catch (error) {
       console.error('Erro ao buscar responsáveis técnicos:', error);
     } finally {
