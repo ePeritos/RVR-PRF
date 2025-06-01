@@ -35,8 +35,15 @@ export interface RVRReportData {
   custoRedicao?: number;
   valorBenfeitoria?: number;
   valorTerreno?: number;
+  valorTotal?: number;
   valorDepreciacao?: number;
   taxaDepreciacao?: number;
+  responsavelTecnico?: {
+    nome_completo: string;
+    cargo: string;
+    matricula: string;
+    unidade_lotacao: string;
+  };
   parametros?: {
     cub?: number;
     cubM2?: number;
