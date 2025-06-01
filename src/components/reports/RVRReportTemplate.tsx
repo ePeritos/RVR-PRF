@@ -391,17 +391,17 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
         <h2 className="text-base font-bold mb-3 bg-gray-100 p-2">IX. RESPONSABILIDADE TÉCNICA</h2>
         <div className="text-xs space-y-4">
           <p>Declaro que o presente trabalho foi realizado com a observância dos preceitos da legislação e normas técnicas pertinentes.</p>
+
+           <div className="text-right mt-8">
+            <div>[Cidade/{uf}], {format(currentDate, 'dd \'de\' MMMM \'de\' yyyy', { locale: ptBR })}</div>
+          </div>
           
           <div className="mt-8 text-center">
             <div className="border-t border-black w-64 mx-auto mb-2"></div>
             <div><strong>{nomeResponsavel}</strong></div>
             <div>{formacaoResponsavel}</div>
             <div>{registroResponsavel}</div>
-          </div>
-          
-          <div className="text-right mt-8">
-            <div>[Cidade/{uf}], {format(currentDate, 'dd \'de\' MMMM \'de\' yyyy', { locale: ptBR })}</div>
-          </div>
+          </div>             
         </div>
       </section>
 
