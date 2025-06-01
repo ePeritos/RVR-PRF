@@ -7,7 +7,7 @@ export class HTMLGenerator {
     const currentTime = new Date().toLocaleTimeString('pt-BR');
     const reportNumber = `${data.id}/2025`;
     
-    // Usar os dados calculados reais que vêm dos resultados
+    // Usar os dados reais da tabela dados_caip
     const areaTerreno = data.areaTerreno || 0;
     const areaConstruida = data.areaConstruida || 0;
     const valorUnitarioTerreno = data.parametros?.valorM2 || 150;
@@ -28,6 +28,30 @@ export class HTMLGenerator {
     const fatorComercializacao = 1.0;
     const valorAdotado = data.valorAvaliado || (valorTotal * fatorComercializacao);
 
+    // Extrair UF do endereço
+    const extrairUfDoEndereco = (endereco?: string) => {
+      if (!endereco) return 'XX';
+      
+      // Padrões comuns para extrair UF do endereço
+      const patterns = [
+        /\b([A-Z]{2})\s*$/, // UF no final (ex: "Rua X, Cidade - RN")
+        /\b([A-Z]{2})\s*,?\s*\d{5}-?\d{3}/, // UF antes do CEP (ex: "Cidade - RN, 59000-000")
+        /-\s*([A-Z]{2})\b/, // UF após hífen (ex: "Cidade - RN")
+        /,\s*([A-Z]{2})\b/, // UF após vírgula (ex: "Cidade, RN")
+      ];
+      
+      for (const pattern of patterns) {
+        const match = endereco.match(pattern);
+        if (match) {
+          return match[1];
+        }
+      }
+      
+      return 'XX';
+    };
+
+    const uf = extrairUfDoEndereco(data.endereco);
+
     // Dados do responsável técnico selecionado
     const responsavelTecnico = data.parametros?.responsavelTecnico;
     const nomeResponsavel = responsavelTecnico?.nome_completo || '[Nome do Responsável Técnico]';
@@ -42,7 +66,7 @@ export class HTMLGenerator {
         <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #000;">
           <div style="font-size: 12px; margin-bottom: 5px;">MINISTÉRIO DA JUSTIÇA E SEGURANÇA PÚBLICA</div>
           <div style="font-size: 12px; margin-bottom: 5px;">POLÍCIA RODOVIÁRIA FEDERAL</div>
-          <div style="font-size: 12px; margin-bottom: 15px;">SUPERINTENDÊNCIA REGIONAL NO ESTADO DE ${data.unidadeGestora || '[UF]'}</div>
+          <div style="font-size: 12px; margin-bottom: 15px;">SUPERINTENDÊNCIA REGIONAL NO ESTADO DE ${uf}</div>
           
           <h1 style="font-size: 20px; font-weight: bold; margin: 0 0 10px 0; color: #000; text-transform: uppercase;">
             RELATÓRIO DE VALOR DE REFERÊNCIA (RVR)
@@ -86,7 +110,7 @@ export class HTMLGenerator {
                 Solicitante:
               </td>
               <td style="padding: 6px; border: 1px solid #000;">
-                Superintendência Regional da PRF/${data.unidadeGestora || '[UF]'}
+                ${data.unidadeGestora || `Superintendência Regional da PRF/${uf}`}
               </td>
             </tr>
             <tr>
@@ -205,6 +229,18 @@ export class HTMLGenerator {
               <td style="padding: 6px; border: 1px solid #000; font-weight: bold; background-color: #f8f8f8;">Situação:</td>
               <td style="padding: 6px; border: 1px solid #000;">${data.situacaoImovel || 'Próprio'}</td>
             </tr>
+            <tr>
+              <td style="padding: 6px; border: 1px solid #000; font-weight: bold; background-color: #f8f8f8;">Estado de Conservação:</td>
+              <td style="padding: 6px; border: 1px solid #000;">${estadoConservacao}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px; border: 1px solid #000; font-weight: bold; background-color: #f8f8f8;">Idade Aparente:</td>
+              <td style="padding: 6px; border: 1px solid #000;">${idadeAparente} anos</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px; border: 1px solid #000; font-weight: bold; background-color: #f8f8f8;">Vida Útil Estimada:</td>
+              <td style="padding: 6px; border: 1px solid #000;">${vidaUtil} anos</td>
+            </tr>
           </table>
         </div>
 
@@ -228,7 +264,7 @@ export class HTMLGenerator {
             <p style="margin: 0 0 10px 0;"><strong>4.2. Os valores de referência utilizados têm as seguintes fontes e datas-base:</strong></p>
             <ul style="margin: 0 0 15px 20px; line-height: 1.5;">
               <li>Valor unitário do terreno: ${valorUnitarioTerreno.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: ${data.parametros?.fonteValorTerreno || '[Fonte]'} - Data-base: ${data.parametros?.dataReferencia ? new Date(data.parametros.dataReferencia).toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' }) : '05/2025'}</li>
-              <li>CUB/m²: ${cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: SINDUSCON/[UF] - Data-base: ${data.parametros?.dataReferencia ? new Date(data.parametros.dataReferencia).toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' }) : '05/2025'}</li>
+              <li>CUB/m²: ${cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: SINDUSCON/${uf} - Data-base: ${data.parametros?.dataReferencia ? new Date(data.parametros.dataReferencia).toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' }) : '05/2025'}</li>
             </ul>
           </div>
 
@@ -327,22 +363,26 @@ export class HTMLGenerator {
               Declaro que o presente trabalho foi realizado com a observância dos preceitos da legislação e normas técnicas pertinentes.
             </p>
             
+            <!-- Data posicionada acima da assinatura -->
+            <div style="text-align: right; margin-bottom: 20px;">
+              <p style="font-size: 12px; margin: 0;">
+                [Cidade/${uf}], ${currentDate}
+              </p>
+            </div>
+            
             <div style="text-align: center; margin-top: 40px;">
               <div style="border-top: 1px solid #000; width: 300px; margin: 0 auto 10px;">
                 <p style="font-size: 12px; margin: 10px 0 5px; font-weight: bold;">${nomeResponsavel}</p>
                 <p style="font-size: 12px; margin: 0;">${responsavelTecnico?.formacao || 'Engenheiro Civil'}</p>
                 <p style="font-size: 12px; margin: 0;">${registroResponsavel}</p>
               </div>
-              <p style="font-size: 12px; margin-top: 20px;">
-                [Cidade/UF], ${currentDate}
-              </p>
             </div>
           </div>
 
           <!-- Rodapé Final -->
           <div style="position: absolute; bottom: 20mm; left: 20mm; right: 20mm; text-align: center; font-size: 10px; color: #666; border-top: 1px solid #ccc; padding-top: 10px;">
             <p style="margin: 2px 0; font-weight: bold;">Relatório de Valor de Referência (RVR) nº ${reportNumber}</p>
-            <p style="margin: 2px 0;">Polícia Rodoviária Federal - Superintendência Regional no Estado de ${data.unidadeGestora || '[UF]'}</p>
+            <p style="margin: 2px 0;">Polícia Rodoviária Federal - Superintendência Regional no Estado de ${uf}</p>
             <p style="margin: 2px 0;">Gerado automaticamente em ${currentDate} às ${currentTime}</p>
           </div>
         </div>

@@ -75,7 +75,7 @@ export type Database = {
           ha_plano_de_manutencao_do_imovel: string | null
           id: string
           id_caip: string | null
-          idade_aparente_do_imovel: string | null
+          idade_aparente_do_imovel: number | null
           identidade_visual: string | null
           iluminacao_externa: string | null
           imagem_cofre: string | null
@@ -138,7 +138,7 @@ export type Database = {
           updated_at: string | null
           vestiario_para_nao_policiais: string | null
           vestiario_para_policiais: string | null
-          vida_util_estimada_anos: string | null
+          vida_util_estimada_anos: number | null
           zona: string | null
         }
         Insert: {
@@ -206,7 +206,7 @@ export type Database = {
           ha_plano_de_manutencao_do_imovel?: string | null
           id?: string
           id_caip?: string | null
-          idade_aparente_do_imovel?: string | null
+          idade_aparente_do_imovel?: number | null
           identidade_visual?: string | null
           iluminacao_externa?: string | null
           imagem_cofre?: string | null
@@ -269,7 +269,7 @@ export type Database = {
           updated_at?: string | null
           vestiario_para_nao_policiais?: string | null
           vestiario_para_policiais?: string | null
-          vida_util_estimada_anos?: string | null
+          vida_util_estimada_anos?: number | null
           zona?: string | null
         }
         Update: {
@@ -337,7 +337,7 @@ export type Database = {
           ha_plano_de_manutencao_do_imovel?: string | null
           id?: string
           id_caip?: string | null
-          idade_aparente_do_imovel?: string | null
+          idade_aparente_do_imovel?: number | null
           identidade_visual?: string | null
           iluminacao_externa?: string | null
           imagem_cofre?: string | null
@@ -400,7 +400,7 @@ export type Database = {
           updated_at?: string | null
           vestiario_para_nao_policiais?: string | null
           vestiario_para_policiais?: string | null
-          vida_util_estimada_anos?: string | null
+          vida_util_estimada_anos?: number | null
           zona?: string | null
         }
         Relationships: []
