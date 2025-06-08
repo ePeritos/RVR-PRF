@@ -1,6 +1,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { calculateRossHeidecke } from '@/utils/rossHeideckeCalculator';
 
 interface RVRReportData {
   id: string;
@@ -26,6 +27,7 @@ interface RVRReportData {
     bdi: number;
     dataReferencia?: string;
     fonteValorTerreno?: string;
+    padraoConstrutivo?: string;
     responsavelTecnico?: {
       id: string;
       nome_completo: string;
@@ -63,10 +65,10 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
   const areaBenfeitoria = data.areaConstruida || data.areaImovel || 0;
   const cubValor = data.parametros?.cubM2 || data.parametros?.cub; // SEM VALOR PADRÃO
   const bdiPercentual = data.parametros?.bdi; // SEM VALOR PADRÃO
-  const idadeAparente = data.idadeAparente || 15;
-  const vidaUtil = data.vidaUtil || 60;
+  const idadeAparente = data.idadeAparente; // SEM VALOR PADRÃO
+  const vidaUtil = data.vidaUtil; // SEM VALOR PADRÃO
+  const estadoConservacao = data.estadoConservacao; // SEM VALOR PADRÃO
   const fatorComercializacao = 1.0;
-  const coeficienteK = 0.25;
   
   console.log('RVRReportTemplate - Parâmetros recebidos (SEM valores padrão):', {
     valorUnitarioTerreno,
@@ -95,9 +97,27 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
   // Cálculos do Memorial USANDO os parâmetros do formulário
   const valorTerreno = areaTerreno * valorUnitarioTerreno;
   const custoRedicao = areaBenfeitoria * cubValor * (1 + (bdiPercentual / 100));
-  const idadePercentual = (idadeAparente / vidaUtil) * 100;
-  const depreciacao = custoRedicao * coeficienteK;
-  const valorBenfeitoria = custoRedicao - depreciacao;
+  
+  // Calcular depreciação usando Ross-Heidecke APENAS se dados estiverem disponíveis
+  let rossHeideckeResult;
+  let depreciacao = 0;
+  let valorBenfeitoria = custoRedicao;
+  let idadePercentual = 0;
+  let coeficienteK = 0;
+  
+  if (idadeAparente && vidaUtil && estadoConservacao) {
+    rossHeideckeResult = calculateRossHeidecke(
+      custoRedicao,
+      idadeAparente,
+      vidaUtil,
+      estadoConservacao
+    );
+    depreciacao = rossHeideckeResult.depreciacao;
+    valorBenfeitoria = rossHeideckeResult.valorDepreciado;
+    idadePercentual = rossHeideckeResult.idadePercentual;
+    coeficienteK = rossHeideckeResult.coeficiente;
+  }
+  
   const valorImovel = valorTerreno + valorBenfeitoria;
   const valorAdotado = valorImovel * fatorComercializacao;
 
@@ -247,9 +267,9 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
           <div><strong>Estrutura:</strong> Concreto armado</div>
           <div><strong>Vedação:</strong> Alvenaria de tijolos cerâmicos</div>
           <div><strong>Cobertura:</strong> Telhas cerâmicas</div>
-          <div><strong>Idade Aparente:</strong> {idadeAparente} anos</div>
-          <div><strong>Estado de Conservação:</strong> Bom</div>
-          <div><strong>Padrão Construtivo:</strong> Médio</div>
+          <div><strong>Idade Aparente:</strong> {idadeAparente ? `${idadeAparente} anos` : '[Não informado]'}</div>
+          <div><strong>Estado de Conservação:</strong> {estadoConservacao || '[Não informado]'}</div>
+          <div><strong>Padrão Construtivo:</strong> {data.parametros?.padraoConstrutivo || '[Não informado]'}</div>
         </div>
       </section>
 
@@ -323,8 +343,8 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
               
               <p><strong>Passo 2: Custo Unitário Básico (CUB/m²)</strong></p>
               <ul className="list-disc list-inside ml-4">
-                <li>Padrão Construtivo: Médio</li>
-                <li>Fonte: SINDUSCON/[UF]</li>
+                <li>Padrão Construtivo: {data.parametros?.padraoConstrutivo || '[Não informado]'}</li>
+                <li>Fonte: SINDUSCON/{uf}</li>
                 <li>Data-Base do CUB: {format(dataReferencia, 'MM/yyyy')}</li>
                 <li>Valor do CUB/m²: {cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m²</li>
               </ul>
@@ -365,7 +385,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
               
               <p><strong>Passo 4: Estado de Conservação (EC)</strong></p>
               <ul className="list-disc list-inside ml-4">
-                <li>EC: Bom</li>
+                <li>EC: {estadoConservacao || '[Não informado]'}</li>
               </ul>
               
               <p><strong>Passo 5: Identificação do Coeficiente de Depreciação (K)</strong></p>
