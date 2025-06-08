@@ -33,6 +33,9 @@ interface ResultRow {
   endereco?: string;
   rip?: string;
   matriculaImovel?: string;
+  estadoConservacao?: string;
+  idadeAparente?: number | null;
+  padraoConstrutivo?: string;
   parametros?: {
     cub: number;
     valorM2: number;
@@ -205,13 +208,13 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
                     {row.areaTerreno.toFixed(0)} m²
                   </td>
                   <td className="p-3 text-xs text-foreground text-center">
-                    {(row as any).idadeAparente !== null && (row as any).idadeAparente !== undefined ? `${(row as any).idadeAparente} anos` : '-'}
+                    {row.idadeAparente !== null && row.idadeAparente !== undefined ? `${row.idadeAparente} anos` : '-'}
                   </td>
                   <td className="p-3 text-xs text-foreground">
-                    {(row as any).estadoConservacao || '-'}
+                    {row.estadoConservacao || '-'}
                   </td>
                   <td className="p-3 text-xs text-foreground">
-                    {(row as any).padraoConstrutivo || '-'}
+                    {row.padraoConstrutivo || '-'}
                   </td>
                   <td className="p-3 text-xs text-foreground">
                     {row.valorBenfeitoria.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}

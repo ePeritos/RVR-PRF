@@ -99,7 +99,8 @@ const Index = () => {
       bdi: Number(parameters.bdi),
       dataReferencia: parameters.dataReferencia,
       fonteValorTerreno: parameters.fonteValorTerreno,
-      responsavelTecnico: parameters.responsavelTecnico
+      responsavelTecnico: parameters.responsavelTecnico,
+      padraoConstrutivo: parameters.padraoConstrutivo
     };
     
     console.log('PARÂMETROS FORÇADOS que serão usados nos cálculos:', PARAMETROS_FORMULARIO);
@@ -110,12 +111,12 @@ const Index = () => {
       .map(item => {
         console.log('Processando item:', item.nome_da_unidade);
         
-        // Get real data from dados_caip
+        // Get real data from dados_caip - manter valores nulos quando não existirem
         const areaConstruida = Number(item['area_construida_m2']) || 0;
         const areaTerreno = Number(item['area_do_terreno_m2']) || 0;
-        const idadeAparente = item['idade_aparente_do_imovel'] ? Number(item['idade_aparente_do_imovel']) : 15;
-        const vidaUtil = item['vida_util_estimada_anos'] ? Number(item['vida_util_estimada_anos']) : 80;
-        const estadoConservacao = item['estado_de_conservacao'] || 'BOM';
+        const idadeAparente = item['idade_aparente_do_imovel'] ? Number(item['idade_aparente_do_imovel']) : null;
+        const vidaUtil = item['vida_util_estimada_anos'] ? Number(item['vida_util_estimada_anos']) : null;
+        const estadoConservacao = item['estado_de_conservacao'] || null;
         
         // USAR PARÂMETROS FORÇADOS
         const valorM2 = PARAMETROS_FORMULARIO.valorM2;
@@ -139,12 +140,16 @@ const Index = () => {
           valorTerreno: `${areaTerreno} * ${valorM2} = ${valorTerreno}`
         });
         
-        // Ross-Heidecke depreciation calculation
+        // Ross-Heidecke depreciation calculation - usar valores padrão apenas para cálculo se forem nulos
+        const idadeParaCalculo = idadeAparente || 15;
+        const vidaUtilParaCalculo = vidaUtil || 80;
+        const estadoParaCalculo = estadoConservacao || 'BOM';
+        
         const rossHeideckeResult = calculateRossHeidecke(
           custoRedicao,
-          idadeAparente,
-          vidaUtil,
-          estadoConservacao
+          idadeParaCalculo,
+          vidaUtilParaCalculo,
+          estadoParaCalculo
         );
         
         const valorBenfeitoria = rossHeideckeResult.valorDepreciado;
@@ -182,10 +187,10 @@ const Index = () => {
           rip: item['rip'] || '',
           matriculaImovel: item['matricula_do_imovel'] || '',
           processoSei: item['processo_sei'] || '',
-          estadoConservacao: item['estado_de_conservacao'] || '',
-          idadeAparente: item['idade_aparente_do_imovel'] ? Number(item['idade_aparente_do_imovel']) : null,
-          vidaUtil,
-          padraoConstrutivo: item['tipo_de_imovel'] || '',
+          estadoConservacao: estadoConservacao,
+          idadeAparente: idadeAparente,
+          vidaUtil: vidaUtil,
+          padraoConstrutivo: PARAMETROS_FORMULARIO.padraoConstrutivo,
           idadePercentual: rossHeideckeResult.idadePercentual,
           coeficienteK: rossHeideckeResult.coeficiente,
           // GARANTIR que os parâmetros corretos sejam passados

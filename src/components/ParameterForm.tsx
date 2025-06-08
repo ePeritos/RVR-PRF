@@ -35,7 +35,8 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
     dataReferencia: new Date().toISOString().split('T')[0],
     fonteValorTerreno: 'Planta Genérica de Valores do Município',
     justificativaValores: 'Valores baseados em pesquisa de mercado local e dados oficiais do município.',
-    responsavelTecnicoId: ''
+    responsavelTecnicoId: '',
+    padraoConstrutivo: 'R8'
   });
 
   useEffect(() => {
@@ -181,6 +182,31 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
                   Nenhum responsável técnico cadastrado. Cadastre um responsável técnico primeiro.
                 </p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="padraoConstrutivo" className="text-sm font-medium">
+                Padrão Construtivo *
+              </Label>
+              <Select
+                value={parameters.padraoConstrutivo}
+                onValueChange={(value) => setParameters({...parameters, padraoConstrutivo: value})}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Selecione o padrão construtivo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="R1">R1 - Residencial Popular</SelectItem>
+                  <SelectItem value="R8">R8 - Residencial Normal</SelectItem>
+                  <SelectItem value="R16">R16 - Residencial Elevado</SelectItem>
+                  <SelectItem value="C8">C8 - Comercial Popular</SelectItem>
+                  <SelectItem value="C12">C12 - Comercial Normal</SelectItem>
+                  <SelectItem value="C16">C16 - Comercial Elevado</SelectItem>
+                  <SelectItem value="I">I - Industrial</SelectItem>
+                  <SelectItem value="IG">IG - Galpão Industrial</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Baseado nos padrões ABNT</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

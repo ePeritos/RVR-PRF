@@ -28,8 +28,9 @@ export interface RVRReportData {
   matriculaImovel?: string;
   processoSei?: string;
   estadoConservacao?: string;
-  idadeAparente?: number;
-  vidaUtil?: number;
+  idadeAparente?: number | null;
+  vidaUtil?: number | null;
+  padraoConstrutivo?: string;
   idadePercentual?: number;
   coeficienteK?: number;
   custoRedicao?: number;
@@ -51,6 +52,7 @@ export interface RVRReportData {
     bdi: number;
     dataReferencia?: string;
     fonteValorTerreno?: string;
+    padraoConstrutivo?: string;
     responsavelTecnico?: {
       id: string;
       nome_completo: string;
