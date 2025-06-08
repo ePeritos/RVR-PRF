@@ -82,7 +82,7 @@ function mapEstadoToCode(estadoConservacao: string): string {
   if (estado.includes('ENTRE REPAROS IMPORTANTES E S/ VALOR') || estado === 'H') return 'H';
   
   // Mapeamentos alternativos para compatibilidade
-  if (estado.includes('BOM')) return 'B';
+  if (estado.includes('BOM')) return 'A'; // "Bom" = "Novo" na escala Ross-Heidecke
   if (estado.includes('MÉDIO') || estado.includes('MEDIO')) return 'C';
   if (estado.includes('RUIM')) return 'E';
   if (estado.includes('PÉSSIMO') || estado.includes('PESSIMO')) return 'G';
@@ -147,6 +147,17 @@ export function calculateRossHeidecke(
   
   // Obter percentual de depreciação da tabela
   const percentualDepreciacao = interpolateDepreciation(idadePercentual, estadoCode);
+  
+  // Log para debug
+  console.log('Ross-Heidecke Debug:', {
+    idadeAparente,
+    vidaUtil,
+    idadePercentual: idadePercentual.toFixed(2),
+    estadoConservacao,
+    estadoCode,
+    percentualDepreciacao: percentualDepreciacao.toFixed(2),
+    custoRedicao
+  });
   
   // Converter percentual para coeficiente (0-1)
   const coeficiente = percentualDepreciacao / 100;
