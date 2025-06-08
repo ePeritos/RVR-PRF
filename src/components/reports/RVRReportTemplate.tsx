@@ -210,9 +210,9 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
                 <td className="border border-gray-300 p-2">Fator de Comercialização</td>
                 <td className="border border-gray-300 p-2 text-right">{fatorComercializacao.toFixed(2)}</td>
               </tr>
-              <tr className="bg-blue-50">
-                <td className="border border-gray-300 p-2 font-bold text-blue-800">VALOR ADOTADO</td>
-                <td className="border border-gray-300 p-2 text-right font-bold text-blue-800 text-base">
+              <tr className="bg-green-50">
+                <td className="border border-gray-300 p-2 font-bold text-green-800">VALOR ADOTADO</td>
+                <td className="border border-gray-300 p-2 text-right font-bold text-green-800 text-base">
                   {valorAdotado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </td>
               </tr>
@@ -465,15 +465,13 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
             <div>{format(currentDate, 'dd \'de\' MMMM \'de\' yyyy', { locale: ptBR })}</div>
           </div>
           
-          <div className="mt-8 text-center">
+           <div className="mt-8 text-center mb-12">
             <div className="border-t border-black w-64 mx-auto mb-2"></div>
             <div><strong>{nomeResponsavel}</strong></div>
             <div>{formacaoResponsavel}</div>
             <div>{registroResponsavel}</div>
           </div>             
         </div>
-
-        
       </section>
       
 
@@ -481,7 +479,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
       <div className="border-t border-gray-400 pt-4 mt-8">
         <div className="text-center text-xs text-gray-600">
           <p>Relatório de Valor de Referência (RVR) nº {reportNumber}</p>
-          <p>Polícia Rodoviária Federal - Superintendência Regional no Estado de {uf}</p>
+          <p>Polícia Rodoviária Federal</p>
           <p>Gerado automaticamente em {format(currentDate, 'dd/MM/yyyy \'às\' HH:mm', { locale: ptBR })}</p>
         </div>
       </div>
