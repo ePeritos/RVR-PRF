@@ -174,10 +174,12 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
                 <th className="p-3 text-left text-xs font-medium text-foreground">Tipo</th>
                 <th className="p-3 text-left text-xs font-medium text-foreground">Área Const.</th>
                 <th className="p-3 text-left text-xs font-medium text-foreground">Área Terreno</th>
+                <th className="p-3 text-left text-xs font-medium text-foreground">Idade Aparente</th>
+                <th className="p-3 text-left text-xs font-medium text-foreground">Estado de Conservação</th>
+                <th className="p-3 text-left text-xs font-medium text-foreground">Padrão Construtivo</th>
                 <th className="p-3 text-left text-xs font-medium text-foreground">Valor Benfeitoria</th>
                 <th className="p-3 text-left text-xs font-medium text-foreground">Valor Terreno</th>
                 <th className="p-3 text-left text-xs font-medium text-foreground">Depreciação</th>
-                <th className="p-3 text-left text-xs font-medium text-foreground">Valor Depreciado</th>
                 <th className="p-3 text-left text-xs font-medium text-foreground">RVR Final</th>
                 <th className="p-3 text-left text-xs font-medium text-foreground">Ações</th>
               </tr>
@@ -202,6 +204,15 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
                   <td className="p-3 text-xs text-foreground text-center">
                     {row.areaTerreno.toFixed(0)} m²
                   </td>
+                  <td className="p-3 text-xs text-foreground text-center">
+                    {(row as any).idadeAparente !== null && (row as any).idadeAparente !== undefined ? `${(row as any).idadeAparente} anos` : '-'}
+                  </td>
+                  <td className="p-3 text-xs text-foreground">
+                    {(row as any).estadoConservacao || '-'}
+                  </td>
+                  <td className="p-3 text-xs text-foreground">
+                    {(row as any).padraoConstrutivo || '-'}
+                  </td>
                   <td className="p-3 text-xs text-foreground">
                     {row.valorBenfeitoria.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}
                   </td>
@@ -213,9 +224,6 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
                     <span className="text-xs">
                       {row.valorDepreciacao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}
                     </span>
-                  </td>
-                  <td className="p-3 text-xs font-medium text-foreground">
-                    {row.valorDepreciado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}
                   </td>
                   <td className="p-3 text-xs font-bold text-green-600">
                     {row.valorAvaliado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 })}

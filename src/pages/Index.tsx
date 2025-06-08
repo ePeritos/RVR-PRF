@@ -113,8 +113,8 @@ const Index = () => {
         // Get real data from dados_caip
         const areaConstruida = Number(item['area_construida_m2']) || 0;
         const areaTerreno = Number(item['area_do_terreno_m2']) || 0;
-        const idadeAparente = Number(item['idade_aparente_do_imovel']) || 15;
-        const vidaUtil = Number(item['vida_util_estimada_anos']) || 80;
+        const idadeAparente = item['idade_aparente_do_imovel'] ? Number(item['idade_aparente_do_imovel']) : 15;
+        const vidaUtil = item['vida_util_estimada_anos'] ? Number(item['vida_util_estimada_anos']) : 80;
         const estadoConservacao = item['estado_de_conservacao'] || 'BOM';
         
         // USAR PARÂMETROS FORÇADOS
@@ -182,9 +182,10 @@ const Index = () => {
           rip: item['rip'] || '',
           matriculaImovel: item['matricula_do_imovel'] || '',
           processoSei: item['processo_sei'] || '',
-          estadoConservacao,
-          idadeAparente,
+          estadoConservacao: item['estado_de_conservacao'] || '',
+          idadeAparente: item['idade_aparente_do_imovel'] ? Number(item['idade_aparente_do_imovel']) : null,
           vidaUtil,
+          padraoConstrutivo: item['tipo_de_imovel'] || '',
           idadePercentual: rossHeideckeResult.idadePercentual,
           coeficienteK: rossHeideckeResult.coeficiente,
           // GARANTIR que os parâmetros corretos sejam passados
