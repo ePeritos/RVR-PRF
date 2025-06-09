@@ -131,9 +131,9 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
                 <p className="text-xs text-muted-foreground">{item.tipo_de_unidade}</p>
                 <p className="text-xs font-medium">Área Construída: {item.area_construida_m2 || 0} m²</p>
                 <p className="text-xs font-medium">Área Terreno: {item.area_do_terreno_m2 || 0} m²</p>
-                <p className="text-xs text-green-600">
-                  Benfeitoria: R$ {((item.area_construida_m2 || 0) * parameters.cubM2).toLocaleString('pt-BR')}
-                </p>
+                <p className="text-xs text-muted-foreground">Idade Aparente: {item.idade_aparente_do_imovel || 'Não informado'} anos</p>
+                <p className="text-xs text-muted-foreground">Estado de Conservação: {item.estado_de_conservacao || 'Não informado'}</p>
+                <p className="text-xs text-muted-foreground">Vida Útil: {item.vida_util_estimada_anos || 'Não informado'} anos</p>
               </div>
             ))}
           </div>
