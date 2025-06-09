@@ -30,42 +30,44 @@ export const UserProfile = () => {
   });
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [unidadesGestoras, setUnidadesGestoras] = useState<string[]>([]);
-  const [loadingUnidades, setLoadingUnidades] = useState(false);
+  const unidadesGestoras = [
+    'SEDE NACIONAL/DF',
+    'UNIPRF/DF',
+    'SPRF/AC',
+    'SPRF/AL',
+    'SPRF/AM',
+    'SPRF/AP',
+    'SPRF/BA',
+    'SPRF/CE',
+    'SPRF/DF',
+    'SPRF/ES',
+    'SPRF/GO',
+    'SPRF/MA',
+    'SPRF/MG',
+    'SPRF/MS',
+    'SPRF/MT',
+    'SPRF/PA',
+    'SPRF/PB',
+    'SPRF/PE',
+    'SPRF/PI',
+    'SPRF/PR',
+    'SPRF/RJ',
+    'SPRF/RN',
+    'SPRF/RO',
+    'SPRF/RR',
+    'SPRF/RS',
+    'SPRF/SC',
+    'SPRF/SE',
+    'SPRF/SP',
+    'SPRF/TO'
+  ];
   const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
       fetchProfile();
-      fetchUnidadesGestoras();
     }
   }, [user]);
-
-  const fetchUnidadesGestoras = async () => {
-    try {
-      setLoadingUnidades(true);
-      const { data, error } = await supabase
-        .from('dados_caip')
-        .select('unidade_gestora')
-        .not('unidade_gestora', 'is', null)
-        .order('unidade_gestora');
-
-      if (error) throw error;
-
-      // Extrair valores únicos e filtrar vazios
-      const unidadesUnicas = [...new Set(
-        data
-          .map(item => item.unidade_gestora)
-          .filter(unidade => unidade && unidade.trim() !== '')
-      )].sort();
-
-      setUnidadesGestoras(unidadesUnicas);
-    } catch (error: any) {
-      console.error('Erro ao carregar unidades gestoras:', error);
-    } finally {
-      setLoadingUnidades(false);
-    }
-  };
 
   const fetchProfile = async () => {
     try {
@@ -173,7 +175,7 @@ export const UserProfile = () => {
                 onValueChange={(value) => setProfile(prev => ({ ...prev, unidade_lotacao: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={loadingUnidades ? "Carregando..." : "Selecione uma unidade"} />
+                  <SelectValue placeholder="Selecione uma unidade" />
                 </SelectTrigger>
                 <SelectContent>
                   {unidadesGestoras.map((unidade) => (
