@@ -18,17 +18,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('useAuth - Configurando listener de auth state...');
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('useAuth - Auth state changed:', event, 'Session:', session);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Force re-render after auth change
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log('useAuth - Usuário logado, forçando navegação...');
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 100);
+        }
       }
     );
 
     // Check for existing session
+    console.log('useAuth - Verificando sessão existente...');
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('useAuth - Sessão existente encontrada:', session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);

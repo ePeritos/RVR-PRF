@@ -59,7 +59,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
+  console.log('PublicRoute - user:', user, 'loading:', loading);
+  
   if (loading) {
+    console.log('PublicRoute - Ainda carregando auth state...');
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -71,9 +74,11 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (user) {
+    console.log('PublicRoute - Usuário encontrado, redirecionando para dashboard');
     return <Navigate to="/" replace />;
   }
   
+  console.log('PublicRoute - Nenhum usuário, mostrando página de auth');
   return <>{children}</>;
 };
 
