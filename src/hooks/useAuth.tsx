@@ -24,17 +24,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('useAuth - Auth state changed:', event, 'Session:', session);
+        console.log('useAuth - User from session:', session?.user);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
-        // Force re-render after auth change
-        if (event === 'SIGNED_IN' && session?.user) {
-          console.log('useAuth - Usuário logado, forçando navegação...');
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 100);
-        }
       }
     );
 
