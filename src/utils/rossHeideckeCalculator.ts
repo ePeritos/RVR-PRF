@@ -148,15 +148,17 @@ export function calculateRossHeidecke(
   // Obter percentual de depreciação da tabela
   const percentualDepreciacao = interpolateDepreciation(idadePercentual, estadoCode);
   
-  // Log para debug
-  console.log('Ross-Heidecke Debug:', {
+  // Log detalhado para debug
+  console.log('Ross-Heidecke Debug COMPLETO:', {
+    custoRedicao,
     idadeAparente,
     vidaUtil,
     idadePercentual: idadePercentual.toFixed(2),
-    estadoConservacao,
-    estadoCode,
+    estadoConservacaoOriginal: estadoConservacao,
+    estadoConservacaoProcessado: estadoConservacao.toUpperCase().trim(),
+    estadoCodeMapeado: estadoCode,
     percentualDepreciacao: percentualDepreciacao.toFixed(2),
-    custoRedicao
+    coeficienteFinal: (percentualDepreciacao / 100).toFixed(4)
   });
   
   // Converter percentual para coeficiente (0-1)
