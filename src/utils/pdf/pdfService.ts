@@ -1,7 +1,7 @@
 import html2canvas from 'html2canvas';
 import { createRoot } from 'react-dom/client';
 import { PDFCreator } from './pdfCreator';
-import { RVRReportTemplate } from '../../components/reports/RVRReportTemplate';
+import { RVRReportPDFTemplate } from '../../components/reports/RVRReportPDFTemplate';
 import React from 'react';
 
 interface PDFGenerationOptions {
@@ -44,11 +44,11 @@ export class PDFService {
       // Cria o root do React para renderizar o componente
       const root = createRoot(container);
       
-      console.log('3. Renderizando componente RVRReportTemplate...');
-      // Renderiza o RVRReportTemplate (mesmo componente da visualização)
+      console.log('3. Renderizando componente RVRReportPDFTemplate...');
+      // Renderiza o RVRReportPDFTemplate (versão otimizada para PDF)
       await new Promise<void>((resolve, reject) => {
         try {
-          root.render(React.createElement(RVRReportTemplate, { 
+          root.render(React.createElement(RVRReportPDFTemplate, { 
             data, 
             className: 'print:text-black' 
           }));
