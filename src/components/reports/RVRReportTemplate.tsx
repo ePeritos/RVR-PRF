@@ -77,6 +77,13 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
     fonte: data.parametros
   });
 
+  console.log('RVRReportTemplate - Dados Ross-Heidecke:', {
+    idadeAparente,
+    vidaUtil,
+    estadoConservacao: data.estadoConservacao,
+    estadoConservacaoOriginal: data.estadoConservacao
+  });
+
   // Validar se os parâmetros obrigatórios estão presentes
   if (!valorUnitarioTerreno || !cubValor || bdiPercentual === undefined) {
     console.error('ERRO: Parâmetros obrigatórios não encontrados no RVRReportTemplate:', {
@@ -106,12 +113,22 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
   let coeficienteK = 0;
   
   if (idadeAparente && vidaUtil && estadoConservacao) {
+    console.log('Chamando calculateRossHeidecke com:', {
+      custoRedicao,
+      idadeAparente,
+      vidaUtil,
+      estadoConservacao
+    });
+    
     rossHeideckeResult = calculateRossHeidecke(
       custoRedicao,
       idadeAparente,
       vidaUtil,
       estadoConservacao
     );
+    
+    console.log('Resultado Ross-Heidecke:', rossHeideckeResult);
+    
     depreciacao = rossHeideckeResult.depreciacao;
     valorBenfeitoria = rossHeideckeResult.valorDepreciado;
     idadePercentual = rossHeideckeResult.idadePercentual;
@@ -351,12 +368,12 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
               
               <p><strong>Passo 3: Benefícios e Despesas Indiretas (BDI)</strong></p>
               <ul className="list-disc list-inside ml-4">
-                <li>Percentual BDI: {(bdiPercentual/100).toFixed(2)} ({bdiPercentual}%)</li>
+                <li>Percentual BDI: {bdiPercentual.toFixed(0)}%</li>
               </ul>
               
               <p><strong>Passo 4: Cálculo do Custo de Reedição (CR)</strong></p>
               <ul className="list-disc list-inside ml-4">
-                <li>Cálculo: CR = {areaBenfeitoria.toLocaleString('pt-BR')} m² × {cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² × (1 + {bdiPercentual/100})</li>
+                <li>Cálculo: CR = {areaBenfeitoria.toLocaleString('pt-BR')} m² × {cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² × (1 + {(bdiPercentual/100).toFixed(2)})</li>
                 <li>CR = {areaBenfeitoria.toLocaleString('pt-BR')} × {cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} × {(1 + bdiPercentual/100).toFixed(2)}</li>
                 <li><strong>Resultado CR: {custoRedicao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></li>
               </ul>
