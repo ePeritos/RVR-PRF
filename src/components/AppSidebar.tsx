@@ -27,16 +27,18 @@ export function AppSidebar() {
   const { signOut } = useAuth();
   const currentPath = location.pathname;
 
+  console.log('AppSidebar - Current path:', currentPath, 'Sidebar state:', state);
+
   const isActive = (path: string) => currentPath === path;
-  const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-muted text-primary font-medium" : "hover:bg-muted/50";
 
   return (
     <Sidebar
       className={state === "collapsed" ? "w-14" : "w-60"}
       collapsible="icon"
     >
-      <SidebarTrigger className="m-2 self-end" />
+      <div className="p-2">
+        <SidebarTrigger />
+      </div>
 
       <SidebarContent>
         <SidebarGroup>
@@ -47,7 +49,15 @@ export function AppSidebar() {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className={getNavCls}>
+                    <NavLink 
+                      to={item.url} 
+                      end 
+                      className={({ isActive }) =>
+                        isActive 
+                          ? "bg-muted text-primary font-medium flex items-center w-full px-3 py-2 rounded-md" 
+                          : "hover:bg-muted/50 flex items-center w-full px-3 py-2 rounded-md"
+                      }
+                    >
                       <item.icon className="mr-2 h-4 w-4" />
                       {state !== "collapsed" && <span>{item.title}</span>}
                     </NavLink>
@@ -58,7 +68,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
+        <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -66,7 +76,7 @@ export function AppSidebar() {
                   <Button
                     variant="ghost"
                     onClick={signOut}
-                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     {state !== "collapsed" && <span>Sair</span>}

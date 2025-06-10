@@ -19,6 +19,8 @@ const queryClient = new QueryClient();
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
+  console.log('ProtectedRoute - user:', user, 'loading:', loading);
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -31,18 +33,21 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user) {
+    console.log('ProtectedRoute - Redirecionando para /auth - usuário não encontrado');
     return <Navigate to="/auth" replace />;
   }
+
+  console.log('ProtectedRoute - Usuário autenticado, renderizando com sidebar');
   
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
-        <div className="flex-1">
-          <header className="h-12 flex items-center border-b bg-background px-4">
+        <div className="flex-1 flex flex-col">
+          <header className="h-12 flex items-center border-b bg-background px-4 flex-shrink-0">
             <SidebarTrigger />
           </header>
-          <main className="flex-1">
+          <main className="flex-1 overflow-auto">
             {children}
           </main>
         </div>
