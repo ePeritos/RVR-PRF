@@ -390,7 +390,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
               
               <p><strong>Passo 5: Identificação do Coeficiente de Depreciação (K)</strong></p>
               <ul className="list-disc list-inside ml-4">
-                <li>K = {coeficienteK.toFixed(2)} (conforme Tabela de Ross-Heidecke para IP = {idadePercentual.toFixed(2)}% e EC = Bom)</li>
+                <li>K = {coeficienteK.toFixed(3)} (conforme Tabela de Ross-Heidecke para IP = {idadePercentual.toFixed(2)}% e EC = {estadoConservacao || '[Não informado]'})</li>
                 <li>Fonte do Coeficiente K: Tabela de Ross-Heidecke</li>
               </ul>
               
