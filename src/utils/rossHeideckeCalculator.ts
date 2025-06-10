@@ -77,9 +77,9 @@ function mapEstadoToCode(estadoConservacao: string): string {
   if (estado.includes('ENTRE REGULAR E REPAROS SIMPLES') || estado === 'D') return 'D';
   if (estado.includes('ENTRE REPAROS SIMPLES E IMPORTANTES') || estado === 'F') return 'F';
   if (estado.includes('ENTRE REPAROS IMPORTANTES E S/ VALOR') || estado === 'H') return 'H';
-  if (estado.includes('REGULAR') || estado === 'C') return 'C';
   if (estado.includes('REPAROS SIMPLES') || estado === 'E') return 'E';
   if (estado.includes('REPAROS IMPORTANTES') || estado === 'G') return 'G';
+  if (estado.includes('REGULAR') || estado === 'C') return 'C';
   
   // Mapeamentos alternativos para compatibilidade
   if (estado.includes('BOM')) return 'A'; // "Bom" = "Novo" na escala Ross-Heidecke
