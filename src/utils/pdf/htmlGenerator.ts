@@ -37,8 +37,23 @@ export class HTMLGenerator {
     const idadeAparente = data.idadeAparente || 15;
     const vidaUtil = data.vidaUtil || 80;
     const estadoConservacao = data.estadoConservacao || 'BOM';
-    const coeficienteK = data.coeficienteK || 0.25;
-    const idadePercentual = data.idadePercentual || 18.75;
+    
+    // Calcular Ross-Heidecke SEMPRE usando a função oficial
+    let coeficienteK = 0.25;
+    let idadePercentual = 18.75;
+    if (idadeAparente && vidaUtil && estadoConservacao && cubValor) {
+      const { calculateRossHeidecke } = require('../../utils/rossHeideckeCalculator');
+      const custoTemporario = areaConstruida * cubValor * (1 + (bdiPercentual / 100));
+      const rossResult = calculateRossHeidecke(custoTemporario, idadeAparente, vidaUtil, estadoConservacao);
+      coeficienteK = rossResult.coeficiente;
+      idadePercentual = rossResult.idadePercentual;
+      console.log('HTMLGenerator - Ross-Heidecke calculado:', {
+        estadoConservacao,
+        coeficienteK,
+        idadePercentual,
+        custoTemporario
+      });
+    }
     
     // Usar os valores calculados reais do sistema (que já usam os parâmetros corretos)
     const valorTerreno = data.valorTerreno || (areaTerreno * valorUnitarioTerreno);
@@ -91,6 +106,7 @@ export class HTMLGenerator {
     const registroResponsavel = responsavelTecnico ? 
       `${responsavelTecnico.conselho}/${responsavelTecnico.uf} ${responsavelTecnico.numero_registro}` : 
       'CREA/[UF] [Número]';
+    const formacaoResponsavel = responsavelTecnico?.formacao || 'Engenheiro Civil';
     
     return `
       <div style="width: 100%; max-width: 210mm; font-family: Arial, sans-serif; color: #000; background: white; padding: 20mm; box-sizing: border-box; line-height: 1.4; font-size: 14px;">
@@ -406,7 +422,7 @@ export class HTMLGenerator {
             <div style="text-align: center; margin-top: 40px;">
               <div style="border-top: 1px solid #000; width: 300px; margin: 0 auto 10px;">
                 <p style="font-size: 12px; margin: 10px 0 5px; font-weight: bold;">${nomeResponsavel}</p>
-                <p style="font-size: 12px; margin: 0;">${responsavelTecnico?.formacao || 'Engenheiro Civil'}</p>
+                <p style="font-size: 12px; margin: 0;">${formacaoResponsavel}</p>
                 <p style="font-size: 12px; margin: 0;">${registroResponsavel}</p>
               </div>
             </div>
