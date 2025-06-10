@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ThemeProvider } from '@/hooks/useTheme';
 import { Header } from '@/components/Header';
 import { StepIndicator } from '@/components/StepIndicator';
 import { StepContent } from '@/components/StepContent';
@@ -11,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateRossHeidecke } from '@/utils/rossHeideckeCalculator';
 
-const Index = () => {
+const RVR = () => {
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -296,74 +295,68 @@ const Index = () => {
   // Show loading state
   if (loading) {
     return (
-      <ThemeProvider>
-        <div className="min-h-screen bg-background flex items-center justify-center px-4">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-lg">Carregando dados...</p>
-          </div>
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-lg">Carregando dados...</p>
         </div>
-      </ThemeProvider>
+      </div>
     );
   }
 
   // Show error state
   if (error) {
     return (
-      <ThemeProvider>
-        <div className="min-h-screen bg-background flex items-center justify-center px-4">
-          <div className="text-center">
-            <p className="text-red-500 text-lg">Erro ao carregar dados: {error}</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Verifique se a tabela dados_caip foi criada corretamente no Supabase.
-            </p>
-          </div>
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center">
+          <p className="text-red-500 text-lg">Erro ao carregar dados: {error}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Verifique se a tabela dados_caip foi criada corretamente no Supabase.
+          </p>
         </div>
-      </ThemeProvider>
+      </div>
     );
   }
 
   return (
-    <ThemeProvider>
-      <div className="min-h-screen bg-background">
-        <Header />
-        
-        <main className="container mx-auto px-2 sm:px-4 py-4">
-          <div className="mb-4">
-            <StepIndicator currentStep={currentStep} totalSteps={4} />
-          </div>
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <main className="container mx-auto px-2 sm:px-4 py-4">
+        <div className="mb-4">
+          <StepIndicator currentStep={currentStep} totalSteps={4} />
+        </div>
 
-          <StepContent
-            currentStep={currentStep}
-            uploadedFile={uploadedFile}
-            onFileUpload={handleFileUpload}
-            onDataLoaded={handleDataLoaded}
-            filteredData={filteredData.length > 0 ? filteredData : supabaseData}
-            onFilterChange={handleFilterChange}
-            selectedItems={selectedItems}
-            onSelectionChange={setSelectedItems}
-            onParameterSubmit={handleParameterSubmit}
-            results={results}
-            onViewPDF={handleViewPDF}
-            onDownloadPDF={handleDownloadPDF}
-            currentParameters={currentParameters}
-            canProceed={canProceed()}
-            onNextStep={nextStep}
-            onPrevStep={prevStep}
-            onNewEvaluation={handleNewEvaluation}
-          />
+        <StepContent
+          currentStep={currentStep}
+          uploadedFile={uploadedFile}
+          onFileUpload={handleFileUpload}
+          onDataLoaded={handleDataLoaded}
+          filteredData={filteredData.length > 0 ? filteredData : supabaseData}
+          onFilterChange={handleFilterChange}
+          selectedItems={selectedItems}
+          onSelectionChange={setSelectedItems}
+          onParameterSubmit={handleParameterSubmit}
+          results={results}
+          onViewPDF={handleViewPDF}
+          onDownloadPDF={handleDownloadPDF}
+          currentParameters={currentParameters}
+          canProceed={canProceed()}
+          onNextStep={nextStep}
+          onPrevStep={prevStep}
+          onNewEvaluation={handleNewEvaluation}
+        />
 
-          <NavigationButtons
-            currentStep={currentStep}
-            canProceed={canProceed()}
-            onNextStep={nextStep}
-            onPrevStep={prevStep}
-            onNewEvaluation={handleNewEvaluation}
-          />
-        </main>
-      </div>
-    </ThemeProvider>
+        <NavigationButtons
+          currentStep={currentStep}
+          canProceed={canProceed()}
+          onNextStep={nextStep}
+          onPrevStep={prevStep}
+          onNewEvaluation={handleNewEvaluation}
+        />
+      </main>
+    </div>
   );
 };
 
-export default Index;
+export default RVR;
