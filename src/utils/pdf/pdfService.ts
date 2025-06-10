@@ -1,8 +1,8 @@
-
 import html2canvas from 'html2canvas';
-import { RVRReportData } from './types';
-import { HTMLGenerator } from './htmlGenerator';
+import { createRoot } from 'react-dom/client';
 import { PDFCreator } from './pdfCreator';
+import { RVRReportTemplate } from '../../components/reports/RVRReportTemplate';
+import React from 'react';
 
 interface PDFGenerationOptions {
   filename?: string;
@@ -20,21 +20,39 @@ export class PDFService {
     return PDFService.instance;
   }
 
-  async generateFromData(data: RVRReportData): Promise<void> {
+  async generateFromData(data: any): Promise<void> {
     console.log('Iniciando geração de PDF para:', data.nome);
     
     // Cria um container temporário VISÍVEL para garantir renderização
-    const container = HTMLGenerator.createContainer();
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '210mm';
+    container.style.backgroundColor = 'white';
+    container.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+    container.style.fontSize = '12px';
+    container.style.lineHeight = '1.4';
     
     try {
       // Adiciona ao DOM
       document.body.appendChild(container);
 
-      // Cria o conteúdo do relatório
-      const reportContent = HTMLGenerator.createReportHTML(data);
-      container.innerHTML = reportContent;
+      // Cria o root do React para renderizar o componente
+      const root = createRoot(container);
+      
+      // Renderiza o RVRReportTemplate (mesmo componente da visualização)
+      await new Promise<void>((resolve) => {
+        root.render(React.createElement(RVRReportTemplate, { 
+          data, 
+          className: 'print:text-black' 
+        }));
+        
+        // Aguarda a renderização
+        setTimeout(resolve, 2000);
+      });
 
-      console.log('Conteúdo HTML criado, aguardando renderização...');
+      console.log('Componente React renderizado, aguardando captura...');
       
       // Gera o canvas a partir do elemento
       const canvas = await PDFCreator.generateCanvasFromElement(container);
@@ -44,6 +62,9 @@ export class PDFService {
       
       // Cria e salva o PDF
       await PDFCreator.createPDFFromCanvas(canvas, filename);
+      
+      // Limpa o root do React
+      root.unmount();
       
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
