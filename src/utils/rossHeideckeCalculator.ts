@@ -158,7 +158,9 @@ export function calculateRossHeidecke(
     estadoConservacaoProcessado: estadoConservacao.toUpperCase().trim(),
     estadoCodeMapeado: estadoCode,
     percentualDepreciacao: percentualDepreciacao.toFixed(2),
-    coeficienteFinal: (percentualDepreciacao / 100).toFixed(4)
+    coeficienteFinal: (percentualDepreciacao / 100).toFixed(4),
+    valorTabela60D: ROSS_HEIDECKE_TABLE[60]['D'],
+    valorTabela60C: ROSS_HEIDECKE_TABLE[60]['C']
   });
   
   // Converter percentual para coeficiente (0-1)

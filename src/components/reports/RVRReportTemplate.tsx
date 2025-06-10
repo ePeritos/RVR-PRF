@@ -2,6 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { calculateRossHeidecke } from '@/utils/rossHeideckeCalculator';
+import { useAuth } from '@/hooks/useAuth';
 
 interface RVRReportData {
   id: string;
@@ -56,6 +57,7 @@ interface RVRReportTemplateProps {
 }
 
 export function RVRReportTemplate({ data, className = "" }: RVRReportTemplateProps) {
+  const { user } = useAuth();
   const currentDate = new Date();
   const reportNumber = `${data.id}/2025`;
   
@@ -146,7 +148,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
 
   // Dados do responsável técnico
   const responsavelTecnico = data.parametros?.responsavelTecnico || data.responsavelTecnico;
-  const nomeResponsavel = responsavelTecnico?.nome_completo || '[Nome do Responsável Técnico]';
+  const nomeResponsavel = responsavelTecnico?.nome_completo || user?.user_metadata?.full_name || '[Nome do Responsável Técnico]';
   const registroResponsavel = responsavelTecnico ? 
     `${responsavelTecnico.conselho}/${responsavelTecnico.uf} ${responsavelTecnico.numero_registro}` : 
     'CREA/[UF] [Número]';
@@ -482,18 +484,18 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
             <div>{format(currentDate, 'dd \'de\' MMMM \'de\' yyyy', { locale: ptBR })}</div>
           </div>
           
-           <div className="mt-8 text-center mb-12">
+           <div className="mt-8 text-center mb-16">
             <div className="border-t border-black w-64 mx-auto mb-2"></div>
             <div><strong>{nomeResponsavel}</strong></div>
             <div>{formacaoResponsavel}</div>
             <div>{registroResponsavel}</div>
-          </div>             
+          </div>
         </div>
       </section>
       
 
       {/* Rodapé */}
-      <div className="border-t border-gray-400 pt-4 mt-8">
+      <div className="border-t border-gray-400 pt-4 mt-12">
         <div className="text-center text-xs text-gray-600">
           <p>Relatório de Valor de Referência (RVR) nº {reportNumber}</p>
           <p>Polícia Rodoviária Federal</p>
