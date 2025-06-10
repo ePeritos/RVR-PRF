@@ -1,10 +1,9 @@
 
 import { useState } from 'react';
-import { Download, Eye, FileText } from 'lucide-react';
+import { Eye, FileText } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RVRReportViewer } from './reports/RVRReportViewer';
-import { generatePDF } from '@/utils/pdfGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -58,7 +57,7 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
   const { user } = useAuth();
   const [selectedReport, setSelectedReport] = useState<ResultRow | null>(null);
   const [isReportViewerOpen, setIsReportViewerOpen] = useState(false);
-  const [isDownloadingPDF, setIsDownloadingPDF] = useState<string | null>(null);
+  
   const [userProfile, setUserProfile] = useState<any>(null);
   const { toast } = useToast();
 
@@ -84,11 +83,6 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
     }
   };
 
-  const getDiferencaColor = (valor: number) => {
-    if (valor > 0) return 'text-green-600 dark:text-green-400';
-    if (valor < 0) return 'text-red-600 dark:text-red-400';
-    return 'text-muted-foreground';
-  };
 
   const handleViewReport = async (result: ResultRow) => {
     const profile = await fetchUserProfile();
@@ -109,44 +103,6 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
     setIsReportViewerOpen(true);
   };
 
-  const handleDownloadReport = async (result: ResultRow) => {
-    setIsDownloadingPDF(result.id);
-    
-    try {
-      const profile = await fetchUserProfile();
-      
-      const reportData = {
-        ...result,
-        parametros,
-        responsavelTecnico: profile ? {
-          nome_completo: profile.nome_completo,
-          cargo: profile.cargo,
-          matricula: profile.matricula,
-          unidade_lotacao: profile.unidade_lotacao
-        } : undefined
-      };
-      
-      console.log('Iniciando download direto do PDF para:', reportData.nome);
-      console.log('Dados do relatório:', reportData);
-      
-      // Usa o novo serviço de PDF que não depende de elementos no DOM
-      await generatePDF(reportData);
-      
-      toast({
-        title: "PDF Gerado",
-        description: "O relatório RVR foi baixado com sucesso.",
-      });
-    } catch (error) {
-      console.error('Erro ao baixar PDF:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao gerar o PDF. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDownloadingPDF(null);
-    }
-  };
 
   const handleCloseReportViewer = () => {
     setIsReportViewerOpen(false);
@@ -241,16 +197,6 @@ export function ResultsTable({ results, onViewPDF, onDownloadPDF, parametros }: 
                         title="Visualizar Relatório RVR"
                       >
                         <Eye className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDownloadReport(row)}
-                        disabled={isDownloadingPDF === row.id}
-                        className="hover-scale h-8 w-8 p-0"
-                        title="Baixar Relatório RVR"
-                      >
-                        <Download className="h-3 w-3" />
                       </Button>
                     </div>
                   </td>

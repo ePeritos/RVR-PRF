@@ -143,7 +143,7 @@ const Index = () => {
         // Ross-Heidecke depreciation calculation - usar valores padrão apenas para cálculo se forem nulos
         const idadeParaCalculo = idadeAparente || 15;
         const vidaUtilParaCalculo = vidaUtil || 80;
-        const estadoParaCalculo = estadoConservacao || 'BOM';
+        const estadoParaCalculo = estadoConservacao || 'REGULAR'; // Default para REGULAR (C) em vez de BOM
         
         const rossHeideckeResult = calculateRossHeidecke(
           custoRedicao,
