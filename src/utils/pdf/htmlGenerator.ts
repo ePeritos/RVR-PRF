@@ -1,5 +1,6 @@
 
 import { RVRReportData } from './types';
+import { calculateRossHeidecke } from '../rossHeideckeCalculator';
 
 export class HTMLGenerator {
   static createReportHTML(data: RVRReportData): string {
@@ -42,7 +43,6 @@ export class HTMLGenerator {
     let coeficienteK = 0.25;
     let idadePercentual = 18.75;
     if (idadeAparente && vidaUtil && estadoConservacao && cubValor) {
-      const { calculateRossHeidecke } = require('../../utils/rossHeideckeCalculator');
       const custoTemporario = areaConstruida * cubValor * (1 + (bdiPercentual / 100));
       const rossResult = calculateRossHeidecke(custoTemporario, idadeAparente, vidaUtil, estadoConservacao);
       coeficienteK = rossResult.coeficiente;
