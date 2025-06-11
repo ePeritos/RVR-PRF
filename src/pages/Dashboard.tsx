@@ -15,7 +15,9 @@ interface DashboardStats {
 }
 
 const Dashboard = () => {
+  console.log('🔵 Dashboard - Componente sendo renderizado');
   const { user } = useAuth();
+  console.log('🔵 Dashboard - User:', user?.email);
   const { data: supabaseData, loading } = useSupabaseData();
   const [stats, setStats] = useState<DashboardStats>({
     totalImoveis: 0,
