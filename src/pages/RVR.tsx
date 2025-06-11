@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Header } from '@/components/Header';
+
 import { StepIndicator } from '@/components/StepIndicator';
 import { StepContent } from '@/components/StepContent';
 import { NavigationButtons } from '@/components/NavigationButtons';
@@ -319,42 +319,42 @@ const RVR = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="p-6">
+      <div className="flex items-center gap-2 mb-6">
+        <h1 className="text-2xl font-bold text-foreground">RVR - Relatório de Valor de Reposição</h1>
+      </div>
       
-      <main className="container mx-auto px-2 sm:px-4 py-4">
-        <div className="mb-4">
-          <StepIndicator currentStep={currentStep} totalSteps={4} />
-        </div>
+      <div className="mb-4">
+        <StepIndicator currentStep={currentStep} totalSteps={4} />
+      </div>
 
-        <StepContent
-          currentStep={currentStep}
-          uploadedFile={uploadedFile}
-          onFileUpload={handleFileUpload}
-          onDataLoaded={handleDataLoaded}
-          filteredData={filteredData.length > 0 ? filteredData : supabaseData}
-          onFilterChange={handleFilterChange}
-          selectedItems={selectedItems}
-          onSelectionChange={setSelectedItems}
-          onParameterSubmit={handleParameterSubmit}
-          results={results}
-          onViewPDF={handleViewPDF}
-          onDownloadPDF={handleDownloadPDF}
-          currentParameters={currentParameters}
-          canProceed={canProceed()}
-          onNextStep={nextStep}
-          onPrevStep={prevStep}
-          onNewEvaluation={handleNewEvaluation}
-        />
+      <StepContent
+        currentStep={currentStep}
+        uploadedFile={uploadedFile}
+        onFileUpload={handleFileUpload}
+        onDataLoaded={handleDataLoaded}
+        filteredData={filteredData.length > 0 ? filteredData : supabaseData}
+        onFilterChange={handleFilterChange}
+        selectedItems={selectedItems}
+        onSelectionChange={setSelectedItems}
+        onParameterSubmit={handleParameterSubmit}
+        results={results}
+        onViewPDF={handleViewPDF}
+        onDownloadPDF={handleDownloadPDF}
+        currentParameters={currentParameters}
+        canProceed={canProceed()}
+        onNextStep={nextStep}
+        onPrevStep={prevStep}
+        onNewEvaluation={handleNewEvaluation}
+      />
 
-        <NavigationButtons
-          currentStep={currentStep}
-          canProceed={canProceed()}
-          onNextStep={nextStep}
-          onPrevStep={prevStep}
-          onNewEvaluation={handleNewEvaluation}
-        />
-      </main>
+      <NavigationButtons
+        currentStep={currentStep}
+        canProceed={canProceed()}
+        onNextStep={nextStep}
+        onPrevStep={prevStep}
+        onNewEvaluation={handleNewEvaluation}
+      />
     </div>
   );
 };

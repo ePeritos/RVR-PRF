@@ -40,7 +40,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/auth" replace />;
   }
 
-  console.log('ProtectedRoute - Usuário autenticado, renderizando dashboard com sidebar');
+  console.log('ProtectedRoute - Usuário autenticado, renderizando com sidebar');
   
   return (
     <SidebarProvider>
