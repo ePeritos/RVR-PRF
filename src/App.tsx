@@ -41,7 +41,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   console.log('ProtectedRoute - Usuário autenticado, renderizando com sidebar');
-  console.log('ProtectedRoute - Renderizando children:', children);
   
   return (
     <SidebarProvider>
@@ -52,14 +51,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
             <SidebarTrigger />
           </header>
           <main className="flex-1 overflow-auto">
-            <div className="p-4">
-              <div style={{ border: '2px solid red', padding: '10px', margin: '10px', backgroundColor: '#ffe6e6' }}>
-                <p style={{ color: 'red', fontWeight: 'bold' }}>🔍 DEBUG: ProtectedRoute renderizando children</p>
-                <p style={{ color: 'blue' }}>User: {user?.email}</p>
-                <p style={{ color: 'green' }}>Children type: {typeof children}</p>
-                {children}
-              </div>
-            </div>
+            {children}
           </main>
         </div>
       </div>

@@ -23,20 +23,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('useAuth - Auth state changed:', event, 'Session:', !!session);
+        console.log('useAuth - Auth state changed:', event, 'Session exists:', !!session);
         console.log('useAuth - User from session:', session?.user?.email);
         
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
-        // Force redirect on successful sign in
-        if (event === 'SIGNED_IN' && session?.user) {
-          console.log('useAuth - Login bem-sucedido, redirecionando...');
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 100);
-        }
       }
     );
 
