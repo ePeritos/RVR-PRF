@@ -52,9 +52,9 @@ A aplicação RVR foi desenvolvida como uma ferramenta interna para otimizar pro
 
 **Sistema de Autenticação:** A aplicação utiliza o sistema de autenticação do Supabase, que implementa padrões de segurança reconhecidos internacionalmente.
 
-**Processo de Login:** [preencher com detalhes do processo de login - ex: autenticação por e-mail e senha, verificação de e-mail, etc.]
+**Processo de Login:** autenticação por e-mail Google.
 
-**Perfis de Usuário:** [preencher com os diferentes perfis existentes - ex: Administrador, Usuário Padrão, Operador, etc.]
+**Perfis de Usuário:** Usuário Padrão
 
 **Controle de Acesso:** Implementação de Row Level Security (RLS) garantindo que cada usuário acesse apenas os dados autorizados conforme seu perfil e permissões.
 
@@ -74,13 +74,9 @@ A aplicação RVR foi desenvolvida como uma ferramenta interna para otimizar pro
 
 ### 2.4. Tratamento de Dados Sensíveis
 
-[preencher com uma das opções abaixo:]
-
-**Opção A - Se não lida com dados sensíveis:**
 A aplicação não armazena dados classificados como sensíveis pela LGPD. Os dados processados são limitados a informações funcionais necessárias para o cumprimento das atividades institucionais da PRF.
 
-**Opção B - Se lida com dados sensíveis:**
-A aplicação foi projetada para tratar dados sensíveis conforme classificação da LGPD. Medidas adicionais implementadas incluem: [detalhar medidas específicas como criptografia adicional, logs de auditoria, controles de acesso granulares, etc.]
+
 
 ### 2.5. Monitoramento e Auditoria
 
@@ -95,10 +91,10 @@ A aplicação foi projetada para tratar dados sensíveis conforme classificaçã
 A aplicação coleta os seguintes tipos de dados:
 
 **Dados de Identificação:**
-- [preencher com dados como: Nome completo, Matrícula funcional, E-mail institucional, etc.]
+- Nome completo, Matrícula funcional, E-mail institucional
 
 **Dados Funcionais:**
-- [preencher com dados específicos da aplicação: registros de atividades, relatórios gerados, dados operacionais específicos, etc.]
+- [registros de atividades, relatórios gerados apenas par aataulização do valor contabil de cada imóvel
 
 **Dados Técnicos:**
 - Endereço IP (para fins de segurança)
@@ -148,5 +144,5 @@ Todos os dados coletados têm como finalidade exclusiva:
 *Documento técnico elaborado conforme padrões de documentação da Polícia Rodoviária Federal.*
 
 **Versão:** 1.0  
-**Data:** [preencher com a data atual]  
+**Data:** 12/06/2025 
 **Responsável:** Daniel Nunes de Ávila
