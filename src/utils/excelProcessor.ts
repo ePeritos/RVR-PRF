@@ -134,9 +134,39 @@ const columnMapping: { [key: string]: string } = {
   'Data alteração preenchida?': 'data_alteracao_preenchida'
 };
 
+// Sanitize string values to prevent XSS and injection attacks
+const sanitizeValue = (value: any): any => {
+  if (typeof value === 'string') {
+    // Remove potentially dangerous characters and normalize
+    return value
+      .trim()
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
+      .replace(/javascript:/gi, '') // Remove javascript: protocol
+      .replace(/on\w+\s*=/gi, '') // Remove event handlers
+      .slice(0, 1000); // Limit string length
+  }
+  return value;
+};
+
 export const processExcelFile = async (file: File): Promise<{ success: boolean; message: string; count?: number }> => {
   try {
-    console.log('Processando arquivo Excel:', file.name);
+    // Security validations
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB limit
+    const MAX_RECORDS = 10000; // Limit number of records
+    
+    if (file.size > MAX_FILE_SIZE) {
+      return { success: false, message: 'Arquivo muito grande. Limite máximo: 10MB' };
+    }
+
+    // Validate file type more strictly
+    const allowedTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel'
+    ];
+    
+    if (!allowedTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls)$/i)) {
+      return { success: false, message: 'Formato de arquivo inválido. Apenas arquivos Excel são permitidos.' };
+    }
     
     // Ler o arquivo
     const arrayBuffer = await file.arrayBuffer();
@@ -154,6 +184,10 @@ export const processExcelFile = async (file: File): Promise<{ success: boolean; 
     
     if (jsonData.length === 0) {
       return { success: false, message: 'Planilha vazia ou sem dados válidos' };
+    }
+    
+    if (jsonData.length > MAX_RECORDS) {
+      return { success: false, message: `Muitos registros. Limite máximo: ${MAX_RECORDS} registros` };
     }
     
     // Mapear e transformar os dados
@@ -188,11 +222,13 @@ export const processExcelFile = async (file: File): Promise<{ success: boolean; 
             }
           }
           
-          // Tratar strings vazias
+          // Tratar strings vazias e sanitizar
           if (typeof value === 'string') {
             value = value.trim();
             if (value === '') {
               value = null;
+            } else {
+              value = sanitizeValue(value);
             }
           }
           
