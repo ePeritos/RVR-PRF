@@ -226,7 +226,7 @@ Estes Termos de Uso, juntamente com a Política de Privacidade da aplicação, c
 
 ---
 
-**Data de Elaboração:** [preencher com data atual]  
+**Data de Elaboração:** 12/06/2025
 **Versão:** 1.0  
 **Órgão Responsável:** Polícia Rodoviária Federal  
 **Desenvolvedor:** Daniel Nunes de Ávila (Servidor PRF)  
