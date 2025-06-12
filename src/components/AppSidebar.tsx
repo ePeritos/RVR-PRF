@@ -24,8 +24,8 @@ import { useState } from "react";
 
 const menuItems = [
   { title: "Dashboard", url: "/", icon: Home },
-  { title: "RVR", url: "/rvr", icon: Calculator },
   { title: "CAIP", url: "/caip", icon: Database },
+  { title: "RVR", url: "/rvr", icon: Calculator },
 ];
 
 const unidadesGestoras = [
