@@ -170,15 +170,15 @@ Para exercer seus direitos, entre em contato através dos canais oficiais da PRF
 
 ### 6.2. Encarregado de Proteção de Dados (DPO)
 
-**Nome:** [preencher com nome do DPO da PRF]  
-**E-mail:** [preencher com e-mail do DPO]  
-**Telefone:** [preencher com telefone de contato]
+**Nome:** Daniel Nunes de Ávila
+**E-mail:** daniel.avila@prf.gov.br  
+**Telefone:** 81 97116-8618
 
 ### 6.3. Desenvolvedor/Operador
 
 **Nome:** Daniel Nunes de Ávila  
 **Vínculo:** Servidor da PRF  
-**E-mail:** [preencher com e-mail institucional]
+**E-mail:** daniel.avila@prf.gov.br
 
 ## 7. Alterações nesta Política de Privacidade
 
