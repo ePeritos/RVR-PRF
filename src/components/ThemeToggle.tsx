@@ -1,24 +1,30 @@
+import { Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useTheme } from "@/hooks/useTheme";
 
-import { Moon, Sun } from 'lucide-react';
-import { useTheme } from '@/hooks/useTheme';
-import { Button } from '@/components/ui/button';
+interface ThemeToggleProps {
+  collapsed?: boolean;
+}
 
-export function ThemeToggle() {
+export function ThemeToggle({ collapsed = false }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
     <Button
-      variant="outline"
-      size="icon"
+      variant="ghost"
       onClick={toggleTheme}
-      className="h-9 w-9 border-border bg-card hover:bg-accent transition-all duration-200"
+      className="w-full justify-start"
     >
-      {theme === 'light' ? (
-        <Moon className="h-4 w-4 transition-all" />
+      {theme === "dark" ? (
+        <Sun className="mr-2 h-4 w-4" />
       ) : (
-        <Sun className="h-4 w-4 transition-all" />
+        <Moon className="mr-2 h-4 w-4" />
       )}
-      <span className="sr-only">Toggle theme</span>
+      {!collapsed && (
+        <span>
+          {theme === "dark" ? "Modo Claro" : "Modo Escuro"}
+        </span>
+      )}
     </Button>
   );
 }

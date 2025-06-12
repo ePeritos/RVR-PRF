@@ -1,4 +1,4 @@
-import { Home, Calculator, Database, LogOut, User, Settings } from "lucide-react";
+import { Home, Calculator, Database, LogOut, User } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useState } from "react";
 
 const menuItems = [
@@ -159,6 +160,13 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               )}
 
+              {/* Botão toggle tema */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <ThemeToggle collapsed={state === "collapsed"} />
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
               {/* Botão editar perfil */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
@@ -179,7 +187,7 @@ export function AppSidebar() {
                   <Button
                     variant="ghost"
                     onClick={signOut}
-                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                    className="w-full justify-start text-destructive hover:text-destructive-foreground hover:bg-destructive/10"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     {state !== "collapsed" && <span>Sair</span>}
