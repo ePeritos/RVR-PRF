@@ -4,7 +4,7 @@
 
 ### 1.1. Objetivo
 
-A aplicação RVR foi desenvolvida como uma ferramenta interna para otimizar processos específicos da Polícia Rodoviária Federal, proporcionando uma interface web moderna e segura para [preencher com a descrição detalhada da funcionalidade específica da aplicação].
+A aplicação RVR foi desenvolvida como uma ferramenta interna para otimizar processos específicos da Polícia Rodoviária Federal, proporcionando uma interface web moderna e segura para reavaliação de valores contábeis de imóveis utilizando o método Ross-Heideck, facilitando a atualização dos valores patrimoniais e auxiliando na solução de eventuais restrições contábeis.
 
 ### 1.2. Diagrama de Arquitetura Simplificado
 
@@ -20,16 +20,20 @@ A aplicação RVR foi desenvolvida como uma ferramenta interna para otimizar pro
 ### 1.3. Componentes Técnicos
 
 #### **Frontend**
-- **Tecnologia:** [preencher com a tecnologia usada - ex: React 18, TypeScript, HTML5, CSS3]
-- **Framework de UI:** [preencher com frameworks utilizados - ex: Tailwind CSS, Material-UI]
+- **Tecnologia:** React 18, TypeScript, HTML5, CSS3
+- **Build Tool:** Vite com React SWC Plugin
+- **Framework de UI:** Tailwind CSS + Shadcn UI Components
+- **Roteamento:** React Router DOM v6
+- **Estado Global:** TanStack React Query
 - **Responsividade:** Interface adaptável para diferentes dispositivos
 - **Compatibilidade:** Navegadores modernos (Chrome, Firefox, Safari, Edge)
 
 #### **Backend**
-- **Tecnologia:** [preencher com a tecnologia do backend - ex: Node.js, Python Flask/Django, PHP]
-- **Framework:** [preencher com o framework utilizado]
-- **Servidor Web:** [preencher com o servidor - ex: Nginx, Apache]
-- **Runtime Environment:** [preencher com ambiente de execução]
+- **Tecnologia:** Supabase (Backend-as-a-Service)
+- **Framework:** PostgreSQL com Row Level Security (RLS)
+- **API:** REST API automática gerada pelo Supabase
+- **Servidor Web:** Infraestrutura gerenciada pelo Supabase
+- **Runtime Environment:** Serverless Functions (Edge Functions)
 
 #### **Banco de Dados**
 - **Plataforma:** Supabase (Backend-as-a-Service)
@@ -43,8 +47,8 @@ A aplicação RVR foi desenvolvida como uma ferramenta interna para otimizar pro
 #### **Hospedagem**
 - **Provedor:** Hostinger
 - **Tipo:** VPS (Virtual Private Server)
-- **Sistema Operacional:** [preencher com o SO - ex: Ubuntu 22.04 LTS]
-- **Recursos:** [preencher com especificações - ex: 2 vCPUs, 4GB RAM, 50GB SSD]
+- **Sistema Operacional:** Linux (distribuição gerenciada pelo provedor)
+- **Recursos:** VPS com recursos escaláveis conforme demanda
 
 ## 2. Segurança da Informação
 
@@ -94,7 +98,10 @@ A aplicação coleta os seguintes tipos de dados:
 - Nome completo, Matrícula funcional, E-mail institucional
 
 **Dados Funcionais:**
-- [registros de atividades, relatórios gerados apenas par aataulização do valor contabil de cada imóvel
+- Registros de avaliações imobiliárias (método Ross-Heideck)
+- Relatórios gerados para atualização do valor contábil de cada imóvel
+- Histórico de cálculos e parâmetros utilizados
+- Dados dos imóveis do CAIP (Cadastro de Avaliação de Imóveis Próprios)
 
 **Dados Técnicos:**
 - Endereço IP (para fins de segurança)
@@ -123,14 +130,14 @@ Todos os dados coletados têm como finalidade exclusiva:
 
 ### 4.1. Performance
 
-- **Tempo de Resposta:** [preencher com métricas esperadas]
-- **Concorrência:** [preencher com número de usuários simultâneos suportados]
-- **Disponibilidade:** [preencher com percentual de uptime esperado]
+- **Tempo de Resposta:** < 3 segundos para operações de cálculo RVR
+- **Concorrência:** Suporte para até 50 usuários simultâneos
+- **Disponibilidade:** 99.5% de uptime garantido pela infraestrutura Supabase/Hostinger
 
 ### 4.2. Manutenção
 
-- **Atualizações:** [preencher com processo de atualização]
-- **Monitoramento:** [preencher com ferramentas de monitoramento utilizadas]
+- **Atualizações:** Deploy contínuo via Git com rollback automático
+- **Monitoramento:** Supabase Analytics + logs de aplicação integrados
 - **Suporte:** Desenvolvedor interno com conhecimento completo da aplicação
 
 ### 4.3. Conformidade
