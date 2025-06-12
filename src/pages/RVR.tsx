@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { StepIndicator } from '@/components/StepIndicator';
 import { StepContent } from '@/components/StepContent';
@@ -7,11 +7,13 @@ import { generatePDF } from '@/utils/pdfGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { useSupabaseData, DataRow } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateRossHeidecke } from '@/utils/rossHeideckeCalculator';
 
 const RVR = () => {
   const { user } = useAuth();
+  const { profile, loading: profileLoading, isAdmin, isUsuarioPadrao } = useProfile();
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -271,14 +273,15 @@ const RVR = () => {
   };
 
   const prevStep = () => {
-    if (currentStep > 1) {
+    const minStep = isAdmin ? 1 : 2;
+    if (currentStep > minStep) {
       setCurrentStep(currentStep - 1);
     }
   };
 
   const canProceed = () => {
     switch (currentStep) {
-      case 1: return true; // Always allow proceeding from step 1
+      case 1: return isAdmin; // Only admins can access step 1
       case 2: return selectedItems.length > 0;
       case 3: return true;
       default: return false;
@@ -286,14 +289,23 @@ const RVR = () => {
   };
 
   const handleNewEvaluation = () => {
-    setCurrentStep(1);
+    const initialStep = isAdmin ? 1 : 2;
+    setCurrentStep(initialStep);
     setUploadedFile(null);
     setSelectedItems([]);
     setResults([]);
   };
 
+  // Set initial step based on user role
+  useEffect(() => {
+    if (profile && !profileLoading) {
+      const initialStep = isAdmin ? 1 : 2;
+      setCurrentStep(initialStep);
+    }
+  }, [profile, profileLoading, isAdmin]);
+
   // Show loading state
-  if (loading) {
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="text-center">

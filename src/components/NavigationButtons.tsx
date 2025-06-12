@@ -1,6 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useProfile } from '@/hooks/useProfile';
 
 interface NavigationButtonsProps {
   currentStep: number;
@@ -17,6 +18,7 @@ export const NavigationButtons = ({
   onPrevStep,
   onNewEvaluation
 }: NavigationButtonsProps) => {
+  const { isAdmin } = useProfile();
   if (currentStep === 4) {
     return (
       <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8 px-4">
@@ -58,36 +60,42 @@ export const NavigationButtons = ({
 
   // Na etapa 3, não mostra o botão "Próximo" pois será substituído pelo "Gerar Relatório RVR"
   if (currentStep === 3) {
+    const minStep = isAdmin ? 1 : 2;
     return (
       <div className="flex justify-start mt-8 px-4">
-        <Button 
-          variant="outline" 
-          onClick={onPrevStep}
-          className="hover-scale w-full sm:w-auto"
-        >
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          Anterior
-        </Button>
+        {currentStep > minStep && (
+          <Button 
+            variant="outline" 
+            onClick={onPrevStep}
+            className="hover-scale w-full sm:w-auto"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Anterior
+          </Button>
+        )}
       </div>
     );
   }
 
   // Para a etapa 2
+  const minStep = isAdmin ? 1 : 2;
   return (
     <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8 px-4">
-      <Button 
-        variant="outline" 
-        onClick={onPrevStep}
-        className="hover-scale w-full sm:w-auto order-2 sm:order-1"
-      >
-        <ChevronLeft className="mr-2 h-4 w-4" />
-        Anterior
-      </Button>
+      {currentStep > minStep && (
+        <Button 
+          variant="outline" 
+          onClick={onPrevStep}
+          className="hover-scale w-full sm:w-auto order-2 sm:order-1"
+        >
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Anterior
+        </Button>
+      )}
       
       <Button 
         onClick={onNextStep} 
         disabled={!canProceed}
-        className="hover-scale w-full sm:w-auto order-1 sm:order-2"
+        className={`hover-scale w-full sm:w-auto ${currentStep <= minStep ? 'order-1' : 'order-1 sm:order-2'}`}
       >
         Próximo
         <ChevronRight className="ml-2 h-4 w-4" />

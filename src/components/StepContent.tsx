@@ -6,6 +6,9 @@ import { ParameterForm } from '@/components/ParameterForm';
 import { ResultsTable } from '@/components/ResultsTable';
 import { DataRow } from '@/hooks/useSupabaseData';
 import { NavigationButtons } from '@/components/NavigationButtons';
+import { useProfile } from '@/hooks/useProfile';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 interface StepContentProps {
   currentStep: number;
@@ -46,6 +49,7 @@ export const StepContent = ({
   onPrevStep,
   onNewEvaluation
 }: StepContentProps) => {
+  const { isAdmin } = useProfile();
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -59,11 +63,22 @@ export const StepContent = ({
                 Faça o upload da planilha XLSX contendo os dados CAIP que serão importados para o banco de dados
               </p>
             </div>
-            <FileUpload 
-              onFileUpload={onFileUpload} 
-              uploadedFile={uploadedFile}
-              onDataLoaded={onDataLoaded}
-            />
+            
+            {!isAdmin ? (
+              <Alert className="border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950">
+                <AlertTriangle className="h-4 w-4 text-orange-600" />
+                <AlertDescription className="text-orange-800 dark:text-orange-200">
+                  <strong>Acesso Restrito:</strong> Esta etapa está disponível apenas para usuários com perfil ADMIN. 
+                  Como usuário padrão, você deve começar pela Etapa 2 - Seleção de Imóveis.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <FileUpload 
+                onFileUpload={onFileUpload} 
+                uploadedFile={uploadedFile}
+                onDataLoaded={onDataLoaded}
+              />
+            )}
           </div>
         );
       
