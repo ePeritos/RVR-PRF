@@ -8,7 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Database, Plus, Search, Edit } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
+import { Database, Plus, Search, Edit, Upload, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
@@ -48,9 +50,31 @@ const CAIP = () => {
     }
   };
 
+  const validateAnoCAIP = (value: string) => {
+    const year = parseInt(value);
+    if (isNaN(year) || year % 2 === 0) {
+      return 'O Ano CAIP deve ser um número ímpar.';
+    }
+    return true;
+  };
+
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     try {
+      // Validate Ano CAIP
+      if (data.ano_caip) {
+        const validation = validateAnoCAIP(data.ano_caip);
+        if (validation !== true) {
+          toast({
+            title: "Erro de Validação",
+            description: validation,
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
+
       if (editingId) {
         // Atualizar registro existente
         const { error } = await supabase
@@ -152,132 +176,440 @@ const CAIP = () => {
               )}
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                {/* Informações Básicas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="ano_caip">Ano CAIP</Label>
-                    <Input {...register('ano_caip')} placeholder="2024" />
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                {/* Seção 1: Informações Básicas e Cadastro */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Database className="h-5 w-5" />
+                    Informações Básicas
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="cadastrador">Cadastrador</Label>
+                      <Input {...register('cadastrador')} placeholder="Nome do cadastrador" />
+                    </div>
+                    <div>
+                      <Label htmlFor="alterador">Alterador</Label>
+                      <Input {...register('alterador')} placeholder="Nome do alterador" />
+                    </div>
+                    <div>
+                      <Label htmlFor="ultima_alteracao">Última Alteração</Label>
+                      <Input type="date" {...register('ultima_alteracao')} />
+                    </div>
+                    <div>
+                      <Label htmlFor="ano_caip">Ano CAIP *</Label>
+                      <Input 
+                        type="number" 
+                        {...register('ano_caip', { 
+                          required: "Campo obrigatório",
+                          validate: (value) => {
+                            const year = parseInt(value);
+                            return !isNaN(year) && year % 2 !== 0 || "O Ano CAIP deve ser um número ímpar";
+                          }
+                        })} 
+                        placeholder="Ex: 2025 (ímpar)" 
+                      />
+                      {errors.ano_caip && (
+                        <p className="text-sm text-destructive mt-1">{errors.ano_caip.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="unidade_gestora">Unidade Gestora *</Label>
+                      <Input {...register('unidade_gestora', { required: "Campo obrigatório" })} placeholder="Ex: SR/PRF/XX" />
+                      {errors.unidade_gestora && (
+                        <p className="text-sm text-destructive mt-1">{errors.unidade_gestora.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="tipo_de_unidade">Tipo de Unidade</Label>
+                      <Input {...register('tipo_de_unidade')} placeholder="Ex: Superintendência, UOP, Delegacia" />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="nome_da_unidade">Nome da Unidade *</Label>
+                      <Input {...register('nome_da_unidade', { required: "Campo obrigatório" })} placeholder="Nome completo da unidade" />
+                      {errors.nome_da_unidade && (
+                        <p className="text-sm text-destructive mt-1">{errors.nome_da_unidade.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="processo_sei">Processo SEI</Label>
+                      <Input {...register('processo_sei')} placeholder="Nº do processo SEI" />
+                    </div>
+                    <div>
+                      <Label htmlFor="servo2_pdi">Servo2 (PDI)</Label>
+                      <Input {...register('servo2_pdi')} placeholder="Informação do Servo2 (PDI)" />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="tipo_de_unidade">Tipo de Unidade</Label>
-                    <Input {...register('tipo_de_unidade')} placeholder="Ex: PRF" />
-                  </div>
-                  <div>
-                    <Label htmlFor="unidade_gestora">Unidade Gestora</Label>
-                    <Input {...register('unidade_gestora')} placeholder="Ex: SRPRF/DF" />
-                  </div>
-                </div>
+                </Card>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="nome_da_unidade">Nome da Unidade *</Label>
-                    <Input {...register('nome_da_unidade', { required: true })} />
-                    {errors.nome_da_unidade && (
-                      <p className="text-sm text-red-500 mt-1">Campo obrigatório</p>
-                    )}
+                {/* Seção 2: Imagens */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Camera className="h-5 w-5" />
+                    Imagens do Imóvel
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[
+                      { key: 'imagem_geral', label: 'Imagem Geral' },
+                      { key: 'imagem_fachada', label: 'Imagem Fachada' },
+                      { key: 'imagem_lateral_1', label: 'Imagem Lateral 1' },
+                      { key: 'imagem_lateral_2', label: 'Imagem Lateral 2' },
+                      { key: 'imagem_fundos', label: 'Imagem Fundos' },
+                      { key: 'imagem_sala_cofre', label: 'Imagem Sala Cofre' },
+                      { key: 'imagem_cofre', label: 'Imagem Cofre' },
+                      { key: 'imagem_interna_alojamento_masculino', label: 'Imagem Interna Alojamento Masculino' },
+                      { key: 'imagem_interna_alojamento_feminino', label: 'Imagem Interna Alojamento Feminino' },
+                      { key: 'imagem_interna_plantao_uop', label: 'Imagem Interna Plantão UOP' }
+                    ].map(({ key, label }) => (
+                      <div key={key} className="space-y-2">
+                        <Label htmlFor={key}>{label}</Label>
+                        <div className="border-2 border-dashed border-border rounded-lg p-4 text-center bg-muted/20">
+                          <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            {...register(key as keyof DadosCAIP)}
+                            className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div>
-                    <Label htmlFor="situacao_do_imovel">Situação do Imóvel</Label>
-                    <Select onValueChange={(value) => setValue('situacao_do_imovel', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecionar situação" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="PROPRIO">Próprio</SelectItem>
-                        <SelectItem value="ALUGADO">Alugado</SelectItem>
-                        <SelectItem value="CEDIDO">Cedido</SelectItem>
-                        <SelectItem value="COMODATO">Comodato</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                </Card>
 
-                <div>
-                  <Label htmlFor="endereco">Endereço</Label>
-                  <Textarea {...register('endereco')} placeholder="Endereço completo do imóvel" />
-                </div>
+                {/* Seção 3: Localização e Dados do Imóvel */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Localização e Dados do Imóvel</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="endereco">Endereço</Label>
+                      <Textarea {...register('endereco')} placeholder="Endereço completo do imóvel" />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="implantacao_da_unidade">Implantação da Unidade</Label>
+                        <Input {...register('implantacao_da_unidade')} placeholder="Tipo de implantação da unidade" />
+                      </div>
+                      <div>
+                        <Label htmlFor="coordenadas">Coordenadas</Label>
+                        <Input {...register('coordenadas')} placeholder="Ex: -XX.XXXXXX, -XX.XXXXXX" />
+                      </div>
+                      <div>
+                        <Label htmlFor="zona">Zona</Label>
+                        <Input {...register('zona')} placeholder="Zona (Urbana/Rural)" />
+                      </div>
+                      <div>
+                        <Label htmlFor="rip">RIP</Label>
+                        <Input {...register('rip')} placeholder="Número RIP do imóvel" />
+                      </div>
+                      <div>
+                        <Label htmlFor="matricula_do_imovel">Matrícula do Imóvel</Label>
+                        <Input {...register('matricula_do_imovel')} placeholder="Matrícula do imóvel (se houver)" />
+                      </div>
+                      <div>
+                        <Label htmlFor="tipo_de_imovel">Tipo de Imóvel</Label>
+                        <Select onValueChange={(value) => setValue('tipo_de_imovel', value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Urbano">Urbano</SelectItem>
+                            <SelectItem value="Rural">Rural</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="situacao_do_imovel">Situação do Imóvel</Label>
+                        <Input {...register('situacao_do_imovel')} placeholder="Ex: Regular, Irregular, Em obras" />
+                      </div>
+                      <div>
+                        <Label htmlFor="estado_de_conservacao">Estado de Conservação</Label>
+                        <Input {...register('estado_de_conservacao')} placeholder="Ex: Bom, Regular, Ruim" />
+                      </div>
+                    </div>
+                  </div>
+                </Card>
 
-                {/* Áreas e Dados Técnicos */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div>
-                    <Label htmlFor="area_do_terreno_m2">Área do Terreno (m²)</Label>
-                    <Input 
-                      type="number" 
-                      step="0.01"
-                      {...register('area_do_terreno_m2', { valueAsNumber: true })} 
-                    />
+                {/* Seção 4: Dados Técnicos e Áreas */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Dados Técnicos e Áreas</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <Label htmlFor="vida_util_estimada_anos">Vida Útil Estimada (Anos)</Label>
+                      <Input type="number" {...register('vida_util_estimada_anos', { valueAsNumber: true })} placeholder="Ex: 60" />
+                    </div>
+                    <div>
+                      <Label htmlFor="area_do_terreno_m2">Área do Terreno (m²)</Label>
+                      <Input type="number" step="0.01" {...register('area_do_terreno_m2', { valueAsNumber: true })} placeholder="Ex: 500.00" />
+                    </div>
+                    <div>
+                      <Label htmlFor="area_construida_m2">Área Construída (m²)</Label>
+                      <Input type="number" step="0.01" {...register('area_construida_m2', { valueAsNumber: true })} placeholder="Ex: 250.50" />
+                    </div>
+                    <div>
+                      <Label htmlFor="area_do_patio_para_retencao_de_veiculos_m2">Área do Pátio para Retenção de Veículos (m²)</Label>
+                      <Input type="number" step="0.01" {...register('area_do_patio_para_retencao_de_veiculos_m2', { valueAsNumber: true })} placeholder="Ex: 100.00" />
+                    </div>
+                    <div>
+                      <Label htmlFor="area_da_cobertura_de_pista_m2">Área da Cobertura de Pista (m²)</Label>
+                      <Input type="number" step="0.01" {...register('area_da_cobertura_de_pista_m2', { valueAsNumber: true })} placeholder="Ex: 50.00" />
+                    </div>
+                    <div>
+                      <Label htmlFor="area_da_cobertura_para_fiscalizacao_de_veiculos_m2">Área da Cobertura para Fiscalização de Veículos (m²)</Label>
+                      <Input type="number" step="0.01" {...register('area_da_cobertura_para_fiscalizacao_de_veiculos_m2', { valueAsNumber: true })} placeholder="Ex: 30.00" />
+                    </div>
+                    <div>
+                      <Label htmlFor="idade_aparente_do_imovel">Idade Aparente do Imóvel</Label>
+                      <Input type="number" {...register('idade_aparente_do_imovel', { valueAsNumber: true })} placeholder="Idade em anos" />
+                    </div>
+                    <div>
+                      <Label htmlFor="ano_da_ultima_intervencao_na_infraestrutura_do_imovel">Ano da Última Intervenção na Infraestrutura</Label>
+                      <Input type="number" {...register('ano_da_ultima_intervencao_na_infraestrutura_do_imovel')} placeholder="Ano da intervenção" />
+                    </div>
+                    <div>
+                      <Label htmlFor="tempo_de_intervencao">Tempo de Intervenção</Label>
+                      <Input {...register('tempo_de_intervencao')} placeholder="Ex: 3 meses, 1 ano" />
+                    </div>
+                    <div>
+                      <Label htmlFor="ano_da_ultima_reavaliacao_rvr">Ano da Última Reavaliação (RVR)</Label>
+                      <Input type="number" {...register('ano_da_ultima_reavaliacao_rvr')} placeholder="Ano da última RVR" />
+                    </div>
+                    <div>
+                      <Label htmlFor="rvr">RVR</Label>
+                      <Input {...register('rvr')} placeholder="Detalhes do RVR" />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="area_construida_m2">Área Construída (m²)</Label>
-                    <Input 
-                      type="number" 
-                      step="0.01"
-                      {...register('area_construida_m2', { valueAsNumber: true })} 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="idade_aparente_do_imovel">Idade Aparente (anos)</Label>
-                    <Input 
-                      type="number"
-                      {...register('idade_aparente_do_imovel', { valueAsNumber: true })} 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="vida_util_estimada_anos">Vida Útil Estimada (anos)</Label>
-                    <Input 
-                      type="number"
-                      {...register('vida_util_estimada_anos', { valueAsNumber: true })} 
-                    />
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="estado_de_conservacao">Estado de Conservação</Label>
-                    <Select onValueChange={(value) => setValue('estado_de_conservacao', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecionar estado" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="NOVO">Novo (A)</SelectItem>
-                        <SelectItem value="BOM">Bom (B)</SelectItem>
-                        <SelectItem value="REGULAR">Regular (C)</SelectItem>
-                        <SelectItem value="DETERIORADO">Deteriorado (D)</SelectItem>
-                        <SelectItem value="RUIM">Ruim (E)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="rvr">RVR (R$)</Label>
-                    <Input 
-                      type="number" 
-                      step="0.01"
-                      {...register('rvr', { valueAsNumber: true })} 
-                    />
-                  </div>
-                </div>
+                  <Separator className="my-4" />
 
-                {/* Identificadores */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="rip">RIP</Label>
-                    <Input {...register('rip')} />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('adere_ao_pgprf_teletrabalho')} />
+                      <Label>Adere ao PGPRF? (TELETRABALHO)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('ha_contrato_de_manutencao_predial')} />
+                      <Label>Há contrato de manutenção predial?</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('ha_plano_de_manutencao_do_imovel')} />
+                      <Label>Há plano de manutenção do imóvel?</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('o_trecho_e_concessionado')} />
+                      <Label>O trecho é concessionado?</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('acessibilidade')} />
+                      <Label>Acessibilidade?</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('sustentabilidade')} />
+                      <Label>Sustentabilidade?</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('aproveitamento_da_agua_da_chuva')} />
+                      <Label>Aproveitamento da água da chuva?</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('energia_solar')} />
+                      <Label>Energia Solar?</Label>
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="matricula_do_imovel">Matrícula do Imóvel</Label>
-                    <Input {...register('matricula_do_imovel')} />
-                  </div>
-                  <div>
-                    <Label htmlFor="processo_sei">Processo SEI</Label>
-                    <Input {...register('processo_sei')} />
-                  </div>
-                </div>
+                </Card>
 
-                <div>
-                  <Label htmlFor="observacoes">Observações</Label>
-                  <Textarea {...register('observacoes')} placeholder="Observações gerais sobre o imóvel" />
-                </div>
+                {/* Seção 5: Infraestrutura e Utilidades */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Infraestrutura e Utilidades</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="fornecimento_de_agua">Fornecimento de Água</Label>
+                      <Input {...register('fornecimento_de_agua')} placeholder="Tipo de fornecimento de água" />
+                    </div>
+                    <div>
+                      <Label htmlFor="fornecimento_de_energia_eletrica">Fornecimento de Energia Elétrica</Label>
+                      <Input {...register('fornecimento_de_energia_eletrica')} placeholder="Tipo de fornecimento de energia elétrica" />
+                    </div>
+                    <div>
+                      <Label htmlFor="esgotamento_sanitario">Esgotamento Sanitário</Label>
+                      <Input {...register('esgotamento_sanitario')} placeholder="Tipo de esgotamento sanitário" />
+                    </div>
+                    <div>
+                      <Label htmlFor="conexao_de_internet">Conexão de Internet</Label>
+                      <Input {...register('conexao_de_internet')} placeholder="Tipo de conexão de internet" />
+                    </div>
+                    <div>
+                      <Label htmlFor="identidade_visual">Identidade Visual</Label>
+                      <Input {...register('identidade_visual')} placeholder="Estado da identidade visual" />
+                    </div>
+                  </div>
+
+                  <Separator className="my-4" />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('possui_wireless_wifi')} />
+                      <Label>Possui Wireless (Wi-Fi)?</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('blindagem')} />
+                      <Label>Blindagem?</Label>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Seção 6: Ambientes e Espaços */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Ambientes e Espaços</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[
+                      { key: 'almoxarifado', label: 'Almoxarifado' },
+                      { key: 'alojamento_feminino', label: 'Alojamento Feminino' },
+                      { key: 'alojamento_masculino', label: 'Alojamento Masculino' },
+                      { key: 'alojamento_misto', label: 'Alojamento Misto' },
+                      { key: 'area_de_servico', label: 'Área de Serviço' },
+                      { key: 'area_de_uso_compartilhado_com_outros_orgaos', label: 'Área de Uso Compartilhado com Outros Órgãos' },
+                      { key: 'arquivo', label: 'Arquivo' },
+                      { key: 'auditorio', label: 'Auditório' },
+                      { key: 'banheiro_para_zeladoria', label: 'Banheiro para Zeladoria' },
+                      { key: 'banheiro_feminino_para_servidoras', label: 'Banheiro Feminino para Servidoras' },
+                      { key: 'banheiro_masculino_para_servidores', label: 'Banheiro Masculino para Servidores' },
+                      { key: 'banheiro_misto_para_servidores', label: 'Banheiro Misto para Servidores' },
+                      { key: 'box_com_chuveiro_externo', label: 'Box com Chuveiro Externo' },
+                      { key: 'box_para_lavagem_de_veiculos', label: 'Box para Lavagem de Veículos' },
+                      { key: 'canil', label: 'Canil' },
+                      { key: 'casa_de_maquinas', label: 'Casa de Máquinas' },
+                      { key: 'central_de_gas', label: 'Central de Gás' },
+                      { key: 'cobertura_para_aglomeracao_de_usuarios', label: 'Cobertura para Aglomeração de Usuários' },
+                      { key: 'cobertura_para_fiscalizacao_de_veiculos', label: 'Cobertura para Fiscalização de Veículos' },
+                      { key: 'copa_e_cozinha', label: 'Copa e Cozinha' },
+                      { key: 'deposito_de_lixo', label: 'Depósito de Lixo' },
+                      { key: 'deposito_de_materiais_de_descarte_e_baixa', label: 'Depósito de Materiais de Descarte e Baixa' },
+                      { key: 'deposito_de_material_de_limpeza', label: 'Depósito de Material de Limpeza' },
+                      { key: 'deposito_de_material_operacional', label: 'Depósito de Material Operacional' },
+                      { key: 'estacionamento_para_usuarios', label: 'Estacionamento para Usuários' },
+                      { key: 'garagem_para_servidores', label: 'Garagem para Servidores' },
+                      { key: 'garagem_para_viaturas', label: 'Garagem para Viaturas' },
+                      { key: 'lavabo_para_servidores_sem_box_para_chuveiro', label: 'Lavabo para Servidores (sem box para chuveiro)' },
+                      { key: 'local_para_custodia_temporaria_de_detidos', label: 'Local para Custódia Temporária de Detidos' },
+                      { key: 'local_para_guarda_provisoria_de_animais', label: 'Local para Guarda Provisória de Animais' },
+                      { key: 'patio_de_retencao_de_veiculos', label: 'Pátio de Retenção de Veículos' },
+                      { key: 'plataforma_para_fiscalizacao_da_parte_superior_dos_veiculos', label: 'Plataforma para Fiscalização da Parte Superior dos Veículos' },
+                      { key: 'ponto_de_pouso_para_aeronaves', label: 'Ponto de Pouso para Aeronaves' },
+                      { key: 'rampa_de_fiscalizacao_de_veiculos', label: 'Rampa de Fiscalização de Veículos' },
+                      { key: 'recepcao', label: 'Recepção' },
+                      { key: 'sala_administrativa_escritorio', label: 'Sala Administrativa / Escritório' },
+                      { key: 'sala_de_assepsia', label: 'Sala de Assepsia' },
+                      { key: 'sala_de_aula', label: 'Sala de Aula' },
+                      { key: 'sala_de_reuniao', label: 'Sala de Reunião' },
+                      { key: 'sala_de_revista_pessoal', label: 'Sala de Revista Pessoal' },
+                      { key: 'sala_operacional_observatorio', label: 'Sala Operacional / Observatório' },
+                      { key: 'sala_tecnica', label: 'Sala Técnica' },
+                      { key: 'sanitario_publico', label: 'Sanitário Público' },
+                      { key: 'telefone_publico', label: 'Telefone Público' },
+                      { key: 'torre_de_telecomunicacoes', label: 'Torre de Telecomunicações' },
+                      { key: 'vestiario_para_nao_policiais', label: 'Vestiário para Não-Policiais' },
+                      { key: 'vestiario_para_policiais', label: 'Vestiário para Policiais' }
+                    ].map(({ key, label }) => (
+                      <div key={key} className="flex items-center space-x-2">
+                        <Checkbox {...register(key as keyof DadosCAIP)} />
+                        <Label>{label}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                {/* Seção 7: Sistemas e Equipamentos */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Sistemas e Equipamentos</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[
+                      { key: 'abastecimento_de_agua', label: 'Abastecimento de Água' },
+                      { key: 'aterramento_e_protecao_contra_descargas_atmosfericas', label: 'Aterramento e Proteção contra Descargas Atmosféricas' },
+                      { key: 'climatizacao_de_ambientes', label: 'Climatização de Ambientes' },
+                      { key: 'coleta_de_lixo', label: 'Coleta de Lixo' },
+                      { key: 'energia_eletrica_de_emergencia', label: 'Energia Elétrica de Emergência' },
+                      { key: 'iluminacao_externa', label: 'Iluminação Externa' },
+                      { key: 'protecao_contra_incendios', label: 'Proteção contra Incêndios' },
+                      { key: 'protecao_contra_intrusao', label: 'Proteção contra Intrusão' },
+                      { key: 'radiocomunicacao', label: 'Radiocomunicação' },
+                      { key: 'cabeamento_estruturado', label: 'Cabeamento Estruturado' }
+                    ].map(({ key, label }) => (
+                      <div key={key} className="flex items-center space-x-2">
+                        <Checkbox {...register(key as keyof DadosCAIP)} />
+                        <Label>{label}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                {/* Seção 8: Segurança e Proteção */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Segurança e Proteção</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[
+                      { key: 'claviculario', label: 'Claviculário' },
+                      { key: 'sala_cofre', label: 'Sala Cofre' },
+                      { key: 'concertina', label: 'Concertina' },
+                      { key: 'muro_ou_alambrado', label: 'Muro ou Alambrado' }
+                    ].map(({ key, label }) => (
+                      <div key={key} className="flex items-center space-x-2">
+                        <Checkbox {...register(key as keyof DadosCAIP)} />
+                        <Label>{label}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                {/* Seção 9: Notas e Avaliações */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Notas e Avaliações</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="nota_para_adequacao">Nota para ADEQUAÇÃO</Label>
+                      <Input type="number" step="0.1" {...register('nota_para_adequacao')} placeholder="Ex: 8.5" />
+                    </div>
+                    <div>
+                      <Label htmlFor="nota_para_manutencao">Nota para MANUTENÇÃO</Label>
+                      <Input type="number" step="0.1" {...register('nota_para_manutencao')} placeholder="Ex: 7.0" />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Label htmlFor="precisaria_de_qual_intervencao">Precisaria de qual intervenção?</Label>
+                    <Textarea {...register('precisaria_de_qual_intervencao')} placeholder="Descreva as intervenções necessárias" />
+                  </div>
+                  <div className="mt-4">
+                    <Label htmlFor="observacoes">Observações</Label>
+                    <Textarea {...register('observacoes')} placeholder="Outras observações relevantes" />
+                  </div>
+                </Card>
+
+                {/* Seção 10: Campos Calculados (Readonly) */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Campos Calculados</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="preenchido">Preenchido</Label>
+                      <Input {...register('preenchido')} readOnly placeholder="Automaticamente preenchido" className="bg-muted" />
+                    </div>
+                    <div>
+                      <Label htmlFor="percentual_preenchimento">Percentual Preenchimento</Label>
+                      <Input {...register('percentual_preenchimento')} readOnly placeholder="Calculado automaticamente" className="bg-muted" />
+                    </div>
+                    <div>
+                      <Label htmlFor="gatilho">Gatilho</Label>
+                      <Input {...register('gatilho')} readOnly placeholder="Disparado por regra" className="bg-muted" />
+                    </div>
+                    <div>
+                      <Label htmlFor="data_alteracao_preenchida">Data Alteração Preenchida</Label>
+                      <Input {...register('data_alteracao_preenchida')} readOnly placeholder="Data da última alteração de preenchimento" className="bg-muted" />
+                    </div>
+                    <div>
+                      <Label htmlFor="id_caip">ID CAIP</Label>
+                      <Input {...register('id_caip')} readOnly placeholder="ID CAIP" className="bg-muted" />
+                    </div>
+                  </div>
+                </Card>
 
                 <div className="flex gap-4">
                   <Button type="submit" disabled={isLoading}>
