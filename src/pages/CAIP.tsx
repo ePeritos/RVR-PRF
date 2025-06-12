@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Database, Plus, Search, Edit, Upload, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 
@@ -19,16 +20,69 @@ type DadosCAIP = Tables<'dados_caip'>;
 
 const CAIP = () => {
   const { toast } = useToast();
+  const { profile } = useProfile();
   const [isLoading, setIsLoading] = useState(false);
   const [existingData, setExistingData] = useState<DadosCAIP[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [percentualPreenchimento, setPercentualPreenchimento] = useState(0);
 
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<DadosCAIP>();
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<DadosCAIP>();
+  const watchedValues = watch();
+
+  // Lista de unidades gestoras baseada no perfil do usuário
+  const unidadesGestoras = [
+    'SR/PRF/AC', 'SR/PRF/AL', 'SR/PRF/AP', 'SR/PRF/AM', 'SR/PRF/BA', 'SR/PRF/CE',
+    'SR/PRF/DF', 'SR/PRF/ES', 'SR/PRF/GO', 'SR/PRF/MA', 'SR/PRF/MT', 'SR/PRF/MS',
+    'SR/PRF/MG', 'SR/PRF/PA', 'SR/PRF/PB', 'SR/PRF/PR', 'SR/PRF/PE', 'SR/PRF/PI',
+    'SR/PRF/RJ', 'SR/PRF/RN', 'SR/PRF/RS', 'SR/PRF/RO', 'SR/PRF/RR', 'SR/PRF/SC',
+    'SR/PRF/SP', 'SR/PRF/SE', 'SR/PRF/TO'
+  ];
+
+  // Estados de conservação
+  const estadosConservacao = [
+    { value: 'A', label: 'A - Novo' },
+    { value: 'B', label: 'B - Entre novo e regular' },
+    { value: 'C', label: 'C - Regular' },
+    { value: 'D', label: 'D - Entre regular e reparos simples' },
+    { value: 'E', label: 'E - Reparos simples' },
+    { value: 'F', label: 'F - Entre reparos simples e importantes' },
+    { value: 'G', label: 'G - Reparos importantes' },
+    { value: 'H', label: 'H - Entre reparos importantes e sem valor' }
+  ];
 
   useEffect(() => {
     fetchExistingData();
   }, []);
+
+  // Preencher campos automáticos ao criar novo registro
+  useEffect(() => {
+    if (profile && !editingId) {
+      setValue('cadastrador', profile.nome_completo);
+      setValue('alterador', profile.nome_completo);
+      setValue('ultima_alteracao', new Date().toISOString().split('T')[0]);
+      if (profile.unidade_lotacao) {
+        setValue('unidade_gestora', profile.unidade_lotacao);
+      }
+    }
+  }, [profile, editingId, setValue]);
+
+  // Calcular percentual de preenchimento
+  useEffect(() => {
+    if (watchedValues) {
+      const campos = Object.keys(watchedValues);
+      const camposPreenchidos = campos.filter(campo => {
+        const valor = watchedValues[campo as keyof DadosCAIP];
+        return valor !== null && valor !== undefined && valor !== '';
+      });
+      
+      const percentual = Math.round((camposPreenchidos.length / campos.length) * 100);
+      setPercentualPreenchimento(percentual);
+      setValue('percentual_preenchimento', percentual.toString());
+      setValue('preenchido', percentual > 70 ? 'Sim' : 'Não');
+      setValue('data_alteracao_preenchida', new Date().toISOString().split('T')[0]);
+    }
+  }, [watchedValues, setValue]);
 
   const fetchExistingData = async () => {
     try {
@@ -183,25 +237,23 @@ const CAIP = () => {
                     <Database className="h-5 w-5" />
                     Informações Básicas
                   </h3>
+                  {/* Campos automáticos ocultos */}
+                  <input type="hidden" {...register('cadastrador')} />
+                  <input type="hidden" {...register('alterador')} />
+                  <input type="hidden" {...register('ultima_alteracao')} />
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="cadastrador">Cadastrador</Label>
-                      <Input {...register('cadastrador')} placeholder="Nome do cadastrador" />
-                    </div>
-                    <div>
-                      <Label htmlFor="alterador">Alterador</Label>
-                      <Input {...register('alterador')} placeholder="Nome do alterador" />
-                    </div>
-                    <div>
-                      <Label htmlFor="ultima_alteracao">Última Alteração</Label>
-                      <Input type="date" {...register('ultima_alteracao')} />
-                    </div>
                     <div>
                       <Label htmlFor="ano_caip">Ano CAIP *</Label>
                       <Input 
-                        type="number" 
+                        type="text" 
+                        maxLength={4}
                         {...register('ano_caip', { 
                           required: "Campo obrigatório",
+                          pattern: {
+                            value: /^\d{4}$/,
+                            message: "O Ano CAIP deve ter 4 dígitos"
+                          },
                           validate: (value) => {
                             const year = parseInt(value);
                             return !isNaN(year) && year % 2 !== 0 || "O Ano CAIP deve ser um número ímpar";
@@ -215,7 +267,16 @@ const CAIP = () => {
                     </div>
                     <div>
                       <Label htmlFor="unidade_gestora">Unidade Gestora *</Label>
-                      <Input {...register('unidade_gestora', { required: "Campo obrigatório" })} placeholder="Ex: SR/PRF/XX" />
+                      <Select onValueChange={(value) => setValue('unidade_gestora', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma unidade gestora" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {unidadesGestoras.map((unidade) => (
+                            <SelectItem key={unidade} value={unidade}>{unidade}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       {errors.unidade_gestora && (
                         <p className="text-sm text-destructive mt-1">{errors.unidade_gestora.message}</p>
                       )}
@@ -324,7 +385,16 @@ const CAIP = () => {
                       </div>
                       <div>
                         <Label htmlFor="estado_de_conservacao">Estado de Conservação</Label>
-                        <Input {...register('estado_de_conservacao')} placeholder="Ex: Bom, Regular, Ruim" />
+                        <Select onValueChange={(value) => setValue('estado_de_conservacao', value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o estado de conservação" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {estadosConservacao.map((estado) => (
+                              <SelectItem key={estado.value} value={estado.value}>{estado.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   </div>
@@ -421,39 +491,34 @@ const CAIP = () => {
                 {/* Seção 5: Infraestrutura e Utilidades */}
                 <Card className="p-6">
                   <h3 className="text-lg font-semibold mb-4">Infraestrutura e Utilidades</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="fornecimento_de_agua">Fornecimento de Água</Label>
-                      <Input {...register('fornecimento_de_agua')} placeholder="Tipo de fornecimento de água" />
-                    </div>
-                    <div>
-                      <Label htmlFor="fornecimento_de_energia_eletrica">Fornecimento de Energia Elétrica</Label>
-                      <Input {...register('fornecimento_de_energia_eletrica')} placeholder="Tipo de fornecimento de energia elétrica" />
-                    </div>
-                    <div>
-                      <Label htmlFor="esgotamento_sanitario">Esgotamento Sanitário</Label>
-                      <Input {...register('esgotamento_sanitario')} placeholder="Tipo de esgotamento sanitário" />
-                    </div>
-                    <div>
-                      <Label htmlFor="conexao_de_internet">Conexão de Internet</Label>
-                      <Input {...register('conexao_de_internet')} placeholder="Tipo de conexão de internet" />
-                    </div>
-                    <div>
-                      <Label htmlFor="identidade_visual">Identidade Visual</Label>
-                      <Input {...register('identidade_visual')} placeholder="Estado da identidade visual" />
-                    </div>
-                  </div>
-
-                  <Separator className="my-4" />
-
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="flex items-center space-x-2">
+                      <Checkbox {...register('fornecimento_de_agua')} />
+                      <Label>Fornecimento de Água</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('fornecimento_de_energia_eletrica')} />
+                      <Label>Fornecimento de Energia Elétrica</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('esgotamento_sanitario')} />
+                      <Label>Esgotamento Sanitário</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('conexao_de_internet')} />
+                      <Label>Conexão de Internet</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox {...register('identidade_visual')} />
+                      <Label>Identidade Visual</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
                       <Checkbox {...register('possui_wireless_wifi')} />
-                      <Label>Possui Wireless (Wi-Fi)?</Label>
+                      <Label>Possui Wireless (Wi-Fi)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox {...register('blindagem')} />
-                      <Label>Blindagem?</Label>
+                      <Label>Blindagem</Label>
                     </div>
                   </div>
                 </Card>
@@ -566,12 +631,44 @@ const CAIP = () => {
                   <h3 className="text-lg font-semibold mb-4">Notas e Avaliações</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="nota_para_adequacao">Nota para ADEQUAÇÃO</Label>
-                      <Input type="number" step="0.1" {...register('nota_para_adequacao')} placeholder="Ex: 8.5" />
+                      <Label htmlFor="nota_para_adequacao">Nota para ADEQUAÇÃO (1-10)</Label>
+                      <Select onValueChange={(value) => setValue('nota_para_adequacao', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a nota de adequação" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1 - Muito Inadequado</SelectItem>
+                          <SelectItem value="2">2 - Inadequado</SelectItem>
+                          <SelectItem value="3">3 - Muito Deficiente</SelectItem>
+                          <SelectItem value="4">4 - Deficiente</SelectItem>
+                          <SelectItem value="5">5 - Regular</SelectItem>
+                          <SelectItem value="6">6 - Satisfatório</SelectItem>
+                          <SelectItem value="7">7 - Bom</SelectItem>
+                          <SelectItem value="8">8 - Muito Bom</SelectItem>
+                          <SelectItem value="9">9 - Excelente</SelectItem>
+                          <SelectItem value="10">10 - Perfeito</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div>
-                      <Label htmlFor="nota_para_manutencao">Nota para MANUTENÇÃO</Label>
-                      <Input type="number" step="0.1" {...register('nota_para_manutencao')} placeholder="Ex: 7.0" />
+                      <Label htmlFor="nota_para_manutencao">Nota para MANUTENÇÃO (1-10)</Label>
+                      <Select onValueChange={(value) => setValue('nota_para_manutencao', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a nota de manutenção" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1 - Péssimo Estado</SelectItem>
+                          <SelectItem value="2">2 - Muito Ruim</SelectItem>
+                          <SelectItem value="3">3 - Ruim</SelectItem>
+                          <SelectItem value="4">4 - Regular Inferior</SelectItem>
+                          <SelectItem value="5">5 - Regular</SelectItem>
+                          <SelectItem value="6">6 - Regular Superior</SelectItem>
+                          <SelectItem value="7">7 - Bom</SelectItem>
+                          <SelectItem value="8">8 - Muito Bom</SelectItem>
+                          <SelectItem value="9">9 - Excelente</SelectItem>
+                          <SelectItem value="10">10 - Novo/Perfeito</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   <div className="mt-4">
@@ -584,32 +681,20 @@ const CAIP = () => {
                   </div>
                 </Card>
 
-                {/* Seção 10: Campos Calculados (Readonly) */}
-                <Card className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Campos Calculados</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="preenchido">Preenchido</Label>
-                      <Input {...register('preenchido')} readOnly placeholder="Automaticamente preenchido" className="bg-muted" />
-                    </div>
-                    <div>
-                      <Label htmlFor="percentual_preenchimento">Percentual Preenchimento</Label>
-                      <Input {...register('percentual_preenchimento')} readOnly placeholder="Calculado automaticamente" className="bg-muted" />
-                    </div>
-                    <div>
-                      <Label htmlFor="gatilho">Gatilho</Label>
-                      <Input {...register('gatilho')} readOnly placeholder="Disparado por regra" className="bg-muted" />
-                    </div>
-                    <div>
-                      <Label htmlFor="data_alteracao_preenchida">Data Alteração Preenchida</Label>
-                      <Input {...register('data_alteracao_preenchida')} readOnly placeholder="Data da última alteração de preenchimento" className="bg-muted" />
-                    </div>
-                    <div>
-                      <Label htmlFor="id_caip">ID CAIP</Label>
-                      <Input {...register('id_caip')} readOnly placeholder="ID CAIP" className="bg-muted" />
-                    </div>
+                {/* Campos calculados ocultos */}
+                <input type="hidden" {...register('preenchido')} />
+                <input type="hidden" {...register('percentual_preenchimento')} />
+                <input type="hidden" {...register('gatilho')} />
+                <input type="hidden" {...register('data_alteracao_preenchida')} />
+                <input type="hidden" {...register('id_caip')} />
+
+                {/* Mostrar percentual de preenchimento */}
+                <div className="flex items-center justify-center p-4 bg-muted/20 rounded-lg">
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground">Progresso do preenchimento:</p>
+                    <p className="text-2xl font-bold text-primary">{percentualPreenchimento}%</p>
                   </div>
-                </Card>
+                </div>
 
                 <div className="flex gap-4">
                   <Button type="submit" disabled={isLoading}>
