@@ -22,7 +22,6 @@ A aplicação RVR coleta os seguintes dados pessoais:
 - Nome completo
 - E-mail institucional (@prf.gov.br)
 - Matrícula funcional
-- [preencher com outros dados de identificação necessários]
 
 **Dados Funcionais e Operacionais:**
 - [preencher com dados específicos da aplicação: relatórios gerados, registros de atividades, dados operacionais, etc.]
