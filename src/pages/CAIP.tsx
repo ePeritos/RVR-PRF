@@ -20,6 +20,7 @@ import { SecuritySection } from '@/components/caip/SecuritySection';
 import { NotesEvaluationSection } from '@/components/caip/NotesEvaluationSection';
 import { ProgressActionsSection } from '@/components/caip/ProgressActionsSection';
 import { ExistingRecordsList } from '@/components/caip/ExistingRecordsList';
+import { DataFilter } from '@/components/DataFilter';
 
 type DadosCAIP = Tables<'dados_caip'>;
 
@@ -31,6 +32,7 @@ const CAIP = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [percentualPreenchimento, setPercentualPreenchimento] = useState(0);
+  const [filteredData, setFilteredData] = useState<DadosCAIP[]>([]);
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<DadosCAIP>();
   const watchedValues = watch();
@@ -196,11 +198,44 @@ const CAIP = () => {
     setEditingId(null);
   };
 
-  const filteredData = existingData.filter(item =>
-    item.nome_da_unidade?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.unidade_gestora?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.endereco?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleFilterChange = (filters: any) => {
+    let filtered = existingData;
+    
+    if (filters.anoCAIP) {
+      filtered = filtered.filter(item => item.ano_caip === filters.anoCAIP);
+    }
+    
+    if (filters.unidadeGestora) {
+      filtered = filtered.filter(item => item.unidade_gestora === filters.unidadeGestora);
+    }
+    
+    if (filters.tipoUnidade) {
+      filtered = filtered.filter(item => item.tipo_de_unidade === filters.tipoUnidade);
+    }
+    
+    if (filters.nomeUnidade) {
+      filtered = filtered.filter(item => 
+        item.nome_da_unidade && 
+        item.nome_da_unidade.toLowerCase().includes(filters.nomeUnidade.toLowerCase())
+      );
+    }
+    
+    // Apply search term filter
+    if (searchTerm) {
+      filtered = filtered.filter(item =>
+        item.nome_da_unidade?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.unidade_gestora?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.endereco?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    setFilteredData(filtered);
+  };
+
+  // Initialize filtered data
+  useEffect(() => {
+    setFilteredData(existingData);
+  }, [existingData]);
 
   return (
     <div className="p-6 space-y-6">
@@ -215,12 +250,12 @@ const CAIP = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="form" className="w-full">
+      <Tabs defaultValue="list" className="w-full">
         <TabsList>
+          <TabsTrigger value="list">Consultar Registros</TabsTrigger>
           <TabsTrigger value="form">
             {editingId ? 'Editar Registro' : 'Novo Registro'}
           </TabsTrigger>
-          <TabsTrigger value="list">Registros Existentes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="form">
@@ -280,12 +315,15 @@ const CAIP = () => {
         </TabsContent>
 
         <TabsContent value="list">
-          <ExistingRecordsList 
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filteredData={filteredData}
-            handleEdit={handleEdit}
-          />
+          <div className="space-y-6">
+            <DataFilter onFilterChange={handleFilterChange} />
+            <ExistingRecordsList 
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filteredData={filteredData}
+              handleEdit={handleEdit}
+            />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

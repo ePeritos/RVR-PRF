@@ -31,6 +31,9 @@ export const LocationPropertySection = ({ register, setValue, estadosConservacao
           <div>
             <Label htmlFor="coordenadas">Coordenadas</Label>
             <Input {...register('coordenadas')} placeholder="Ex: -XX.XXXXXX, -XX.XXXXXX" />
+            <div className="mt-2 text-xs text-muted-foreground">
+              <p>💡 Dica: Use o Google Maps para obter coordenadas precisas</p>
+            </div>
           </div>
           <div>
             <Label htmlFor="zona">Zona</Label>
@@ -58,7 +61,20 @@ export const LocationPropertySection = ({ register, setValue, estadosConservacao
           </div>
           <div>
             <Label htmlFor="situacao_do_imovel">Situação do Imóvel</Label>
-            <Input {...register('situacao_do_imovel')} placeholder="Ex: Regular, Irregular, Em obras" />
+            <Select onValueChange={(value) => setValue('situacao_do_imovel', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a situação" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Regular">Regular</SelectItem>
+                <SelectItem value="Irregular">Irregular</SelectItem>
+                <SelectItem value="Em obras">Em obras</SelectItem>
+                <SelectItem value="Reformado">Reformado</SelectItem>
+                <SelectItem value="A reformar">A reformar</SelectItem>
+                <SelectItem value="Demolido">Demolido</SelectItem>
+                <SelectItem value="Outros">Outros</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="estado_de_conservacao">Estado de Conservação</Label>

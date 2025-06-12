@@ -162,9 +162,9 @@ export function AppSidebar() {
 
               {/* Botão toggle tema */}
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <div className="flex justify-center w-full">
                   <ThemeToggle collapsed={state === "collapsed"} />
-                </SidebarMenuButton>
+                </div>
               </SidebarMenuItem>
 
               {/* Botão editar perfil */}

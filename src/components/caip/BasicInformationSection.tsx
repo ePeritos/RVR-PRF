@@ -75,7 +75,21 @@ export const BasicInformationSection = ({
         </div>
         <div>
           <Label htmlFor="tipo_de_unidade">Tipo de Unidade</Label>
-          <Input {...register('tipo_de_unidade')} placeholder="Ex: Superintendência, UOP, Delegacia" />
+          <Select onValueChange={(value) => setValue('tipo_de_unidade', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o tipo de unidade" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Superintendência">Superintendência</SelectItem>
+              <SelectItem value="UOP">UOP</SelectItem>
+              <SelectItem value="Delegacia">Delegacia</SelectItem>
+              <SelectItem value="Posto">Posto</SelectItem>
+              <SelectItem value="Base">Base</SelectItem>
+              <SelectItem value="Escritório Regional">Escritório Regional</SelectItem>
+              <SelectItem value="Centro de Treinamento">Centro de Treinamento</SelectItem>
+              <SelectItem value="Outros">Outros</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="md:col-span-2">
           <Label htmlFor="nome_da_unidade">Nome da Unidade *</Label>

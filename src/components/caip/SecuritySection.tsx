@@ -18,9 +18,27 @@ export const SecuritySection = ({ register }: SecuritySectionProps) => {
     { key: 'muro_ou_alambrado', label: 'Muro ou Alambrado' }
   ];
 
+  const handleSelectAll = (checked: boolean) => {
+    securityFields.forEach(({ key }) => {
+      const event = { target: { name: key, checked } };
+      register(key as keyof DadosCAIP).onChange(event);
+    });
+  };
+
   return (
     <Card className="p-6">
-      <h3 className="text-lg font-semibold mb-4">Segurança e Proteção</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold">Segurança e Proteção</h3>
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            onCheckedChange={handleSelectAll}
+            id="select-all-security"
+          />
+          <Label htmlFor="select-all-security" className="text-sm font-medium">
+            Marcar todos
+          </Label>
+        </div>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {securityFields.map(({ key, label }) => (
           <div key={key} className="flex items-center space-x-2">

@@ -21,9 +21,28 @@ export const InfrastructureSection = ({ register }: InfrastructureSectionProps) 
     { key: 'blindagem', label: 'Blindagem' }
   ];
 
+  const handleSelectAll = (checked: boolean) => {
+    infrastructureFields.forEach(({ key }) => {
+      // Set value for each checkbox
+      const event = { target: { name: key, checked } };
+      register(key as keyof DadosCAIP).onChange(event);
+    });
+  };
+
   return (
     <Card className="p-6">
-      <h3 className="text-lg font-semibold mb-4">Infraestrutura e Utilidades</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold">Infraestrutura e Utilidades</h3>
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            onCheckedChange={handleSelectAll}
+            id="select-all-infrastructure"
+          />
+          <Label htmlFor="select-all-infrastructure" className="text-sm font-medium">
+            Marcar todos
+          </Label>
+        </div>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {infrastructureFields.map(({ key, label }) => (
           <div key={key} className="flex items-center space-x-2">

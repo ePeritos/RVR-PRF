@@ -14,7 +14,6 @@ interface TechnicalDataSectionProps {
 
 export const TechnicalDataSection = ({ register }: TechnicalDataSectionProps) => {
   const checkboxFields = [
-    { key: 'adere_ao_pgprf_teletrabalho', label: 'Adere ao PGPRF? (TELETRABALHO)' },
     { key: 'ha_contrato_de_manutencao_predial', label: 'Há contrato de manutenção predial?' },
     { key: 'ha_plano_de_manutencao_do_imovel', label: 'Há plano de manutenção do imóvel?' },
     { key: 'o_trecho_e_concessionado', label: 'O trecho é concessionado?' },
@@ -73,6 +72,9 @@ export const TechnicalDataSection = ({ register }: TechnicalDataSectionProps) =>
           <Input {...register('rvr')} placeholder="Detalhes do RVR" />
         </div>
       </div>
+
+      {/* Campo oculto para PGPRF */}
+      <input type="hidden" {...register('adere_ao_pgprf_teletrabalho')} />
 
       <Separator className="my-4" />
 
