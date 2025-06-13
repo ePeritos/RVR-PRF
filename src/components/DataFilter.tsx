@@ -203,7 +203,7 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
   }
 
   return (
-    <Card className="p-6 bg-card border border-border">
+    <Card className="p-6 bg-card border border-border max-w-4xl">
       <div className="flex items-center gap-2 mb-4">
         <Filter className="h-5 w-5 text-primary" />
         <h3 className="text-lg font-semibold text-foreground">Filtros de Dados</h3>

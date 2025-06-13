@@ -191,6 +191,12 @@ const CAIP = () => {
     Object.keys(item).forEach(key => {
       setValue(key as keyof DadosCAIP, item[key as keyof DadosCAIP]);
     });
+    
+    // Mudar para a aba do formulário
+    const formTab = document.querySelector('[value="form"]') as HTMLButtonElement;
+    if (formTab) {
+      formTab.click();
+    }
   };
 
   const handleNew = () => {

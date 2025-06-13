@@ -20,6 +20,18 @@ interface RVRReportData {
   endereco?: string;
   rip?: string;
   matriculaImovel?: string;
+  zona?: string;
+  coordenadas?: string;
+  fornecimento_de_agua?: string;
+  fornecimento_de_energia_eletrica?: string;
+  esgotamento_sanitario?: string;
+  conexao_de_internet?: string;
+  possui_wireless_wifi?: string;
+  climatizacao_de_ambientes?: string;
+  sala_cofre?: string;
+  protecao_contra_incendios?: string;
+  protecao_contra_intrusao?: string;
+  muro_ou_alambrado?: string;
   parametros?: {
     cub?: number;
     cubM2?: number;
@@ -245,14 +257,14 @@ export function RVRReportPDFTemplate({ data, className = "" }: RVRReportPDFTempl
       <section style={{ marginBottom: '24px' }}>
         <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', backgroundColor: '#f3f4f6', padding: '8px' }}>IV. CARACTERÍSTICAS DO TERRENO E DA REGIÃO</h2>
         <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
-          <div style={{ marginBottom: '8px' }}><strong>Formato:</strong> Retangular</div>
-          <div style={{ marginBottom: '8px' }}><strong>Dimensões:</strong> [Dimensões do terreno]</div>
-          <div style={{ marginBottom: '8px' }}><strong>Topografia:</strong> Plana</div>
-          <div style={{ marginBottom: '8px' }}><strong>Situação:</strong> Meio de quadra</div>
-          <div style={{ marginBottom: '8px' }}><strong>Uso do Solo:</strong> Misto (residencial/comercial)</div>
-          <div style={{ marginBottom: '8px' }}><strong>Infraestrutura Urbana:</strong> Completa (água, esgoto, energia elétrica, telefone, pavimentação)</div>
-          <div style={{ marginBottom: '8px' }}><strong>Transporte Público:</strong> Disponível</div>
-          <div style={{ marginBottom: '8px' }}><strong>Zoneamento:</strong> [Zona conforme legislação municipal]</div>
+          <div style={{ marginBottom: '8px' }}><strong>Área do Terreno:</strong> {areaTerreno.toLocaleString('pt-BR')} m²</div>
+          <div style={{ marginBottom: '8px' }}><strong>Endereço:</strong> {data.endereco || '[Endereço não informado]'}</div>
+          <div style={{ marginBottom: '8px' }}><strong>Zona:</strong> {data.zona || 'Urbana'}</div>
+          <div style={{ marginBottom: '8px' }}><strong>Coordenadas:</strong> {data.coordenadas || '[Coordenadas não informadas]'}</div>
+          <div style={{ marginBottom: '8px' }}><strong>Situação do Imóvel:</strong> {data.situacaoImovel || '[Não informado]'}</div>
+          <div style={{ marginBottom: '8px' }}><strong>Matrícula:</strong> {data.matriculaImovel || '[Não informado]'}</div>
+          <div style={{ marginBottom: '8px' }}><strong>RIP:</strong> {data.rip || '[Não informado]'}</div>
+          <div style={{ marginBottom: '8px' }}><strong>Tipo de Imóvel:</strong> {data.categoria}</div>
         </div>
       </section>
 
@@ -260,15 +272,37 @@ export function RVRReportPDFTemplate({ data, className = "" }: RVRReportPDFTempl
       <section style={{ marginBottom: '24px' }}>
         <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', backgroundColor: '#f3f4f6', padding: '8px' }}>V. CARACTERÍSTICAS DAS BENFEITORIAS</h2>
         <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+          <div style={{ marginBottom: '8px' }}><strong>Área Construída:</strong> {areaBenfeitoria.toLocaleString('pt-BR')} m²</div>
           <div style={{ marginBottom: '8px' }}><strong>Descrição Geral:</strong> Edificação destinada a {data.categoria}</div>
           <div style={{ marginBottom: '8px' }}><strong>Tipo de Uso:</strong> Institucional - Segurança Pública</div>
-          <div style={{ marginBottom: '8px' }}><strong>Número de Pavimentos:</strong> [Número]</div>
-          <div style={{ marginBottom: '8px' }}><strong>Estrutura:</strong> Concreto armado</div>
-          <div style={{ marginBottom: '8px' }}><strong>Vedação:</strong> Alvenaria de tijolos cerâmicos</div>
-          <div style={{ marginBottom: '8px' }}><strong>Cobertura:</strong> Telhas cerâmicas</div>
           <div style={{ marginBottom: '8px' }}><strong>Idade Aparente:</strong> {idadeAparente ? `${idadeAparente} anos` : '[Não informado]'}</div>
+          <div style={{ marginBottom: '8px' }}><strong>Vida Útil Estimada:</strong> {vidaUtil ? `${vidaUtil} anos` : '[Não informado]'}</div>
           <div style={{ marginBottom: '8px' }}><strong>Estado de Conservação:</strong> {estadoConservacao || '[Não informado]'}</div>
           <div style={{ marginBottom: '8px' }}><strong>Padrão Construtivo:</strong> {data.parametros?.padraoConstrutivo || '[Não informado]'}</div>
+          
+          {/* Ambientes e Características Técnicas */}
+          <div style={{ marginTop: '16px' }}>
+            <strong>Infraestrutura Disponível:</strong>
+            <div style={{ marginTop: '8px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+              <div>• Fornecimento de Água: {data.fornecimento_de_agua === 'true' ? 'Sim' : 'Não'}</div>
+              <div>• Energia Elétrica: {data.fornecimento_de_energia_eletrica === 'true' ? 'Sim' : 'Não'}</div>
+              <div>• Esgotamento Sanitário: {data.esgotamento_sanitario === 'true' ? 'Sim' : 'Não'}</div>
+              <div>• Internet: {data.conexao_de_internet === 'true' ? 'Sim' : 'Não'}</div>
+              <div>• Wi-Fi: {data.possui_wireless_wifi === 'true' ? 'Sim' : 'Não'}</div>
+              <div>• Climatização: {data.climatizacao_de_ambientes === 'true' ? 'Sim' : 'Não'}</div>
+            </div>
+          </div>
+
+          {/* Sistemas de Segurança */}
+          <div style={{ marginTop: '16px' }}>
+            <strong>Sistemas de Segurança:</strong>
+            <div style={{ marginTop: '8px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+              <div>• Sala Cofre: {data.sala_cofre === 'true' ? 'Sim' : 'Não'}</div>
+              <div>• Proteção contra Incêndio: {data.protecao_contra_incendios === 'true' ? 'Sim' : 'Não'}</div>
+              <div>• Proteção contra Intrusão: {data.protecao_contra_intrusao === 'true' ? 'Sim' : 'Não'}</div>
+              <div>• Muro/Alambrado: {data.muro_ou_alambrado === 'true' ? 'Sim' : 'Não'}</div>
+            </div>
+          </div>
         </div>
       </section>
 

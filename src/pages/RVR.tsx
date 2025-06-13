@@ -194,6 +194,19 @@ const RVR = () => {
           padraoConstrutivo: PARAMETROS_FORMULARIO.padraoConstrutivo,
           idadePercentual: rossHeideckeResult.idadePercentual,
           coeficienteK: rossHeideckeResult.coeficiente,
+          // Dados adicionais do CAIP para o PDF
+          zona: item['zona'] || '',
+          coordenadas: item['coordenadas'] || '',
+          fornecimento_de_agua: item['fornecimento_de_agua'] || '',
+          fornecimento_de_energia_eletrica: item['fornecimento_de_energia_eletrica'] || '',
+          esgotamento_sanitario: item['esgotamento_sanitario'] || '',
+          conexao_de_internet: item['conexao_de_internet'] || '',
+          possui_wireless_wifi: item['possui_wireless_wifi'] || '',
+          climatizacao_de_ambientes: item['climatizacao_de_ambientes'] || '',
+          sala_cofre: item['sala_cofre'] || '',
+          protecao_contra_incendios: item['protecao_contra_incendios'] || '',
+          protecao_contra_intrusao: item['protecao_contra_intrusao'] || '',
+          muro_ou_alambrado: item['muro_ou_alambrado'] || '',
           // GARANTIR que os parâmetros corretos sejam passados
           parametros: {
             ...PARAMETROS_FORMULARIO,

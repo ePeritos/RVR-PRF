@@ -34,7 +34,7 @@ export const TermsAcceptanceDialog: React.FC<TermsAcceptanceDialogProps> = ({
 
   return (
     <Dialog open={open}>
-      <DialogContent className="max-w-2xl max-h-[80vh]">
+      <DialogContent className="max-w-xl max-h-[70vh]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
             Termos de Uso e Política de Privacidade
@@ -44,12 +44,12 @@ export const TermsAcceptanceDialog: React.FC<TermsAcceptanceDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[50vh] pr-4">
-          <div className="space-y-6">
+        <ScrollArea className="max-h-[40vh] pr-4">
+          <div className="space-y-4">
             {/* Termos de Uso - Resumo */}
             <div>
-              <h3 className="font-semibold text-lg mb-2">Termos de Uso</h3>
-              <div className="text-sm text-muted-foreground space-y-2">
+              <h3 className="font-semibold text-base mb-2">Termos de Uso</h3>
+              <div className="text-xs text-muted-foreground space-y-1">
                 <p>
                   <strong>1. Objeto:</strong> O Sistema RVR destina-se exclusivamente ao uso de servidores da Polícia Rodoviária Federal (PRF) para finalidades institucionais.
                 </p>
@@ -67,8 +67,8 @@ export const TermsAcceptanceDialog: React.FC<TermsAcceptanceDialogProps> = ({
 
             {/* Política de Privacidade - Resumo */}
             <div>
-              <h3 className="font-semibold text-lg mb-2">Política de Privacidade (LGPD)</h3>
-              <div className="text-sm text-muted-foreground space-y-2">
+              <h3 className="font-semibold text-base mb-2">Política de Privacidade (LGPD)</h3>
+              <div className="text-xs text-muted-foreground space-y-1">
                 <p>
                   <strong>Dados Coletados:</strong> Nome, e-mail institucional, matrícula funcional e dados técnicos de acesso.
                 </p>
@@ -92,8 +92,8 @@ export const TermsAcceptanceDialog: React.FC<TermsAcceptanceDialogProps> = ({
 
             {/* Contato */}
             <div>
-              <h3 className="font-semibold text-lg mb-2">Contato</h3>
-              <div className="text-sm text-muted-foreground">
+              <h3 className="font-semibold text-base mb-2">Contato</h3>
+              <div className="text-xs text-muted-foreground">
                 <p><strong>Encarregado de Proteção de Dados:</strong> Daniel Nunes de Ávila</p>
                 <p><strong>E-mail:</strong> daniel.avila@prf.gov.br</p>
                 <p><strong>Telefone:</strong> 81 97116-8618</p>
@@ -102,14 +102,14 @@ export const TermsAcceptanceDialog: React.FC<TermsAcceptanceDialogProps> = ({
           </div>
         </ScrollArea>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <Checkbox
               id="terms"
               checked={termsAccepted}
               onCheckedChange={(checked) => setTermsAccepted(checked === true)}
             />
-            <Label htmlFor="terms" className="text-sm">
+            <Label htmlFor="terms" className="text-xs">
               Li e aceito os <strong>Termos de Uso</strong> da aplicação RVR
             </Label>
           </div>
@@ -120,7 +120,7 @@ export const TermsAcceptanceDialog: React.FC<TermsAcceptanceDialogProps> = ({
               checked={privacyAccepted}
               onCheckedChange={(checked) => setPrivacyAccepted(checked === true)}
             />
-            <Label htmlFor="privacy" className="text-sm">
+            <Label htmlFor="privacy" className="text-xs">
               Li e aceito a <strong>Política de Privacidade</strong> e autorizo o tratamento dos meus dados pessoais conforme a LGPD
             </Label>
           </div>
@@ -130,7 +130,7 @@ export const TermsAcceptanceDialog: React.FC<TermsAcceptanceDialogProps> = ({
           <Button
             onClick={handleAccept}
             disabled={!canAccept}
-            className="w-full"
+            className="w-full h-8 text-xs"
           >
             {canAccept ? 'Aceitar e Continuar' : 'Aceite os termos para continuar'}
           </Button>
