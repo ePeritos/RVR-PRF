@@ -27,6 +27,24 @@ const Dashboard = () => {
   });
   const [filteredStats, setFilteredStats] = useState<DashboardStats>(stats);
 
+  // Função para formatar valores grandes de forma compacta
+  const formatCurrency = (value: number) => {
+    if (value >= 1000000000) {
+      return `R$ ${(value / 1000000000).toFixed(1)} bi`;
+    } else if (value >= 1000000) {
+      return `R$ ${(value / 1000000).toFixed(1)} mi`;
+    } else if (value >= 1000) {
+      return `R$ ${(value / 1000).toFixed(1)} mil`;
+    } else {
+      return value.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+    }
+  };
+
   // Função para calcular percentual de preenchimento dos campos CAIP
   const calculateFieldCompletion = (data: any[]) => {
     if (data.length === 0) return 0;
@@ -215,13 +233,8 @@ const Dashboard = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {filteredStats.valorTotalAvaliado.toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              })}
+            <div className="text-2xl font-bold text-foreground break-words">
+              {formatCurrency(filteredStats.valorTotalAvaliado)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Soma dos RVRs
