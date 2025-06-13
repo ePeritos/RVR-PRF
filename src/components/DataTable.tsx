@@ -112,7 +112,7 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
   const sortedData = getSortedData();
 
   return (
-    <Card className="overflow-hidden bg-card border border-border max-w-6xl">
+    <Card className="overflow-hidden bg-card border border-border max-w-5xl">
       <div className="p-6 border-b border-border bg-muted/50">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-foreground">Dados da Base CAIP</h3>
