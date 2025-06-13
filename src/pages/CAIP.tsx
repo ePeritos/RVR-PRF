@@ -39,11 +39,11 @@ const CAIP = () => {
 
   // Lista de unidades gestoras baseada no perfil do usuário
   const unidadesGestoras = [
-    'SR/PRF/AC', 'SR/PRF/AL', 'SR/PRF/AP', 'SR/PRF/AM', 'SR/PRF/BA', 'SR/PRF/CE',
-    'SR/PRF/DF', 'SR/PRF/ES', 'SR/PRF/GO', 'SR/PRF/MA', 'SR/PRF/MT', 'SR/PRF/MS',
-    'SR/PRF/MG', 'SR/PRF/PA', 'SR/PRF/PB', 'SR/PRF/PR', 'SR/PRF/PE', 'SR/PRF/PI',
-    'SR/PRF/RJ', 'SR/PRF/RN', 'SR/PRF/RS', 'SR/PRF/RO', 'SR/PRF/RR', 'SR/PRF/SC',
-    'SR/PRF/SP', 'SR/PRF/SE', 'SR/PRF/TO'
+    'SPRF/AC', 'SPRF/AL', 'SPRF/AP', 'SPRF/AM', 'SPRF/BA', 'SPRF/CE',
+    'SPRF/DF', 'SPRF/ES', 'SPRF/GO', 'SPRF/MA', 'SPRF/MT', 'SPRF/MS',
+    'SPRF/MG', 'SPRF/PA', 'SPRF/PB', 'SPRF/PR', 'SPRF/PE', 'SPRF/PI',
+    'SPRF/RJ', 'SPRF/RN', 'SPRF/RS', 'SPRF/RO', 'SPRF/RR', 'SPRF/SC',
+    'SPRF/SP', 'SPRF/SE', 'SPRF/TO', 'SEDE NACIONAL', 'UNIPRF'
   ];
 
   // Estados de conservação
@@ -97,7 +97,7 @@ const CAIP = () => {
         .from('dados_caip')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(100);
+        .limit(1000);
 
       if (error) throw error;
       setExistingData(data || []);
