@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
@@ -7,12 +7,23 @@ import { supabase } from '@/integrations/supabase/client';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TermsAcceptanceDialog } from '@/components/TermsAcceptanceDialog';
 
+const TERMS_STORAGE_KEY = 'rvr-terms-accepted';
+
 const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showTermsDialog, setShowTermsDialog] = useState(true);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Verificar se os termos já foram aceitos ao carregar a página
+  useEffect(() => {
+    const savedTermsAcceptance = localStorage.getItem(TERMS_STORAGE_KEY);
+    if (savedTermsAcceptance === 'true') {
+      setTermsAccepted(true);
+      setShowTermsDialog(false);
+    }
+  }, []);
 
   const handleSignInWithGoogle = async () => {
     if (!termsAccepted) {
@@ -47,6 +58,8 @@ const Auth = () => {
   const handleTermsAccept = () => {
     setTermsAccepted(true);
     setShowTermsDialog(false);
+    // Salvar no localStorage para persistir entre sessões
+    localStorage.setItem(TERMS_STORAGE_KEY, 'true');
   };
 
   return (
