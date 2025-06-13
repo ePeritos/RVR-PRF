@@ -45,6 +45,41 @@ export type Database = {
         }
         Relationships: []
       }
+      caderno_ambientes: {
+        Row: {
+          created_at: string | null
+          id: string
+          nome_ambiente: string
+          peso: number
+          prioridade: string
+          tipo_imovel_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          nome_ambiente: string
+          peso: number
+          prioridade: string
+          tipo_imovel_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nome_ambiente?: string
+          peso?: number
+          prioridade?: string
+          tipo_imovel_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caderno_ambientes_tipo_imovel_id_fkey"
+            columns: ["tipo_imovel_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_imoveis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dados_caip: {
         Row: {
           abastecimento_de_agua: string | null
@@ -441,6 +476,77 @@ export type Database = {
         }
         Relationships: []
       }
+      imoveis: {
+        Row: {
+          created_at: string | null
+          endereco: string | null
+          id: string
+          nome_unidade: string
+          rip: string | null
+          tipo_imovel_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          endereco?: string | null
+          id?: string
+          nome_unidade: string
+          rip?: string | null
+          tipo_imovel_id: string
+        }
+        Update: {
+          created_at?: string | null
+          endereco?: string | null
+          id?: string
+          nome_unidade?: string
+          rip?: string | null
+          tipo_imovel_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imoveis_tipo_imovel_id_fkey"
+            columns: ["tipo_imovel_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_imoveis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      imovel_ambientes_existentes: {
+        Row: {
+          ambiente_id: string
+          created_at: string | null
+          imovel_id: string
+          observacao: string | null
+        }
+        Insert: {
+          ambiente_id: string
+          created_at?: string | null
+          imovel_id: string
+          observacao?: string | null
+        }
+        Update: {
+          ambiente_id?: string
+          created_at?: string | null
+          imovel_id?: string
+          observacao?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imovel_ambientes_existentes_ambiente_id_fkey"
+            columns: ["ambiente_id"]
+            isOneToOne: false
+            referencedRelation: "caderno_ambientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imovel_ambientes_existentes_imovel_id_fkey"
+            columns: ["imovel_id"]
+            isOneToOne: false
+            referencedRelation: "imoveis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           cargo: string | null
@@ -527,36 +633,21 @@ export type Database = {
         }
         Relationships: []
       }
-      templates_parametros: {
+      tipos_imoveis: {
         Row: {
-          created_at: string
-          descricao: string | null
+          created_at: string | null
           id: string
-          is_default: boolean | null
-          nome_template: string
-          parametros: Json
-          updated_at: string
-          user_id: string
+          nome_tipo: string
         }
         Insert: {
-          created_at?: string
-          descricao?: string | null
+          created_at?: string | null
           id?: string
-          is_default?: boolean | null
-          nome_template: string
-          parametros: Json
-          updated_at?: string
-          user_id: string
+          nome_tipo: string
         }
         Update: {
-          created_at?: string
-          descricao?: string | null
+          created_at?: string | null
           id?: string
-          is_default?: boolean | null
-          nome_template?: string
-          parametros?: Json
-          updated_at?: string
-          user_id?: string
+          nome_tipo?: string
         }
         Relationships: []
       }
