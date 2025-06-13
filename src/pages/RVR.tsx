@@ -367,10 +367,6 @@ const RVR = () => {
         onViewPDF={handleViewPDF}
         onDownloadPDF={handleDownloadPDF}
         currentParameters={currentParameters}
-        canProceed={canProceed()}
-        onNextStep={nextStep}
-        onPrevStep={prevStep}
-        onNewEvaluation={handleNewEvaluation}
       />
 
       <NavigationButtons
