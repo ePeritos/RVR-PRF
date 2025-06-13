@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { Badge } from '@/components/ui/badge';
 import { Database, Plus, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -192,11 +192,8 @@ const CAIP = () => {
       setValue(key as keyof DadosCAIP, item[key as keyof DadosCAIP]);
     });
     
-    // Mudar para a aba do formulário
-    const formTab = document.querySelector('[value="form"]') as HTMLButtonElement;
-    if (formTab) {
-      formTab.click();
-    }
+    // Scroll para o topo da página onde está o formulário
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleNew = () => {
@@ -256,82 +253,71 @@ const CAIP = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="list" className="w-full">
-        <TabsList>
-          <TabsTrigger value="list">Consultar Registros</TabsTrigger>
-          <TabsTrigger value="form">
-            {editingId ? 'Editar Registro' : 'Novo Registro'}
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="form">
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                {editingId ? <Edit className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
-                {editingId ? 'Editar Registro CAIP' : 'Novo Registro CAIP'}
-              </CardTitle>
-              {editingId && (
-                <Badge variant="outline">Editando ID: {editingId}</Badge>
-              )}
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                <BasicInformationSection 
-                  register={register}
-                  setValue={setValue}
-                  errors={errors}
-                  unidadesGestoras={unidadesGestoras}
-                  estadosConservacao={estadosConservacao}
-                />
-
-                <ImagesSection register={register} />
-
-                <LocationPropertySection 
-                  register={register}
-                  setValue={setValue}
-                  estadosConservacao={estadosConservacao}
-                />
-
-                <TechnicalDataSection register={register} />
-
-                <InfrastructureSection register={register} />
-
-                <EnvironmentsSection register={register} />
-
-                <SystemsSection register={register} />
-
-                <SecuritySection register={register} />
-
-                <NotesEvaluationSection 
-                  register={register}
-                  setValue={setValue}
-                />
-
-                <ProgressActionsSection 
-                  register={register}
-                  percentualPreenchimento={percentualPreenchimento}
-                  isLoading={isLoading}
-                  editingId={editingId}
-                  handleNew={handleNew}
-                />
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="list">
-          <div className="space-y-6 max-w-5xl mx-auto">
-            <DataFilter onFilterChange={handleFilterChange} />
-            <ExistingRecordsList 
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              filteredData={filteredData}
-              handleEdit={handleEdit}
+      {/* Formulário */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            {editingId ? <Edit className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+            {editingId ? 'Editar Registro CAIP' : 'Novo Registro CAIP'}
+          </CardTitle>
+          {editingId && (
+            <Badge variant="outline">Editando ID: {editingId}</Badge>
+          )}
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            <BasicInformationSection 
+              register={register}
+              setValue={setValue}
+              errors={errors}
+              unidadesGestoras={unidadesGestoras}
+              estadosConservacao={estadosConservacao}
             />
-          </div>
-        </TabsContent>
-      </Tabs>
+
+            <ImagesSection register={register} />
+
+            <LocationPropertySection 
+              register={register}
+              setValue={setValue}
+              estadosConservacao={estadosConservacao}
+            />
+
+            <TechnicalDataSection register={register} />
+
+            <InfrastructureSection register={register} />
+
+            <EnvironmentsSection register={register} />
+
+            <SystemsSection register={register} />
+
+            <SecuritySection register={register} />
+
+            <NotesEvaluationSection 
+              register={register}
+              setValue={setValue}
+            />
+
+            <ProgressActionsSection 
+              register={register}
+              percentualPreenchimento={percentualPreenchimento}
+              isLoading={isLoading}
+              editingId={editingId}
+              handleNew={handleNew}
+            />
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Lista de Registros */}
+      <div className="space-y-6">
+        <DataFilter onFilterChange={handleFilterChange} />
+        <ExistingRecordsList 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          filteredData={filteredData}
+          handleEdit={handleEdit}
+        />
+      </div>
     </div>
   );
 };
