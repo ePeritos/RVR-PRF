@@ -344,7 +344,7 @@ const RVR = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 max-w-7xl mx-auto">
       <div className="flex items-center gap-2 mb-6">
         <h1 className="text-2xl font-bold text-foreground">RVR - Relatório de Valor de Reposição</h1>
       </div>

@@ -244,7 +244,7 @@ const CAIP = () => {
   }, [existingData]);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Database className="h-6 w-6 text-primary" />
@@ -321,7 +321,7 @@ const CAIP = () => {
         </TabsContent>
 
         <TabsContent value="list">
-          <div className="space-y-6">
+          <div className="space-y-6 max-w-5xl mx-auto">
             <DataFilter onFilterChange={handleFilterChange} />
             <ExistingRecordsList 
               searchTerm={searchTerm}

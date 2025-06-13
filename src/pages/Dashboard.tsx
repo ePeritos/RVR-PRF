@@ -12,6 +12,7 @@ interface DashboardStats {
   imoveisAvaliados: number;
   totalAreas: number;
   valorTotalAvaliado: number;
+  percentualPreenchimento: number;
 }
 
 const Dashboard = () => {
@@ -22,8 +23,40 @@ const Dashboard = () => {
     imoveisAvaliados: 0,
     totalAreas: 0,
     valorTotalAvaliado: 0,
+    percentualPreenchimento: 0,
   });
   const [filteredStats, setFilteredStats] = useState<DashboardStats>(stats);
+
+  // Função para calcular percentual de preenchimento dos campos CAIP
+  const calculateFieldCompletion = (data: any[]) => {
+    if (data.length === 0) return 0;
+
+    // Lista de campos relevantes do CAIP para calcular o preenchimento
+    const relevantFields = [
+      'nome_da_unidade', 'unidade_gestora', 'tipo_de_unidade', 'endereco', 'zona',
+      'coordenadas', 'area_construida_m2', 'area_do_terreno_m2', 'idade_aparente_do_imovel',
+      'vida_util_estimada_anos', 'estado_de_conservacao', 'situacao_do_imovel',
+      'fornecimento_de_agua', 'fornecimento_de_energia_eletrica', 'esgotamento_sanitario',
+      'conexao_de_internet', 'possui_wireless_wifi', 'climatizacao_de_ambientes',
+      'sala_cofre', 'protecao_contra_incendios', 'protecao_contra_intrusao', 'muro_ou_alambrado'
+    ];
+
+    const totalFields = relevantFields.length;
+    let totalCompletion = 0;
+
+    data.forEach(item => {
+      let filledFields = 0;
+      relevantFields.forEach(field => {
+        const value = item[field];
+        if (value !== null && value !== undefined && value !== '' && value !== 'false') {
+          filledFields++;
+        }
+      });
+      totalCompletion += (filledFields / totalFields) * 100;
+    });
+
+    return totalCompletion / data.length;
+  };
 
   useEffect(() => {
     if (supabaseData.length > 0) {
@@ -40,11 +73,14 @@ const Dashboard = () => {
         acc + (Number(item.rvr) || 0), 0
       );
 
+      const percentualPreenchimento = calculateFieldCompletion(supabaseData);
+
       const newStats = {
         totalImoveis,
         imoveisAvaliados,
         totalAreas,
         valorTotalAvaliado,
+        percentualPreenchimento,
       };
       
       setStats(newStats);
@@ -87,17 +123,20 @@ const Dashboard = () => {
       acc + (Number(item.rvr) || 0), 0
     );
 
+    const percentualPreenchimento = calculateFieldCompletion(filtered);
+
     setFilteredStats({
       totalImoveis,
       imoveisAvaliados,
       totalAreas,
       valorTotalAvaliado,
+      percentualPreenchimento,
     });
   };
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-6 max-w-7xl mx-auto">
         <div className="flex items-center gap-2 mb-6">
           <TrendingUp className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
@@ -111,14 +150,14 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center gap-2 mb-6">
         <TrendingUp className="h-6 w-6 text-primary" />
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
       </div>
 
       {/* Cards de Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total de Imóveis</CardTitle>
@@ -189,10 +228,27 @@ const Dashboard = () => {
             </p>
           </CardContent>
         </Card>
+
+        <Card className="bg-card border-border">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Preenchimento CAIP</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">
+              {filteredStats.percentualPreenchimento.toFixed(1)}%
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Média de campos preenchidos
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filtros */}
-      <DataFilter onFilterChange={handleFilterChange} />
+      <div className="max-w-5xl mx-auto">
+        <DataFilter onFilterChange={handleFilterChange} />
+      </div>
     </div>
   );
 };
