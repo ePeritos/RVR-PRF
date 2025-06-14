@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 // Debounce hook para evitar chamadas excessivas
 export const useDebounce = <T extends (...args: any[]) => any>(
@@ -85,5 +85,3 @@ export const lazyImport = <T extends React.ComponentType<any>>(
   const LazyComponent = React.lazy(factory);
   return LazyComponent;
 };
-
-import React from 'react';
