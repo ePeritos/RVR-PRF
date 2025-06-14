@@ -111,7 +111,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Sistema</SidebarGroupLabel>
+          <SidebarGroupLabel>SIGI-PRF</SidebarGroupLabel>
 
           <SidebarGroupContent>
             <SidebarMenu>

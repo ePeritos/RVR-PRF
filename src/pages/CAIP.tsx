@@ -138,7 +138,7 @@ const CAIP = () => {
           Gerenciamento de Imóveis CAIP
         </h2>
         <p className="text-sm text-muted-foreground">
-          Filtre e gerencie os registros de imóveis do sistema CAIP
+          Cadastro de Avaliação de Imóveis para Programação - Gerencie os registros de imóveis da PRF
         </p>
       </div>
 

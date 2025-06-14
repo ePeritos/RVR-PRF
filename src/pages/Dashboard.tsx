@@ -174,6 +174,18 @@ const Dashboard = () => {
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
       </div>
 
+      <div className="text-center mb-8">
+        <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
+          SIGI-PRF
+        </h2>
+        <p className="text-lg text-muted-foreground mb-1">
+          Sistema de Gestão de Imóveis da PRF
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Plataforma integrada para gestão completa do patrimônio imobiliário da Polícia Rodoviária Federal
+        </p>
+      </div>
+
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <Card className="bg-card border-border">

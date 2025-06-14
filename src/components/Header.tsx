@@ -12,10 +12,10 @@ export const Header = () => {
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1 min-w-0">
             <h1 className="text-lg sm:text-2xl font-bold text-foreground truncate">
-              Sistema RVR
+              SIGI-PRF
             </h1>
             <span className="text-xs sm:text-sm text-muted-foreground block truncate">
-              para geração do Relatório de Valor Referencial
+              Sistema de Gestão de Imóveis da PRF
             </span>
           </div>
           
