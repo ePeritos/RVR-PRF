@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface FilterData {
   anoCAIP: string;
@@ -20,6 +21,8 @@ interface DataFilterProps {
 }
 
 export function DataFilter({ onFilterChange }: DataFilterProps) {
+  const { profile, isAdmin, loading: profileLoading } = useUserProfile();
+  
   const [filters, setFilters] = useState<FilterData>({
     anoCAIP: '',
     unidadeGestora: '',
@@ -170,6 +173,16 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
     fetchAllFilterValues();
   }, []);
 
+  // Aplicar pré-filtro baseado na unidade gestora do usuário (se não for admin)
+  useEffect(() => {
+    if (!profileLoading && profile && !isAdmin && profile.unidade_gestora) {
+      setFilters(prev => ({
+        ...prev,
+        unidadeGestora: profile.unidade_gestora
+      }));
+    }
+  }, [profile, isAdmin, profileLoading]);
+
   // Atualizar filtros quando qualquer valor mudar
   useEffect(() => {
     onFilterChange(filters);
@@ -183,7 +196,12 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
   };
 
   const clearFilters = () => {
-    const emptyFilters = { anoCAIP: '', unidadeGestora: '', tipoUnidade: '', nomeUnidade: '' };
+    const emptyFilters = { 
+      anoCAIP: '', 
+      unidadeGestora: isAdmin ? '' : (profile?.unidade_gestora || ''), 
+      tipoUnidade: '', 
+      nomeUnidade: '' 
+    };
     setFilters(emptyFilters);
   };
 
@@ -225,12 +243,18 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">Unidade Gestora</Label>
+          <Label className="text-sm font-medium text-foreground">
+            Unidade Gestora
+            {!isAdmin && profile?.unidade_gestora && (
+              <span className="text-xs text-muted-foreground ml-2">(Fixo para seu perfil)</span>
+            )}
+          </Label>
           <Select 
             value={filters.unidadeGestora} 
             onValueChange={(value) => handleFilterChange('unidadeGestora', value)}
+            disabled={!isAdmin}
           >
-            <SelectTrigger className="bg-background border-border focus:border-primary">
+            <SelectTrigger className={`border-border focus:border-primary ${!isAdmin ? 'bg-muted cursor-not-allowed' : 'bg-background'}`}>
               <SelectValue placeholder="Selecionar unidade gestora" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">

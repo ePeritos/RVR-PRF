@@ -606,6 +606,7 @@ export type Database = {
           responsavel_tecnico_id: string | null
           role: Database["public"]["Enums"]["app_role"]
           telefone: string | null
+          unidade_gestora: string | null
           unidade_lotacao: string | null
           updated_at: string
         }
@@ -619,6 +620,7 @@ export type Database = {
           responsavel_tecnico_id?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           telefone?: string | null
+          unidade_gestora?: string | null
           unidade_lotacao?: string | null
           updated_at?: string
         }
@@ -632,6 +634,7 @@ export type Database = {
           responsavel_tecnico_id?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           telefone?: string | null
+          unidade_gestora?: string | null
           unidade_lotacao?: string | null
           updated_at?: string
         }
