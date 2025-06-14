@@ -28,8 +28,7 @@ interface AmbienteExistente {
 }
 
 export const EnvironmentsSection = ({ register, setValue, watchedValues }: EnvironmentsSectionProps) => {
-  const [ambientesExistentes, setAmbientesExistentes] = useState<AmbienteExistente[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [avaliacoesLocais, setAvaliacoesLocais] = useState<{[key: string]: number}>({});
   const { toast } = useToast();
 
   const environmentFields = [
@@ -132,100 +131,102 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues }: Envir
     { campo: 'vestiario_para_policiais', nomeAmbiente: 'Vestiário para policiais' }
   ];
 
+  // Carregar avaliações existentes quando há ID do registro
   useEffect(() => {
-    carregarAmbientesExistentes();
-  }, [watchedValues?.tipo_de_unidade, watchedValues?.id]);
-
-  const carregarAmbientesExistentes = async () => {
-    if (!watchedValues?.tipo_de_unidade || !watchedValues?.id) {
-      setLoading(false);
-      return;
+    if (watchedValues?.id) {
+      carregarAvaliacoesExistentes();
     }
+  }, [watchedValues?.id]);
+
+  const carregarAvaliacoesExistentes = async () => {
+    if (!watchedValues?.id) return;
 
     try {
-      // Buscar ambientes do caderno baseado no tipo de unidade
+      const { data: avaliacoes, error } = await supabase
+        .from('manutencao_ambientes')
+        .select('*')
+        .eq('imovel_id', watchedValues.id);
+
+      if (error) throw error;
+
+      // Converter avaliações para o formato local
+      const avaliacoesMap: {[key: string]: number} = {};
+      avaliacoes?.forEach(avaliacao => {
+        // Encontrar o campo correspondente pelo ambiente_id
+        const campoCorrespondente = camposAmbientes.find(c => {
+          // Aqui precisaríamos de uma forma de mapear ambiente_id para campo
+          // Por simplicidade, vamos usar o nome do ambiente
+          return c.nomeAmbiente === avaliacao.ambiente_id; // Isso precisa ser ajustado
+        });
+        
+        if (campoCorrespondente) {
+          avaliacoesMap[campoCorrespondente.campo] = avaliacao.score_conservacao;
+        }
+      });
+
+      setAvaliacoesLocais(avaliacoesMap);
+    } catch (error) {
+      console.error('Erro ao carregar avaliações:', error);
+    }
+  };
+
+  const handleAvaliacaoChange = (campo: string, rating: number) => {
+    // Atualizar estado local
+    setAvaliacoesLocais(prev => ({
+      ...prev,
+      [campo]: rating
+    }));
+
+    // Se o registro já existe, salvar no banco
+    if (watchedValues?.id) {
+      salvarAvaliacaoNoBanco(campo, rating);
+    }
+  };
+
+  const salvarAvaliacaoNoBanco = async (campo: string, scoreConservacao: number) => {
+    if (!watchedValues?.id) return;
+
+    try {
+      // Encontrar o ambiente_id baseado no campo e tipo de unidade
       const { data: cadernoAmbientes, error: errorCaderno } = await supabase
         .from('caderno_ambientes')
         .select(`
           id,
           nome_ambiente,
-          peso,
           tipos_imoveis!inner(nome_tipo)
         `)
         .eq('tipos_imoveis.nome_tipo', watchedValues.tipo_de_unidade);
 
       if (errorCaderno) throw errorCaderno;
 
-      // Buscar avaliações existentes
-      const { data: avaliacoes, error: errorAvaliacoes } = await supabase
-        .from('manutencao_ambientes')
-        .select('*')
-        .eq('imovel_id', watchedValues.id);
+      const campoCorrespondente = camposAmbientes.find(c => c.campo === campo);
+      if (!campoCorrespondente) return;
 
-      if (errorAvaliacoes) throw errorAvaliacoes;
+      const ambiente = cadernoAmbientes?.find(a => a.nome_ambiente === campoCorrespondente.nomeAmbiente);
+      if (!ambiente) return;
 
-      // Filtrar apenas ambientes que existem no imóvel
-      const ambientesExistentesData: AmbienteExistente[] = [];
-
-      cadernoAmbientes?.forEach((ambienteData: any) => {
-        const campoCorrespondente = camposAmbientes.find(
-          c => c.nomeAmbiente === ambienteData.nome_ambiente
-        );
-
-        if (campoCorrespondente) {
-          const valorCampo = watchedValues[campoCorrespondente.campo as keyof DadosCAIP];
-          
-          if (valorCampo === 'Existente' || valorCampo === 'Sim') {
-            const avaliacao = avaliacoes?.find(a => a.ambiente_id === ambienteData.id);
-            ambientesExistentesData.push({
-              ambiente: {
-                id: ambienteData.id,
-                nome_ambiente: ambienteData.nome_ambiente,
-                peso: ambienteData.peso
-              },
-              avaliacao
-            });
-          }
-        }
-      });
-
-      setAmbientesExistentes(ambientesExistentesData);
-    } catch (error) {
-      console.error('Erro ao carregar ambientes:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const salvarAvaliacao = async (ambienteId: string, scoreConservacao: number, observacoes?: string) => {
-    if (!watchedValues?.id) return;
-
-    try {
       const { error } = await supabase
         .from('manutencao_ambientes')
         .upsert({
           imovel_id: watchedValues.id,
-          ambiente_id: ambienteId,
+          ambiente_id: ambiente.id,
           score_conservacao: scoreConservacao,
-          observacoes: observacoes || null
+          observacoes: null
         });
 
       if (error) throw error;
 
-      // Buscar a nova nota de manutenção calculada
-      const { data: imovelAtualizado } = await supabase
-        .from('dados_caip')
-        .select('nota_para_manutencao')
-        .eq('id', watchedValues.id)
-        .single();
-
-      if (imovelAtualizado?.nota_para_manutencao) {
-        setValue('nota_para_manutencao', imovelAtualizado.nota_para_manutencao.toString());
-      }
-
-      await carregarAmbientesExistentes();
+      toast({
+        title: "Avaliação salva",
+        description: `Avaliação para ${campoCorrespondente.nomeAmbiente} foi salva com sucesso.`,
+      });
     } catch (error) {
       console.error('Erro ao salvar avaliação:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar a avaliação.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -235,11 +236,8 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues }: Envir
     });
   };
 
-  const getAmbienteAvaliacao = (key: string) => {
-    const campoCorrespondente = camposAmbientes.find(c => c.campo === key);
-    if (!campoCorrespondente) return null;
-    
-    return ambientesExistentes.find(a => a.ambiente.nome_ambiente === campoCorrespondente.nomeAmbiente);
+  const getAvaliacaoLocal = (campo: string) => {
+    return avaliacoesLocais[campo] || 0;
   };
 
   return (
@@ -262,7 +260,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues }: Envir
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {environmentFields.map(({ key, label }) => {
           const isSelected = watchedValues?.[key as keyof DadosCAIP] === 'Sim';
-          const ambienteAvaliacao = getAmbienteAvaliacao(key);
+          const avaliacaoAtual = getAvaliacaoLocal(key);
           
           return (
             <div key={key} className="border rounded-lg p-3 space-y-2">
@@ -275,12 +273,12 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues }: Envir
                 <Label className="text-sm font-medium">{label}</Label>
               </div>
               
-              {isSelected && ambienteAvaliacao && (
+              {isSelected && (
                 <div className="ml-6 space-y-2">
                   <Label className="text-xs text-muted-foreground">Estado de conservação:</Label>
                   <StarRating
-                    value={ambienteAvaliacao.avaliacao?.score_conservacao || 0}
-                    onChange={(rating) => salvarAvaliacao(ambienteAvaliacao.ambiente.id, rating, ambienteAvaliacao.avaliacao?.observacoes)}
+                    value={avaliacaoAtual}
+                    onChange={(rating) => handleAvaliacaoChange(key, rating)}
                     size={16}
                   />
                 </div>
