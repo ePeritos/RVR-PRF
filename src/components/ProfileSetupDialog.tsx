@@ -20,6 +20,7 @@ interface ProfileData {
   matricula: string;
   unidade_gestora: string;
   telefone: string;
+  formacao: string;
 }
 
 export const ProfileSetupDialog: React.FC<ProfileSetupDialogProps> = ({ open, onComplete }) => {
@@ -29,7 +30,8 @@ export const ProfileSetupDialog: React.FC<ProfileSetupDialogProps> = ({ open, on
     cargo: '',
     matricula: '',
     unidade_gestora: '',
-    telefone: ''
+    telefone: '',
+    formacao: ''
   });
   const [loading, setLoading] = useState(false);
   
@@ -65,6 +67,14 @@ export const ProfileSetupDialog: React.FC<ProfileSetupDialogProps> = ({ open, on
     'SPRF/TO'
   ];
   
+  const opcoesFormacao = [
+    'Arquitetura',
+    'Engenharia Civil',
+    'Engenharia Elétrica',
+    'Engenharia Mecânica',
+    'Outra'
+  ];
+  
   const { toast } = useToast();
 
   const handleSave = async (e: React.FormEvent) => {
@@ -91,6 +101,7 @@ export const ProfileSetupDialog: React.FC<ProfileSetupDialogProps> = ({ open, on
           matricula: profile.matricula,
           unidade_gestora: profile.unidade_gestora,
           telefone: profile.telefone,
+          formacao: profile.formacao,
           email: user?.email,
           role: 'usuario_padrao' as any
         });
@@ -181,6 +192,25 @@ export const ProfileSetupDialog: React.FC<ProfileSetupDialogProps> = ({ open, on
               onChange={(e) => setProfile(prev => ({ ...prev, matricula: e.target.value }))}
               placeholder="Sua matrícula funcional"
             />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="formacao">Formação</Label>
+            <Select
+              value={profile.formacao}
+              onValueChange={(value) => setProfile(prev => ({ ...prev, formacao: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione sua formação" />
+              </SelectTrigger>
+              <SelectContent className="max-h-60 overflow-y-auto">
+                {opcoesFormacao.map((formacao) => (
+                  <SelectItem key={formacao} value={formacao}>
+                    {formacao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="space-y-2">
