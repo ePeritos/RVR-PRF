@@ -222,11 +222,15 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
         }
       }
 
-      // Garantir que as notas não ultrapassem 100
+      // Processar dados e garantir que campos numéricos não sejam strings vazias
       const processedData = {
         ...data,
-        nota_para_adequacao: data.nota_para_adequacao ? Math.min(100, parseFloat(data.nota_para_adequacao)).toString() : data.nota_para_adequacao,
-        nota_para_manutencao: data.nota_para_manutencao ? Math.min(100, parseFloat(data.nota_para_manutencao)).toString() : data.nota_para_manutencao,
+        nota_para_adequacao: data.nota_para_adequacao && data.nota_para_adequacao !== '' ? 
+          Math.min(100, parseFloat(data.nota_para_adequacao)) : null,
+        nota_para_manutencao: data.nota_para_manutencao && data.nota_para_manutencao !== '' ? 
+          Math.min(100, parseFloat(data.nota_para_manutencao)) : null,
+        nota_global: data.nota_global && data.nota_global !== '' ? 
+          Math.min(100, parseFloat(data.nota_global)) : null,
       };
 
       if (editingItem) {
