@@ -6,13 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface FilterData {
-  anoCAIP: string;
-  unidadeGestora: string;
-  tipoUnidade: string;
+  anoCAIP: string[];
+  unidadeGestora: string[];
+  tipoUnidade: string[];
   nomeUnidade: string;
 }
 
@@ -24,9 +25,9 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
   const { profile, isAdmin, loading: profileLoading } = useUserProfile();
   
   const [filters, setFilters] = useState<FilterData>({
-    anoCAIP: '',
-    unidadeGestora: '',
-    tipoUnidade: '',
+    anoCAIP: [],
+    unidadeGestora: [],
+    tipoUnidade: [],
     nomeUnidade: ''
   });
 
@@ -178,7 +179,7 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
     if (!profileLoading && profile && !isAdmin && profile.unidade_gestora) {
       setFilters(prev => ({
         ...prev,
-        unidadeGestora: profile.unidade_gestora
+        unidadeGestora: [profile.unidade_gestora]
       }));
     }
   }, [profile, isAdmin, profileLoading]);
@@ -188,7 +189,7 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
     onFilterChange(filters);
   }, [filters, onFilterChange]);
 
-  const handleFilterChange = (key: keyof FilterData, value: string) => {
+  const handleFilterChange = (key: keyof FilterData, value: string[] | string) => {
     setFilters(prev => ({
       ...prev,
       [key]: value
@@ -197,9 +198,9 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
 
   const clearFilters = () => {
     const emptyFilters = { 
-      anoCAIP: '', 
-      unidadeGestora: isAdmin ? '' : (profile?.unidade_gestora || ''), 
-      tipoUnidade: '', 
+      anoCAIP: [], 
+      unidadeGestora: isAdmin ? [] : (profile?.unidade_gestora ? [profile.unidade_gestora] : []), 
+      tipoUnidade: [], 
       nomeUnidade: '' 
     };
     setFilters(emptyFilters);
@@ -230,16 +231,13 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">Ano CAIP</Label>
-          <Select value={filters.anoCAIP} onValueChange={(value) => handleFilterChange('anoCAIP', value)}>
-            <SelectTrigger className="bg-background border-border focus:border-primary">
-              <SelectValue placeholder="Selecionar ano" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border">
-              {anosDisponiveis.map((ano) => (
-                <SelectItem key={ano} value={ano}>{ano}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MultiSelect
+            options={anosDisponiveis}
+            selected={filters.anoCAIP}
+            onChange={(selected) => handleFilterChange('anoCAIP', selected)}
+            placeholder="Selecionar anos"
+            className="bg-background border-border focus:border-primary"
+          />
         </div>
 
         <div className="space-y-2">
@@ -249,37 +247,25 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
               <span className="text-xs text-muted-foreground ml-2">(Fixo para seu perfil)</span>
             )}
           </Label>
-          <Select 
-            value={filters.unidadeGestora} 
-            onValueChange={(value) => handleFilterChange('unidadeGestora', value)}
+          <MultiSelect
+            options={unidadesGestoras}
+            selected={filters.unidadeGestora}
+            onChange={(selected) => handleFilterChange('unidadeGestora', selected)}
+            placeholder="Selecionar unidades gestoras"
             disabled={!isAdmin}
-          >
-            <SelectTrigger className={`border-border focus:border-primary ${!isAdmin ? 'bg-muted cursor-not-allowed' : 'bg-background'}`}>
-              <SelectValue placeholder="Selecionar unidade gestora" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border">
-              {unidadesGestoras.map((unidade) => (
-                <SelectItem key={unidade} value={unidade}>{unidade}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            className={`border-border focus:border-primary ${!isAdmin ? 'opacity-50' : ''}`}
+          />
         </div>
 
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">Tipo de Unidade</Label>
-          <Select 
-            value={filters.tipoUnidade} 
-            onValueChange={(value) => handleFilterChange('tipoUnidade', value)}
-          >
-            <SelectTrigger className="bg-background border-border focus:border-primary">
-              <SelectValue placeholder="Selecionar tipo" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border">
-              {tiposUnidade.map((tipo) => (
-                <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MultiSelect
+            options={tiposUnidade}
+            selected={filters.tipoUnidade}
+            onChange={(selected) => handleFilterChange('tipoUnidade', selected)}
+            placeholder="Selecionar tipos"
+            className="bg-background border-border focus:border-primary"
+          />
         </div>
 
         <div className="space-y-2">

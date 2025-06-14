@@ -600,6 +600,7 @@ export type Database = {
           cargo: string | null
           created_at: string
           email: string | null
+          formacao: string | null
           id: string
           matricula: string | null
           nome_completo: string
@@ -614,6 +615,7 @@ export type Database = {
           cargo?: string | null
           created_at?: string
           email?: string | null
+          formacao?: string | null
           id: string
           matricula?: string | null
           nome_completo: string
@@ -628,6 +630,7 @@ export type Database = {
           cargo?: string | null
           created_at?: string
           email?: string | null
+          formacao?: string | null
           id?: string
           matricula?: string | null
           nome_completo?: string

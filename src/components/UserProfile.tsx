@@ -17,6 +17,7 @@ interface Profile {
   matricula: string;
   unidade_gestora: string;
   telefone: string;
+  formacao: string;
 }
 
 export const UserProfile = () => {
@@ -26,7 +27,8 @@ export const UserProfile = () => {
     cargo: '',
     matricula: '',
     unidade_gestora: '',
-    telefone: ''
+    telefone: '',
+    formacao: ''
   });
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -61,6 +63,14 @@ export const UserProfile = () => {
     'SPRF/SP',
     'SPRF/TO'
   ];
+  
+  const opcoesFormacao = [
+    'Arquitetura',
+    'Engenharia Civil',
+    'Engenharia Elétrica',
+    'Engenharia Mecânica',
+    'Outra'
+  ];
   const { toast } = useToast();
 
   useEffect(() => {
@@ -87,7 +97,8 @@ export const UserProfile = () => {
           cargo: data.cargo || '',
           matricula: data.matricula || '',
           unidade_gestora: data.unidade_gestora || '',
-          telefone: data.telefone || ''
+          telefone: data.telefone || '',
+          formacao: data.formacao || ''
         });
       }
     } catch (error: any) {
@@ -181,6 +192,24 @@ export const UserProfile = () => {
                   {unidadesGestoras.map((unidade) => (
                     <SelectItem key={unidade} value={unidade}>
                       {unidade}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="formacao">Formação</Label>
+              <Select
+                value={profile.formacao}
+                onValueChange={(value) => setProfile(prev => ({ ...prev, formacao: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione sua formação" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60 overflow-y-auto">
+                  {opcoesFormacao.map((formacao) => (
+                    <SelectItem key={formacao} value={formacao}>
+                      {formacao}
                     </SelectItem>
                   ))}
                 </SelectContent>
