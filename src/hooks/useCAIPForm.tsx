@@ -39,11 +39,25 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
 
   // Preencher formulário com dados existentes quando editar
   useEffect(() => {
+    console.log('=== DEBUGGING FORM LOADING ===');
+    console.log('editingItem:', editingItem);
+    console.log('open:', open);
+    console.log('editingItem && open:', editingItem && open);
+    
     if (editingItem && open) {
+      console.log('Preenchendo formulário com dados existentes...');
+      console.log('Dados a serem carregados:', editingItem);
+      
+      // Load each field from the editing item
       Object.keys(editingItem).forEach(key => {
-        setValue(key as keyof DadosCAIP, editingItem[key as keyof DadosCAIP]);
+        const value = editingItem[key as keyof DadosCAIP];
+        if (value !== null && value !== undefined) {
+          console.log(`Setting ${key}:`, value);
+          setValue(key as keyof DadosCAIP, value);
+        }
       });
     } else if (!editingItem && open) {
+      console.log('Novo registro - resetando formulário...');
       reset();
     }
   }, [editingItem, open, setValue, reset]);

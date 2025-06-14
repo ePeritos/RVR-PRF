@@ -32,6 +32,11 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
   const [avaliacoesLocais, setAvaliacoesLocais] = useState<{[key: string]: number}>({});
   const { toast } = useToast();
   
+  // Debug log to check if editingItem is being received correctly
+  console.log('=== CAIPFormDialog ===');
+  console.log('editingItem recebido:', editingItem);
+  console.log('dialog open:', open);
+  
   const {
     register,
     handleSubmit,
