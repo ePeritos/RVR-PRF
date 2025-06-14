@@ -704,6 +704,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calcular_nota_global: {
+        Args: { p_imovel_id: string }
+        Returns: number
+      }
+      calcular_nota_manutencao: {
+        Args: { p_imovel_id: string }
+        Returns: number
+      }
       get_user_role: {
         Args: Record<PropertyKey, never> | { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
