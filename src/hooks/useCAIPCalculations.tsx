@@ -80,6 +80,11 @@ export const useCAIPCalculations = ({ watchedValues, setValue, setPercentualPree
       // Calcular nota final garantindo que não ultrapasse 100
       const notaFinal = Math.min(100, Math.round((pesoAlcancado / pesoTotalPossivel) * 100 * 100) / 100);
       setValue('nota_para_adequacao', notaFinal.toString());
+      
+      // Recalcular nota global quando a nota de adequação mudar
+      const notaManutencao = parseFloat(watchedValues?.nota_para_manutencao || '0');
+      const notaGlobal = (notaFinal * 0.6) + (notaManutencao * 0.4);
+      setValue('nota_global', notaGlobal.toFixed(2) as any);
     }
   }, [watchedValues, setValue]);
 };
