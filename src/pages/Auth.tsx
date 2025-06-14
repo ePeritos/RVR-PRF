@@ -17,11 +17,8 @@ const Auth = () => {
   } = useToast();
   const navigate = useNavigate();
 
-  // Verificar se os termos já foram aceitos e limpar estado ao carregar
+  // Verificar se os termos já foram aceitos
   useEffect(() => {
-    // Limpar estado de autenticação antes de verificar termos
-    cleanupAuthState();
-    
     const savedTermsAcceptance = localStorage.getItem(TERMS_STORAGE_KEY);
     if (savedTermsAcceptance === 'true') {
       setTermsAccepted(true);
@@ -39,28 +36,24 @@ const Auth = () => {
     }
     try {
       setLoading(true);
-      
-      // Limpar estado antes de tentar login
-      cleanupAuthState();
-      
-      // Tentar logout global primeiro (caso exista sessão anterior)
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        console.log('Nenhuma sessão anterior para limpar');
-      }
+      console.log('🚀 Iniciando login com Google...');
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: `${window.location.origin}/`,
           queryParams: {
             prompt: 'select_account'
           }
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro no OAuth:', error);
+        throw error;
+      }
+      
+      console.log('✅ OAuth iniciado com sucesso');
     } catch (error: any) {
       const errorMessage = handleAuthError(error);
       toast({

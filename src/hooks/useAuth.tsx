@@ -18,25 +18,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('useAuth - Configurando listener de auth state...');
+    console.log('🚀 useAuth - Inicializando...');
     
-    // Set up auth state listener
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('useAuth - Auth state changed:', event, 'Session exists:', !!session);
-        console.log('useAuth - User from session:', session?.user?.email);
+      async (event, session) => {
+        console.log(`🔄 Auth event: ${event}`, 'Session exists:', !!session);
+        console.log('👤 User email:', session?.user?.email);
         
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Se usuário logou com sucesso, redirecionar para dashboard
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log('✅ Login bem-sucedido, redirecionando...');
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 100);
+        }
       }
     );
 
-    // Check for existing session
-    console.log('useAuth - Verificando sessão existente...');
+    // THEN check for existing session
+    console.log('🔍 Verificando sessão existente...');
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('useAuth - Sessão existente encontrada:', !!session);
-      console.log('useAuth - User existente:', session?.user?.email);
+      console.log('📋 Sessão existente:', !!session);
+      if (session?.user) {
+        console.log('👤 Usuário já logado:', session.user.email);
+      }
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
