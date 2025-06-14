@@ -136,10 +136,15 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
   // Carregar avaliações existentes quando há ID do registro
   useEffect(() => {
     if (watchedValues?.id) {
-      console.log('Carregando avaliações para ID:', watchedValues.id);
-      carregarAvaliacoesExistentes();
+      console.log('🔄 Carregando avaliações para ID:', watchedValues.id);
+      // Aguardar um pouco para garantir que o formulário esteja pronto
+      const timer = setTimeout(() => {
+        carregarAvaliacoesExistentes();
+      }, 200);
+      return () => clearTimeout(timer);
     } else {
       // Limpar avaliações quando não há ID (novo registro)
+      console.log('🧹 Limpando avaliações para novo registro');
       setAvaliacoesLocais({});
     }
   }, [watchedValues?.id]);
@@ -195,11 +200,15 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
       }
 
       console.log('Mapa de avaliações carregado:', avaliacoesMap);
+      console.log('Estado atual avaliacoesLocais antes da atualização:', avaliacoesLocais);
       
-      // Aguardar um pouco para garantir que o componente esteja pronto
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      setAvaliacoesLocais(avaliacoesMap);
+      // Forçar atualização do estado
+      setAvaliacoesLocais(prevState => {
+        console.log('🔄 Atualizando estado de avaliacoesLocais');
+        console.log('Estado anterior:', prevState);
+        console.log('Novo estado:', avaliacoesMap);
+        return { ...avaliacoesMap };
+      });
     } catch (error) {
       console.error('Erro ao carregar avaliações:', error);
       setAvaliacoesLocais({});
