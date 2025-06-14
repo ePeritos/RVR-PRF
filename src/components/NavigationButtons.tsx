@@ -77,12 +77,12 @@ export const NavigationButtons = ({
     );
   }
 
-  // Para a etapa 2 - sempre mostra o botão Próximo
+  // Para a etapa 2 - sempre mostra o botão Próximo do lado direito
   const minStep = isAdmin ? 1 : 2;
   const showPrevButton = currentStep > minStep;
   
   return (
-    <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8 max-w-5xl mx-auto">
+    <div className="flex flex-col sm:flex-row gap-4 mt-8 max-w-5xl mx-auto">
       {showPrevButton && (
         <Button 
           variant="outline" 
@@ -94,14 +94,16 @@ export const NavigationButtons = ({
         </Button>
       )}
       
-      <Button 
-        onClick={onNextStep} 
-        disabled={!canProceed}
-        className={`hover-scale w-full sm:w-auto ${!showPrevButton ? 'order-1' : 'order-1 sm:order-2'}`}
-      >
-        Próximo
-        <ChevronRight className="ml-2 h-4 w-4" />
-      </Button>
+      <div className={`${showPrevButton ? 'sm:ml-auto' : 'ml-auto'}`}>
+        <Button 
+          onClick={onNextStep} 
+          disabled={!canProceed}
+          className="hover-scale w-full sm:w-auto order-1 sm:order-2"
+        >
+          Próximo
+          <ChevronRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 };
