@@ -39,20 +39,13 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
 
   // Preencher formulário com dados existentes quando editar
   useEffect(() => {
-    console.log('=== DEBUGGING FORM LOADING ===');
-    console.log('editingItem:', editingItem);
-    console.log('open:', open);
-    console.log('editingItem && open:', editingItem && open);
-    
     if (editingItem && open) {
-      console.log('Preenchendo formulário com dados existentes...');
-      console.log('Dados a serem carregados:', editingItem);
+      console.log('Preenchendo formulário com dados existentes:', editingItem.id);
       
       // Load each field from the editing item
       Object.keys(editingItem).forEach(key => {
         const value = editingItem[key as keyof DadosCAIP];
         if (value !== null && value !== undefined) {
-          console.log(`Setting ${key}:`, value);
           setValue(key as keyof DadosCAIP, value);
         }
       });
@@ -182,10 +175,9 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
           console.log('Salvando avaliações para novo registro...');
           await salvarAvaliacoesAmbientes(newRecord.id, processedData.tipo_de_unidade, avaliacoesLocais);
           
-          // Aguardar um pouco para o trigger processar
-          await new Promise(resolve => setTimeout(resolve, 200));
+          // Aguardar para o trigger processar e buscar notas atualizadas
+          await new Promise(resolve => setTimeout(resolve, 500));
           
-          // Buscar as notas atualizadas
           const { data: notasAtualizadas } = await supabase
             .from('dados_caip')
             .select('nota_para_manutencao, nota_global')

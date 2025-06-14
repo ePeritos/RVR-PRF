@@ -136,6 +136,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
   // Carregar avaliações existentes quando há ID do registro
   useEffect(() => {
     if (watchedValues?.id) {
+      console.log('Carregando avaliações para ID:', watchedValues.id);
       carregarAvaliacoesExistentes();
     }
   }, [watchedValues?.id]);
@@ -185,7 +186,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
       const { data: avaliacoes, error } = await supabase
         .from('manutencao_ambientes')
         .select(`
-          *,
+          score_conservacao,
           caderno_ambientes!inner(
             nome_ambiente,
             tipos_imoveis!inner(nome_tipo)
@@ -197,8 +198,9 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
 
       console.log('Avaliações encontradas:', avaliacoes);
 
-      // Converter avaliações para o formato local
+      // Limpar avaliações locais primeiro
       const avaliacoesMap: {[key: string]: number} = {};
+      
       avaliacoes?.forEach(avaliacao => {
         const nomeAmbiente = avaliacao.caderno_ambientes?.nome_ambiente;
         
@@ -217,6 +219,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
       setAvaliacoesLocais(avaliacoesMap);
     } catch (error) {
       console.error('Erro ao carregar avaliações:', error);
+      setAvaliacoesLocais({});
     }
   };
 
@@ -458,8 +461,8 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
         console.log('✅ Avaliação salva com sucesso');
       }
 
-      // Aguardar um pouco para garantir que o trigger processou
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Aguardar para garantir que o trigger processou
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       // Buscar a nota atualizada diretamente do banco
       const { data: dadosAtualizados, error: errorBusca } = await supabase
@@ -476,8 +479,12 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
       console.log('Dados atualizados do banco:', dadosAtualizados);
 
       // Atualizar os campos no formulário
-      setValue('nota_para_manutencao', (dadosAtualizados.nota_para_manutencao ? parseFloat(dadosAtualizados.nota_para_manutencao.toString()).toFixed(2) : '0.00') as any);
-      setValue('nota_global', (dadosAtualizados.nota_global ? parseFloat(dadosAtualizados.nota_global.toString()).toFixed(2) : '0.00') as any);
+      if (dadosAtualizados.nota_para_manutencao !== null) {
+        setValue('nota_para_manutencao', parseFloat(dadosAtualizados.nota_para_manutencao.toString()).toFixed(2) as any);
+      }
+      if (dadosAtualizados.nota_global !== null) {
+        setValue('nota_global', parseFloat(dadosAtualizados.nota_global.toString()).toFixed(2) as any);
+      }
 
       toast({
         title: "Avaliação salva",
