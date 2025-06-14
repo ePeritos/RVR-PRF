@@ -16,7 +16,6 @@ interface ProfileSetupDialogProps {
 
 interface ProfileData {
   nome_completo: string;
-  cargo: string;
   matricula: string;
   unidade_gestora: string;
   telefone: string;
@@ -27,7 +26,6 @@ export const ProfileSetupDialog: React.FC<ProfileSetupDialogProps> = ({ open, on
   const { user } = useAuth();
   const [profile, setProfile] = useState<ProfileData>({
     nome_completo: user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || '',
-    cargo: '',
     matricula: '',
     unidade_gestora: '',
     telefone: '',
@@ -97,7 +95,6 @@ export const ProfileSetupDialog: React.FC<ProfileSetupDialogProps> = ({ open, on
         .upsert({
           id: user?.id,
           nome_completo: profile.nome_completo,
-          cargo: profile.cargo,
           matricula: profile.matricula,
           unidade_gestora: profile.unidade_gestora,
           telefone: profile.telefone,
@@ -161,16 +158,6 @@ export const ProfileSetupDialog: React.FC<ProfileSetupDialogProps> = ({ open, on
                 setProfile(prev => ({ ...prev, unidade_gestora: value }));
               }}
               placeholder="Selecione sua unidade gestora"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="cargo">Cargo</Label>
-            <Input
-              id="cargo"
-              value={profile.cargo}
-              onChange={(e) => setProfile(prev => ({ ...prev, cargo: e.target.value }))}
-              placeholder="Ex: Engenheiro Civil, Policial Rodoviário Federal"
             />
           </div>
           

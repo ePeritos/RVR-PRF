@@ -13,7 +13,6 @@ import { User, Settings } from 'lucide-react';
 
 interface Profile {
   nome_completo: string;
-  cargo: string;
   matricula: string;
   unidade_gestora: string;
   telefone: string;
@@ -24,7 +23,6 @@ export const UserProfile = () => {
   const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<Profile>({
     nome_completo: '',
-    cargo: '',
     matricula: '',
     unidade_gestora: '',
     telefone: '',
@@ -94,7 +92,6 @@ export const UserProfile = () => {
       if (data) {
         setProfile({
           nome_completo: data.nome_completo || '',
-          cargo: data.cargo || '',
           matricula: data.matricula || '',
           unidade_gestora: data.unidade_gestora || '',
           telefone: data.telefone || '',
@@ -159,15 +156,6 @@ export const UserProfile = () => {
                 value={profile.nome_completo}
                 onChange={(e) => setProfile(prev => ({ ...prev, nome_completo: e.target.value }))}
                 required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cargo">Cargo</Label>
-              <Input
-                id="cargo"
-                value={profile.cargo}
-                onChange={(e) => setProfile(prev => ({ ...prev, cargo: e.target.value }))}
-                placeholder="Ex: Engenheiro Civil"
               />
             </div>
             <div className="space-y-2">
