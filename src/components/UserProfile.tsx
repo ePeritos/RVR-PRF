@@ -9,6 +9,7 @@ import { SimpleSelect } from '@/components/ui/simple-select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import { User, Settings } from 'lucide-react';
 
 interface Profile {
@@ -21,6 +22,7 @@ interface Profile {
 
 export const UserProfile = () => {
   const { user, signOut } = useAuth();
+  const { profile: userProfile } = useProfile();
   const [profile, setProfile] = useState<Profile>({
     nome_completo: '',
     matricula: '',
@@ -160,7 +162,7 @@ export const UserProfile = () => {
             </div>
             <DialogTitle className="text-xl">Editar Perfil</DialogTitle>
             <p className="text-sm text-muted-foreground mt-2">
-              Atualize suas informações pessoais. A unidade gestora não pode ser alterada.
+              Atualize suas informações pessoais. {userProfile?.role !== 'admin' && 'A unidade gestora não pode ser alterada.'}
             </p>
           </DialogHeader>
           
@@ -178,16 +180,27 @@ export const UserProfile = () => {
 
             <div className="space-y-2">
               <Label htmlFor="unidade_gestora">Unidade Gestora *</Label>
-              <Input
-                id="unidade_gestora"
-                value={profile.unidade_gestora}
-                disabled
-                className="bg-muted text-muted-foreground cursor-not-allowed"
-                placeholder="Unidade gestora não pode ser alterada"
-              />
-              <p className="text-xs text-muted-foreground">
-                A unidade gestora não pode ser alterada após o primeiro acesso.
-              </p>
+              {userProfile?.role === 'admin' ? (
+                <SimpleSelect
+                  options={unidadesGestoras}
+                  value={profile.unidade_gestora}
+                  onChange={(value) => setProfile(prev => ({ ...prev, unidade_gestora: value }))}
+                  placeholder="Selecione uma unidade gestora"
+                />
+              ) : (
+                <>
+                  <Input
+                    id="unidade_gestora"
+                    value={profile.unidade_gestora}
+                    disabled
+                    className="bg-muted text-muted-foreground cursor-not-allowed"
+                    placeholder="Unidade gestora não pode ser alterada"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    A unidade gestora não pode ser alterada após o primeiro acesso.
+                  </p>
+                </>
+              )}
             </div>
             
             <div className="space-y-2">

@@ -94,7 +94,7 @@ export function AppSidebar() {
         matricula: profile.matricula || '',
         unidade_gestora: profile.unidade_lotacao || '', // usar unidade_lotacao como unidade_gestora
         telefone: profile.telefone || '',
-        formacao: '' // campo novo, será preenchido pelo usuário
+        formacao: (profile as any).formacao || ''
       });
     }
     setIsProfileOpen(true);
@@ -109,7 +109,7 @@ export function AppSidebar() {
       matricula: profileForm.matricula,
       unidade_lotacao: profileForm.unidade_gestora, // mapear unidade_gestora para unidade_lotacao
       telefone: profileForm.telefone,
-      // formacao não existe no perfil atual, seria preciso adicionar ao schema
+      formacao: profileForm.formacao
     };
     
     const success = await updateProfile(profileUpdate);
@@ -231,7 +231,7 @@ export function AppSidebar() {
             </div>
             <DialogTitle className="text-xl">Editar Perfil</DialogTitle>
             <p className="text-sm text-muted-foreground mt-2">
-              Atualize suas informações pessoais. A unidade gestora não pode ser alterada.
+              Atualize suas informações pessoais. {profile?.role !== 'admin' && 'A unidade gestora não pode ser alterada.'}
             </p>
           </DialogHeader>
           
@@ -249,16 +249,27 @@ export function AppSidebar() {
 
             <div className="space-y-2">
               <Label htmlFor="unidade_gestora">Unidade Gestora *</Label>
-              <Input
-                id="unidade_gestora"
-                value={profileForm.unidade_gestora}
-                disabled
-                className="bg-muted text-muted-foreground cursor-not-allowed"
-                placeholder="Unidade gestora não pode ser alterada"
-              />
-              <p className="text-xs text-muted-foreground">
-                A unidade gestora não pode ser alterada após o primeiro acesso.
-              </p>
+              {profile?.role === 'admin' ? (
+                <SimpleSelect
+                  options={unidadesGestoras}
+                  value={profileForm.unidade_gestora}
+                  onChange={(value) => setProfileForm(prev => ({ ...prev, unidade_gestora: value }))}
+                  placeholder="Selecione uma unidade gestora"
+                />
+              ) : (
+                <>
+                  <Input
+                    id="unidade_gestora"
+                    value={profileForm.unidade_gestora}
+                    disabled
+                    className="bg-muted text-muted-foreground cursor-not-allowed"
+                    placeholder="Unidade gestora não pode ser alterada"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    A unidade gestora não pode ser alterada após o primeiro acesso.
+                  </p>
+                </>
+              )}
             </div>
             
             <div className="space-y-2">
