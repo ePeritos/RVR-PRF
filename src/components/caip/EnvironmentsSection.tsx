@@ -137,6 +137,8 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
   useEffect(() => {
     if (watchedValues?.id) {
       console.log('Carregando avaliações para ID:', watchedValues.id);
+      // Force reload by clearing first, then loading
+      setAvaliacoesLocais({});
       carregarAvaliacoesExistentes();
     } else {
       // Limpar avaliações quando não há ID (novo registro)

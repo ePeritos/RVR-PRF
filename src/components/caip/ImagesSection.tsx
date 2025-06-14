@@ -39,7 +39,7 @@ export const ImagesSection = ({ register, setValue, watchedValues }: ImagesSecti
 
   // Load existing images when editing
   useEffect(() => {
-    if (watchedValues) {
+    if (watchedValues?.id) {
       console.log('=== LOADING EXISTING IMAGES ===');
       console.log('watchedValues:', watchedValues);
       
@@ -50,7 +50,12 @@ export const ImagesSection = ({ register, setValue, watchedValues }: ImagesSecti
         const imageUrl = watchedValues[key];
         console.log(`Verificando campo ${key}:`, imageUrl);
         
-        if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim() !== '') {
+        // Only load images that actually exist and are not null/empty
+        if (imageUrl && 
+            typeof imageUrl === 'string' && 
+            imageUrl.trim() !== '' && 
+            imageUrl !== 'null' && 
+            imageUrl !== 'undefined') {
           existingPreviews[key] = {
             url: imageUrl,
             isExisting: true
@@ -65,11 +70,13 @@ export const ImagesSection = ({ register, setValue, watchedValues }: ImagesSecti
         setImagePreviews(existingPreviews);
       } else {
         console.log('Nenhuma imagem existente encontrada');
-        // Reset previews if no existing images
         setImagePreviews({});
       }
+    } else {
+      // Clear previews when no ID (new record)
+      setImagePreviews({});
     }
-  }, [watchedValues]);
+  }, [watchedValues?.id]);
 
   const handleImageChange = (fieldKey: string, files: FileList | null) => {
     console.log(`=== IMAGE CHANGE ===`);
