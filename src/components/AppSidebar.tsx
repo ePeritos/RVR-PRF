@@ -1,4 +1,4 @@
-import { Home, Calculator, Database, LogOut, User, Menu } from "lucide-react";
+import { Home, Calculator, Database, LogOut, User, Menu, Building } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -134,11 +134,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <div className="flex items-center gap-2 px-2 py-1">
-            <img 
-              src="/lovable-uploads/40767838-14cb-481f-9df0-efaa941d75a0.png" 
-              alt="SIGI-PRF Logo" 
-              className="h-5 w-auto dark:invert"
-            />
+            <Building className="h-5 w-5" />
             {state !== "collapsed" && (
               <SidebarGroupLabel className="text-base font-bold">SIGI-PRF</SidebarGroupLabel>
             )}

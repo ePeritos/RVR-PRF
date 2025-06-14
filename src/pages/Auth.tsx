@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TermsAcceptanceDialog } from '@/components/TermsAcceptanceDialog';
+import { Building } from 'lucide-react';
 
 const TERMS_STORAGE_KEY = 'sigi-prf-terms-accepted';
 
@@ -149,11 +150,7 @@ const Auth = () => {
       <Card className="w-full max-w-md shadow-lg hover:shadow-xl transition-shadow duration-300 animate-scale-in">
         <CardHeader className="text-center px-6 md:px-16">
           <div className="flex flex-col items-center justify-center mb-4 space-y-3">
-            <img 
-              src="/lovable-uploads/40767838-14cb-481f-9df0-efaa941d75a0.png" 
-              alt="SIGI-PRF Logo" 
-              className="h-8 md:h-12 w-auto dark:invert" 
-            />
+            <Building className="h-8 md:h-12 w-8 md:w-12" />
             <CardTitle className="text-xl md:text-2xl font-bold">SIGI-PRF</CardTitle>
           </div>
           <CardDescription className="text-sm md:text-base">
