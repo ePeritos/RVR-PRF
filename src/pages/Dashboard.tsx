@@ -193,6 +193,11 @@ const Dashboard = () => {
         </p>
       </div>
 
+      {/* Filtros */}
+      <div className="max-w-5xl mx-auto mb-8">
+        <DataFilter onFilterChange={handleFilterChange} />
+      </div>
+
       {/* Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="bg-card border-border">
@@ -309,11 +314,6 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Filtros */}
-      <div className="max-w-5xl mx-auto">
-        <DataFilter onFilterChange={handleFilterChange} />
-      </div>
     </div>
   );
 };
