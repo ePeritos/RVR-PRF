@@ -74,14 +74,14 @@ const Auth = () => {
 
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
+          <div className="flex items-center justify-center gap-3 mb-4">
             <img 
               src="/lovable-uploads/0c984027-ab7d-4e16-96fe-f7d523613cc5.png" 
               alt="SIGI-PRF Logo" 
-              className="h-16 w-auto"
+              className="h-12 w-auto"
             />
+            <CardTitle className="text-2xl font-bold">SIGI-PRF</CardTitle>
           </div>
-          <CardTitle className="text-2xl font-bold">SIGI-PRF</CardTitle>
           <CardDescription>
             Faça login para acessar o Sistema de Gestão de Imóveis da PRF
           </CardDescription>
