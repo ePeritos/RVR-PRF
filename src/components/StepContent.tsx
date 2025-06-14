@@ -5,7 +5,7 @@ import { DataTable } from '@/components/DataTable';
 import { ParameterForm } from '@/components/ParameterForm';
 import { ResultsTable } from '@/components/ResultsTable';
 import { DataRow } from '@/hooks/useSupabaseData';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -42,7 +42,7 @@ export const StepContent = ({
   onDownloadPDF,
   currentParameters
 }: StepContentProps) => {
-  const { isAdmin } = useProfile();
+  const { isAdmin } = useUserProfile();
   const { toast } = useToast();
 
   const handleDelete = async (item: DataRow) => {

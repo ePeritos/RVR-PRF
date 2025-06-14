@@ -7,14 +7,14 @@ import { generatePDF } from '@/utils/pdfGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { useSupabaseData, DataRow } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
+
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateRossHeidecke } from '@/utils/rossHeideckeCalculator';
 
 const RVR = () => {
   const { user } = useAuth();
-  const { profile, loading: profileLoading, isAdmin, isUsuarioPadrao } = useProfile();
+  const { profile, loading: profileLoading, isAdmin } = useUserProfile();
   const { profile: userProfile, isAdmin: isUserAdmin } = useUserProfile();
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);

@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface NavigationButtonsProps {
   currentStep: number;
@@ -18,7 +18,7 @@ export const NavigationButtons = ({
   onPrevStep,
   onNewEvaluation
 }: NavigationButtonsProps) => {
-  const { isAdmin } = useProfile();
+  const { isAdmin } = useUserProfile();
   if (currentStep === 4) {
     return (
       <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8 max-w-5xl mx-auto">
