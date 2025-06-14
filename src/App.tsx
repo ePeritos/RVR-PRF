@@ -56,18 +56,18 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         <div className="min-h-screen flex w-full bg-background">
           <AppSidebar />
           <div className="flex-1 flex flex-col">
-            <header className="border-b border-border bg-background/95 backdrop-blur lg:hidden">
+            <header className="border-b border-border bg-background/95 backdrop-blur">
               <div className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-2">
-                  <SidebarTrigger className="mr-2" />
+                  <SidebarTrigger className="mr-2 lg:hidden" />
                   <img 
                     src="/lovable-uploads/40767838-14cb-481f-9df0-efaa941d75a0.png" 
                     alt="SIGI-PRF Logo" 
-                    className="h-5 w-auto dark:invert"
+                    className="h-5 w-auto dark:invert lg:hidden"
                   />
-                  <span className="font-bold text-lg">SIGI-PRF</span>
+                  <span className="font-bold text-lg lg:hidden">SIGI-PRF</span>
                 </div>
-                <ThemeToggle />
+                <ThemeToggle showText={false} />
               </div>
             </header>
             <main className="flex-1 overflow-auto">

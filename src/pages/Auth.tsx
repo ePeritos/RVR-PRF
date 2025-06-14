@@ -81,7 +81,7 @@ const Auth = () => {
   return <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
       {/* Theme toggle button in top right corner */}
       <div className="absolute top-4 right-4">
-        <ThemeToggle />
+        <ThemeToggle showText={false} />
       </div>
 
       <Card className="w-full max-w-md shadow-lg hover:shadow-xl transition-shadow duration-300 animate-scale-in">
