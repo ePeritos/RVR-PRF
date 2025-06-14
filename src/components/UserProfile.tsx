@@ -9,7 +9,7 @@ import { SimpleSelect } from '@/components/ui/simple-select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import { useProfile } from '@/hooks/useProfile';
 import { User, Settings } from 'lucide-react';
 
 interface Profile {
@@ -22,7 +22,7 @@ interface Profile {
 
 export const UserProfile = () => {
   const { user, signOut } = useAuth();
-  const { profile: userProfile } = useUserProfile();
+  const { profile: userProfile } = useProfile();
   const [profile, setProfile] = useState<Profile>({
     nome_completo: '',
     matricula: '',

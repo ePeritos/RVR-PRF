@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Building, FileText, TrendingUp, MapPin } from 'lucide-react';
 import { DataFilter } from '@/components/DataFilter';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { DashboardSkeleton } from '@/components/ui/loading-skeleton';
-import { useDebounce } from '@/utils/performanceUtils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface DashboardStats {
@@ -23,7 +22,7 @@ interface UnidadeGestoraData {
   areaConstruidaMedia: number;
 }
 
-const Dashboard = React.memo(() => {
+const Dashboard = () => {
   const { user } = useAuth();
   const { profile, isAdmin } = useUserProfile();
   const { data: supabaseData, loading } = useSupabaseData(
@@ -37,11 +36,6 @@ const Dashboard = React.memo(() => {
   });
   const [filteredStats, setFilteredStats] = useState<DashboardStats>(stats);
   const [unidadeGestoraData, setUnidadeGestoraData] = useState<UnidadeGestoraData[]>([]);
-  
-  // Debounced filter handler to avoid excessive recalculations
-  const debouncedHandleFilterChange = useDebounce((filters: any) => {
-    handleFilterChange(filters);
-  }, 300);
 
   // Função para formatar valores grandes de forma compacta
   const formatCurrency = (value: number) => {
@@ -60,48 +54,9 @@ const Dashboard = React.memo(() => {
       });
     }
   };
-  
-  // Memoized calculations to avoid recalculating on every render
-  const memoizedStats = useMemo(() => {
-    if (supabaseData.length === 0) return {
-      totalImoveis: 0,
-      imoveisAvaliados: 0, 
-      totalAreas: 0,
-      valorTotalAvaliado: 0,
-    };
 
-    console.log('📊 Calculating dashboard stats for', supabaseData.length, 'items');
-    
-    const totalImoveis = supabaseData.length;
-    const imoveisAvaliados = supabaseData.filter(item => 
-      item.rvr && Number(item.rvr) > 0
-    ).length;
-    
-    const totalAreas = supabaseData.reduce((acc, item) => 
-      acc + (Number(item.area_construida_m2) || 0), 0
-    );
-    
-    const valorTotalAvaliado = supabaseData.reduce((acc, item) => 
-      acc + (Number(item.rvr) || 0), 0
-    );
-
-    return {
-      totalImoveis,
-      imoveisAvaliados,
-      totalAreas,
-      valorTotalAvaliado,
-    };
-  }, [supabaseData]);
-
-  // Memoized unidade gestora data calculation
-  const memoizedUnidadeData = useMemo(() => {
-    return calculateUnidadeGestoraData(supabaseData);
-  }, [supabaseData]);
-
-  // Function moved to useMemo above for better performance
+  // Função para calcular dados por unidade gestora
   const calculateUnidadeGestoraData = (data: any[]) => {
-    if (data.length === 0) return [];
-    
     const unidadeMap = new Map<string, { count: number; area: number }>();
     
     data.forEach(item => {
@@ -121,19 +76,42 @@ const Dashboard = React.memo(() => {
 
     return Array.from(unidadeMap.entries())
       .map(([unidade, data]) => ({
-        unidade: unidade.replace('SPRF/', ''),
+        unidade: unidade.replace('SPRF/', ''), // Remove prefixo para melhor visualização
         numeroImoveis: data.count,
         areaConstruidaMedia: Math.round(data.area / data.count)
       }))
-      .sort((a, b) => b.areaConstruidaMedia - a.areaConstruidaMedia);
+      .sort((a, b) => b.areaConstruidaMedia - a.areaConstruidaMedia); // Ordenar por área construída média (maior para menor)
   };
 
-  // Update states when memoized values change
   useEffect(() => {
-    setStats(memoizedStats);
-    setFilteredStats(memoizedStats);
-    setUnidadeGestoraData(memoizedUnidadeData);
-  }, [memoizedStats, memoizedUnidadeData]);
+    if (supabaseData.length > 0) {
+      const totalImoveis = supabaseData.length;
+      const imoveisAvaliados = supabaseData.filter(item => 
+        item.rvr && Number(item.rvr) > 0
+      ).length;
+      
+      const totalAreas = supabaseData.reduce((acc, item) => 
+        acc + (Number(item.area_construida_m2) || 0), 0
+      );
+      
+      const valorTotalAvaliado = supabaseData.reduce((acc, item) => 
+        acc + (Number(item.rvr) || 0), 0
+      );
+
+      const unidadeData = calculateUnidadeGestoraData(supabaseData);
+
+      const newStats = {
+        totalImoveis,
+        imoveisAvaliados,
+        totalAreas,
+        valorTotalAvaliado,
+      };
+      
+      setStats(newStats);
+      setFilteredStats(newStats);
+      setUnidadeGestoraData(unidadeData);
+    }
+  }, [supabaseData]);
 
   const handleFilterChange = (filters: any) => {
     let filtered = supabaseData;
@@ -182,7 +160,18 @@ const Dashboard = React.memo(() => {
   };
 
   if (loading) {
-    return <DashboardSkeleton />;
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="flex items-center gap-2 mb-6">
+          <TrendingUp className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        </div>
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Carregando dados...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -206,7 +195,7 @@ const Dashboard = React.memo(() => {
 
       {/* Filtros */}
       <div className="max-w-5xl mx-auto mb-8">
-        <DataFilter onFilterChange={debouncedHandleFilterChange} />
+        <DataFilter onFilterChange={handleFilterChange} />
       </div>
 
       {/* Cards de Estatísticas */}
@@ -327,6 +316,6 @@ const Dashboard = React.memo(() => {
       </Card>
     </div>
   );
-});
+};
 
 export default Dashboard;

@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
+import { UseFormRegister } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Camera, Upload, X, Loader2 } from 'lucide-react';
+import { Camera, Upload, X, Image } from 'lucide-react';
 import { Tables } from '@/integrations/supabase/types';
 import { Button } from '@/components/ui/button';
-import { ImageUploadService } from '@/utils/imageUpload';
-import { useToast } from '@/hooks/use-toast';
 
 type DadosCAIP = Tables<'dados_caip'>;
 
 interface ImagesSectionProps {
+  register: UseFormRegister<DadosCAIP>;
   setValue?: any;
   watchedValues?: any;
 }
@@ -19,12 +19,10 @@ interface ImagePreview {
   file?: File;
   url: string;
   isExisting?: boolean;
-  isUploading?: boolean;
 }
 
-export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) => {
+export const ImagesSection = ({ register, setValue, watchedValues }: ImagesSectionProps) => {
   const [imagePreviews, setImagePreviews] = useState<{[key: string]: ImagePreview}>({});
-  const { toast } = useToast();
 
   const imageFields = [
     { key: 'imagem_geral', label: 'Imagem Geral' },
@@ -80,33 +78,14 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
     }
   }, [watchedValues?.id]);
 
-  const handleImageChange = async (fieldKey: string, files: FileList | null) => {
+  const handleImageChange = (fieldKey: string, files: FileList | null) => {
     console.log(`=== IMAGE CHANGE ===`);
     console.log(`Campo: ${fieldKey}`);
     console.log('Files:', files);
     
     if (files && files[0]) {
       const file = files[0];
-      
-      // Validar tipo de arquivo
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Erro",
-          description: "Por favor, selecione apenas arquivos de imagem.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Validar tamanho (máximo 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Erro",
-          description: "A imagem deve ter no máximo 5MB.",
-          variant: "destructive",
-        });
-        return;
-      }
+      const url = URL.createObjectURL(file);
       
       console.log(`Processando imagem para campo ${fieldKey}:`, {
         fileName: file.name,
@@ -114,69 +93,23 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
         fileType: file.type
       });
       
-      // Mostrar preview e estado de carregamento
-      const previewUrl = URL.createObjectURL(file);
+      // Update preview state
       setImagePreviews(prev => ({
         ...prev,
-        [fieldKey]: { file, url: previewUrl, isUploading: true }
+        [fieldKey]: { file, url }
       }));
       
-      try {
-        // Fazer upload da imagem
-        const uploadedUrl = await ImageUploadService.uploadImage(file, `imovel-${watchedValues?.id || 'novo'}`);
-        
-        if (uploadedUrl) {
-          // Atualizar preview com URL final
-          setImagePreviews(prev => ({
-            ...prev,
-            [fieldKey]: { url: uploadedUrl, isUploading: false }
-          }));
-          
-          // Atualizar valor no formulário
-          if (setValue) {
-            console.log(`Atualizando campo ${fieldKey} no formulário com URL: ${uploadedUrl}`);
-            setValue(fieldKey, uploadedUrl);
-          }
-          
-          // Limpar preview temporário
-          URL.revokeObjectURL(previewUrl);
-          
-          toast({
-            title: "Sucesso",
-            description: "Imagem carregada com sucesso.",
-          });
-        } else {
-          throw new Error('Falha no upload');
-        }
-      } catch (error) {
-        console.error('Erro no upload:', error);
-        setImagePreviews(prev => {
-          const newPreviews = { ...prev };
-          delete newPreviews[fieldKey];
-          return newPreviews;
-        });
-        
-        toast({
-          title: "Erro",
-          description: "Erro ao carregar a imagem. Tente novamente.",
-          variant: "destructive",
-        });
-        
-        URL.revokeObjectURL(previewUrl);
+      // Update form value if setValue is available
+      if (setValue) {
+        console.log(`Atualizando campo ${fieldKey} no formulário`);
+        setValue(fieldKey, file);
       }
     }
   };
 
-  const removeImage = async (fieldKey: string) => {
+  const removeImage = (fieldKey: string) => {
     const preview = imagePreviews[fieldKey];
-    
-    // Se for uma imagem existente no storage, tentar deletar
-    if (preview && preview.url && ImageUploadService.isStorageUrl(preview.url)) {
-      await ImageUploadService.deleteImage(preview.url);
-    }
-    
-    // Limpar preview temporário se existir
-    if (preview && preview.url && !preview.isExisting && !ImageUploadService.isStorageUrl(preview.url)) {
+    if (preview && preview.url && !preview.isExisting) {
       URL.revokeObjectURL(preview.url);
     }
     
@@ -218,32 +151,22 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
                       alt={label}
                       className="w-full h-32 object-cover"
                     />
-                    {preview.isUploading && (
-                      <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-                        <div className="flex flex-col items-center gap-2 text-white">
-                          <Loader2 className="h-6 w-6 animate-spin" />
-                          <span className="text-sm">Carregando...</span>
-                        </div>
-                      </div>
-                    )}
-                    {!preview.isUploading && (
-                      <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            removeImage(key);
-                          }}
-                          className="flex items-center gap-2 z-10"
-                        >
-                          <X className="h-4 w-4" />
-                          Remover
-                        </Button>
-                      </div>
-                    )}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          removeImage(key);
+                        }}
+                        className="flex items-center gap-2 z-10"
+                      >
+                        <X className="h-4 w-4" />
+                        Remover
+                      </Button>
+                    </div>
                     <div className="p-2 bg-background">
                       <p className="text-xs text-muted-foreground truncate">
                         {preview.file?.name || (preview.isExisting ? 'Imagem existente' : 'Imagem')}
@@ -265,12 +188,12 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
                   id={key}
                   type="file"
                   accept="image/*"
+                  {...register(key as keyof DadosCAIP)}
                   onChange={(e) => {
                     console.log(`Input onChange para campo ${key}:`, e.target.files);
                     handleImageChange(key, e.target.files);
                   }}
                   className="hidden"
-                  disabled={preview?.isUploading}
                 />
               </div>
             </div>

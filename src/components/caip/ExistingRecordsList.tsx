@@ -1,4 +1,3 @@
-import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -7,9 +6,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Search, Edit, Trash2, ChevronUp, ChevronDown, ChevronsUpDown, FileText } from 'lucide-react';
 import { Tables } from '@/integrations/supabase/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import { useProfile } from '@/hooks/useProfile';
 import { useCAIPReport } from '@/hooks/useCAIPReport';
-import { TableSkeleton } from '@/components/ui/loading-skeleton';
+import { useState, useMemo } from 'react';
 
 type DadosCAIP = Tables<'dados_caip'>;
 
@@ -24,14 +23,14 @@ interface ExistingRecordsListProps {
   handleDelete?: (item: DadosCAIP) => void;
 }
 
-export const ExistingRecordsList = React.memo(({ 
+export const ExistingRecordsList = ({ 
   searchTerm, 
   setSearchTerm, 
   filteredData, 
   handleEdit,
   handleDelete 
 }: ExistingRecordsListProps) => {
-  const { isAdmin } = useUserProfile();
+  const { isAdmin } = useProfile();
   const { generateReport, isGenerating } = useCAIPReport();
   const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
@@ -309,4 +308,4 @@ export const ExistingRecordsList = React.memo(({
       </CardContent>
     </Card>
   );
-});
+};

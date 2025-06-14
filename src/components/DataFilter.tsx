@@ -1,15 +1,14 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Filter, Search } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { FilterSkeleton } from '@/components/ui/loading-skeleton';
-import { useDebounce, queryCache } from '@/utils/performanceUtils';
 
 interface FilterData {
   anoCAIP: string[];
@@ -22,7 +21,7 @@ interface DataFilterProps {
   onFilterChange: (filters: FilterData) => void;
 }
 
-export const DataFilter = React.memo(({ onFilterChange }: DataFilterProps) => {
+export function DataFilter({ onFilterChange }: DataFilterProps) {
   const { profile, isAdmin, loading: profileLoading } = useUserProfile();
   
   const [filters, setFilters] = useState<FilterData>({
@@ -37,75 +36,132 @@ export const DataFilter = React.memo(({ onFilterChange }: DataFilterProps) => {
   const [unidadesGestoras, setUnidadesGestoras] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Debounced filter change to avoid excessive calls
-  const debouncedFilterChange = useDebounce(onFilterChange, 300);
-
-  // Optimized fetch function using a single query with distinct values
+  // Função para buscar todos os valores únicos com paginação
   const fetchAllFilterValues = async () => {
     try {
       setLoading(true);
-      
-      // Check cache first
-      const cacheKey = 'filter-values-v2';
-      const cachedData = queryCache.get(cacheKey);
-      
-      if (cachedData) {
-        console.log('🚀 Using cached filter values');
-        const { anos, unidades, tipos } = cachedData as any;
-        setAnosDisponiveis(anos);
-        setUnidadesGestoras(unidades);
-        setTiposUnidade(tipos);
-        setLoading(false);
-        return;
+
+      // Buscar todos os anos disponíveis com paginação
+      console.log('🔍 Buscando TODOS os anos disponíveis...');
+      let allAnosData: any[] = [];
+      let from = 0;
+      const batchSize = 1000;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data: batchData, error } = await supabase
+          .from('dados_caip')
+          .select('ano_caip')
+          .range(from, from + batchSize - 1);
+
+        if (error) {
+          console.error('❌ Erro na consulta de anos:', error);
+          break;
+        }
+
+        if (batchData) {
+          allAnosData = [...allAnosData, ...batchData];
+          console.log(`📊 Carregados ${batchData.length} registros de anos (total: ${allAnosData.length})`);
+          
+          if (batchData.length < batchSize) {
+            hasMore = false;
+          } else {
+            from += batchSize;
+          }
+        } else {
+          hasMore = false;
+        }
       }
 
-      console.log('🔍 Fetching filter values optimized...');
+      console.log(`✅ Total final de registros de anos carregados: ${allAnosData.length}`);
       
-      // Single optimized query to get all unique values
-      const { data, error } = await supabase
-        .from('dados_caip')
-        .select('ano_caip, unidade_gestora, tipo_de_unidade')
-        .not('ano_caip', 'is', null)
-        .not('unidade_gestora', 'is', null)
-        .not('tipo_de_unidade', 'is', null)
-        .limit(5000); // Reasonable limit
-
-      if (error) {
-        console.error('❌ Erro na consulta otimizada:', error);
-        return;
-      }
-
-      if (data) {
-        // Process unique values in memory (much faster than multiple DB queries)
-        const anosSet = new Set<string>();
-        const unidadesSet = new Set<string>();
-        const tiposSet = new Set<string>();
-
-        data.forEach(item => {
-          if (item.ano_caip && item.ano_caip.trim()) {
-            anosSet.add(item.ano_caip);
-          }
-          if (item.unidade_gestora && item.unidade_gestora.trim()) {
-            unidadesSet.add(item.unidade_gestora);
-          }
-          if (item.tipo_de_unidade && item.tipo_de_unidade.trim()) {
-            tiposSet.add(item.tipo_de_unidade);
+      if (allAnosData.length > 0) {
+        // Criar um objeto para contar ocorrências de cada ano
+        const contadorAnos: { [key: string]: number } = {};
+        allAnosData.forEach(item => {
+          const ano = item.ano_caip;
+          if (ano && ano.trim() !== '') {
+            contadorAnos[ano] = (contadorAnos[ano] || 0) + 1;
           }
         });
-
-        const anos = Array.from(anosSet).sort();
-        const unidades = Array.from(unidadesSet).sort();
-        const tipos = Array.from(tiposSet).sort();
-
-        console.log('✅ Filter values processed:', { anos: anos.length, unidades: unidades.length, tipos: tipos.length });
-
-        // Cache the results
-        queryCache.set(cacheKey, { anos, unidades, tipos });
-
-        setAnosDisponiveis(anos);
-        setUnidadesGestoras(unidades);
-        setTiposUnidade(tipos);
+        
+        console.log('📈 Contador de TODOS os anos encontrados:', contadorAnos);
+        
+        // Filtrar valores nulos/vazios e remover duplicatas
+        const todosAnos = allAnosData
+          .map(item => item.ano_caip)
+          .filter(ano => ano && ano.trim() !== '');
+        
+        console.log('✅ Total de anos válidos após filtrar nulos:', todosAnos.length);
+        
+        const anosUnicos = [...new Set(todosAnos)].sort();
+        console.log('🎯 Anos únicos ordenados final:', anosUnicos);
+        
+        // Verificar especificamente se 2025 existe
+        const tem2025 = allAnosData.some(item => item.ano_caip === '2025');
+        console.log('🔎 Existe ano 2025 na base completa?', tem2025);
+        
+        setAnosDisponiveis(anosUnicos);
       }
+
+      // Buscar todas as unidades gestoras disponíveis com paginação
+      let allUnidadesData: any[] = [];
+      from = 0;
+      hasMore = true;
+
+      while (hasMore) {
+        const { data: batchData } = await supabase
+          .from('dados_caip')
+          .select('unidade_gestora')
+          .not('unidade_gestora', 'is', null)
+          .range(from, from + batchSize - 1);
+
+        if (batchData) {
+          allUnidadesData = [...allUnidadesData, ...batchData];
+          if (batchData.length < batchSize) {
+            hasMore = false;
+          } else {
+            from += batchSize;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      if (allUnidadesData.length > 0) {
+        const unidadesUnicas = [...new Set(allUnidadesData.map(item => item.unidade_gestora).filter(Boolean))].sort();
+        setUnidadesGestoras(unidadesUnicas);
+      }
+
+      // Buscar todos os tipos de unidade disponíveis com paginação
+      let allTiposData: any[] = [];
+      from = 0;
+      hasMore = true;
+
+      while (hasMore) {
+        const { data: batchData } = await supabase
+          .from('dados_caip')
+          .select('tipo_de_unidade')
+          .not('tipo_de_unidade', 'is', null)
+          .range(from, from + batchSize - 1);
+
+        if (batchData) {
+          allTiposData = [...allTiposData, ...batchData];
+          if (batchData.length < batchSize) {
+            hasMore = false;
+          } else {
+            from += batchSize;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      if (allTiposData.length > 0) {
+        const tiposUnicos = [...new Set(allTiposData.map(item => item.tipo_de_unidade).filter(Boolean))].sort();
+        setTiposUnidade(tiposUnicos);
+      }
+
     } catch (err) {
       console.error('💥 Erro ao carregar valores únicos:', err);
     } finally {
@@ -128,18 +184,21 @@ export const DataFilter = React.memo(({ onFilterChange }: DataFilterProps) => {
     }
   }, [profile, isAdmin, profileLoading]);
 
-  // Optimized filter change with debouncing
-  const handleFilterChange = useDebounce((key: keyof FilterData, value: string[] | string) => {
+  // Atualizar filtros quando qualquer valor mudar
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onFilterChange(filters);
+    }, 100); // Debounce para evitar chamadas excessivas
+    
+    return () => clearTimeout(timeoutId);
+  }, [filters]);
+
+  const handleFilterChange = (key: keyof FilterData, value: string[] | string) => {
     setFilters(prev => ({
       ...prev,
       [key]: value
     }));
-  }, 200);
-
-  // Apply filter changes with debouncing
-  useEffect(() => {
-    debouncedFilterChange(filters);
-  }, [filters, debouncedFilterChange]);
+  };
 
   const clearFilters = () => {
     const emptyFilters = { 
@@ -152,7 +211,18 @@ export const DataFilter = React.memo(({ onFilterChange }: DataFilterProps) => {
   };
 
   if (loading) {
-    return <FilterSkeleton />;
+    return (
+      <Card className="p-6 bg-card border border-border">
+        <div className="flex items-center gap-2 mb-4">
+          <Filter className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold text-foreground">Filtros de Dados</h3>
+        </div>
+        <div className="text-center py-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-sm text-muted-foreground">Carregando filtros...</p>
+        </div>
+      </Card>
+    );
   }
 
   return (
@@ -224,4 +294,4 @@ export const DataFilter = React.memo(({ onFilterChange }: DataFilterProps) => {
       </div>
     </Card>
   );
-});
+}
