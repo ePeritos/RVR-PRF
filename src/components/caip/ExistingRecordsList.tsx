@@ -53,10 +53,10 @@ export const ExistingRecordsList = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[200px]">Nome da Unidade</TableHead>
-                <TableHead className="min-w-[120px]">Unidade Gestora</TableHead>
-                <TableHead className="min-w-[100px]">Tipo</TableHead>
                 <TableHead className="min-w-[80px]">Ano CAIP</TableHead>
+                <TableHead className="min-w-[120px]">Unidade Gestora</TableHead>
+                <TableHead className="min-w-[100px]">Tipo de Unidade</TableHead>
+                <TableHead className="min-w-[200px]">Nome da Unidade</TableHead>
                 <TableHead className="min-w-[100px]">Nota Adequação</TableHead>
                 <TableHead className="min-w-[100px]">Nota Manutenção</TableHead>
                 <TableHead className="min-w-[90px]">Nota Total</TableHead>
@@ -67,15 +67,15 @@ export const ExistingRecordsList = ({
             <TableBody>
               {filteredData.map((item) => (
                 <TableRow key={item.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium">
-                    {item.nome_da_unidade || 'Nome não informado'}
-                  </TableCell>
-                  <TableCell>{item.unidade_gestora || 'N/A'}</TableCell>
-                  <TableCell>{item.tipo_de_unidade || 'N/A'}</TableCell>
                   <TableCell>
                     <Badge variant="outline">
                       {item.ano_caip || 'Sem ano'}
                     </Badge>
+                  </TableCell>
+                  <TableCell>{item.unidade_gestora || 'N/A'}</TableCell>
+                  <TableCell>{item.tipo_de_unidade || 'N/A'}</TableCell>
+                  <TableCell className="font-medium">
+                    {item.nome_da_unidade || 'Nome não informado'}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">
