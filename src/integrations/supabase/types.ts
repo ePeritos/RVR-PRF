@@ -705,7 +705,7 @@ export type Database = {
     }
     Functions: {
       calcular_nota_global: {
-        Args: { p_imovel_id: string }
+        Args: Record<PropertyKey, never> | { p_imovel_id: string }
         Returns: number
       }
       calcular_nota_manutencao: {
@@ -717,10 +717,9 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"]
       }
       has_role: {
-        Args: {
-          _user_id: string
-          _role: Database["public"]["Enums"]["app_role"]
-        }
+        Args:
+          | { _user_id: string; _role: Database["public"]["Enums"]["app_role"] }
+          | { user_id: number; role_name: string }
         Returns: boolean
       }
     }

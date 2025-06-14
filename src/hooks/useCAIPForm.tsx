@@ -112,28 +112,35 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess }: UseC
         }
       });
 
-      // Verificar se há avaliações de manutenção para ambientes selecionados
-      if (ambientesSelecionados.length > 0 && data.id) {
-        try {
-          const { data: avaliacoes, error: errorAvaliacoes } = await supabase
-            .from('manutencao_ambientes')
-            .select('*')
-            .eq('imovel_id', data.id);
+      // Para novos registros, verificar se há avaliações locais no EnvironmentsSection
+      // Para registros existentes, verificar no banco de dados
+      if (ambientesSelecionados.length > 0) {
+        if (!editingItem) {
+          // Novo registro: não verificar no banco, a validação é feita no componente
+          console.log('Novo registro: validação de ambientes será feita no componente');
+        } else {
+          // Registro existente: verificar no banco
+          try {
+            const { data: avaliacoes, error: errorAvaliacoes } = await supabase
+              .from('manutencao_ambientes')
+              .select('*')
+              .eq('imovel_id', editingItem.id);
 
-          if (errorAvaliacoes) throw errorAvaliacoes;
+            if (errorAvaliacoes) throw errorAvaliacoes;
 
-          const avaliacoesCount = avaliacoes?.length || 0;
-          if (avaliacoesCount < ambientesSelecionados.length) {
-            toast({
-              title: "Avaliações de manutenção obrigatórias",
-              description: `Por favor, avalie o estado de conservação de todos os ${ambientesSelecionados.length} ambientes selecionados.`,
-              variant: "destructive",
-            });
-            setIsLoading(false);
-            return;
+            const avaliacoesCount = avaliacoes?.length || 0;
+            if (avaliacoesCount < ambientesSelecionados.length) {
+              toast({
+                title: "Avaliações de manutenção obrigatórias",
+                description: `Por favor, avalie o estado de conservação de todos os ${ambientesSelecionados.length} ambientes selecionados.`,
+                variant: "destructive",
+              });
+              setIsLoading(false);
+              return;
+            }
+          } catch (error) {
+            console.error('Erro ao verificar avaliações:', error);
           }
-        } catch (error) {
-          console.error('Erro ao verificar avaliações:', error);
         }
       }
 

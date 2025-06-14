@@ -16,6 +16,7 @@ interface EnvironmentsSectionProps {
   register: UseFormRegister<DadosCAIP>;
   setValue: UseFormSetValue<DadosCAIP>;
   watchedValues?: any;
+  onAvaliacoesChange?: (avaliacoes: {[key: string]: number}) => void;
 }
 
 interface AmbienteExistente {
@@ -27,7 +28,7 @@ interface AmbienteExistente {
   avaliacao?: ManutencaoAmbientes;
 }
 
-export const EnvironmentsSection = ({ register, setValue, watchedValues }: EnvironmentsSectionProps) => {
+export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvaliacoesChange }: EnvironmentsSectionProps) => {
   const [avaliacoesLocais, setAvaliacoesLocais] = useState<{[key: string]: number}>({});
   const { toast } = useToast();
 
@@ -138,6 +139,13 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues }: Envir
     }
   }, [watchedValues?.id]);
 
+  // Notificar mudanças nas avaliações para o componente pai
+  useEffect(() => {
+    if (onAvaliacoesChange) {
+      onAvaliacoesChange(avaliacoesLocais);
+    }
+  }, [avaliacoesLocais, onAvaliacoesChange]);
+
   const carregarAvaliacoesExistentes = async () => {
     if (!watchedValues?.id) return;
 
@@ -177,7 +185,8 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues }: Envir
       [campo]: rating
     }));
 
-    // Se o registro já existe, salvar no banco
+    // Se o registro já existe (editando), salvar no banco
+    // Para novos registros, apenas manter no estado local
     if (watchedValues?.id) {
       salvarAvaliacaoNoBanco(campo, rating);
     }
@@ -281,9 +290,9 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues }: Envir
                     onChange={(rating) => handleAvaliacaoChange(key, rating)}
                     size={18}
                   />
-                  {avaliacaoAtual === 0 && (
-                    <p className="text-xs text-destructive">Por favor, avalie o estado de conservação deste ambiente</p>
-                  )}
+                   {avaliacaoAtual === 0 && (
+                     <p className="text-xs text-destructive font-medium">⚠️ Obrigatório: Avalie o estado de conservação</p>
+                   )}
                 </div>
               )}
             </div>
