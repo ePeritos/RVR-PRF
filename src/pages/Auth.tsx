@@ -69,7 +69,7 @@ const Auth = () => {
         <ThemeToggle />
       </div>
 
-      <Card className="w-full max-w-lg shadow-lg hover:shadow-xl transition-shadow duration-300 animate-scale-in">
+      <Card className="w-full max-w-sm shadow-lg hover:shadow-xl transition-shadow duration-300 animate-scale-in">
         <CardHeader className="text-center">
           <div className="relative flex items-center justify-center mb-4 h-12">
             <img src="/lovable-uploads/0c984027-ab7d-4e16-96fe-f7d523613cc5.png" alt="SIGI-PRF Logo" className="h-12 w-auto absolute left-4" />
