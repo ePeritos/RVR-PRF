@@ -1,20 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 
 interface MultiSelectProps {
   options: string[];
@@ -34,6 +22,22 @@ export function MultiSelect({
   disabled = false
 }: MultiSelectProps) {
   const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Fechar dropdown quando clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [open]);
 
   const handleSelect = (value: string) => {
     if (selected.includes(value)) {
@@ -51,76 +55,92 @@ export function MultiSelect({
     onChange([]);
   };
 
+  const filteredOptions = options.filter(option => 
+    option.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className={cn("w-full", className)}>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className={cn(
-              "w-full justify-between min-h-10 h-auto p-2",
-              disabled && "opacity-50 cursor-not-allowed"
-            )}
-            disabled={disabled}
-          >
-            <div className="flex flex-wrap gap-1 max-w-full">
-              {selected.length === 0 ? (
-                <span className="text-muted-foreground">{placeholder}</span>
-              ) : (
-                <>
-                  {selected.slice(0, 2).map((item) => (
-                    <Badge
-                      key={item}
-                      variant="secondary"
-                      className="text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemove(item);
-                      }}
-                    >
-                      {item}
-                      <X className="ml-1 h-3 w-3 cursor-pointer" />
-                    </Badge>
-                  ))}
-                  {selected.length > 2 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{selected.length - 2} mais
-                    </Badge>
-                  )}
-                </>
-              )}
-            </div>
-            <div className="flex items-center gap-2 ml-2">
-              {selected.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+    <div className={cn("relative w-full", className)} ref={containerRef}>
+      <Button
+        type="button"
+        variant="outline"
+        role="combobox"
+        aria-expanded={open}
+        className={cn(
+          "w-full justify-between min-h-10 h-auto p-2",
+          disabled && "opacity-50 cursor-not-allowed"
+        )}
+        disabled={disabled}
+        onClick={() => setOpen(!open)}
+      >
+        <div className="flex flex-wrap gap-1 max-w-full">
+          {selected.length === 0 ? (
+            <span className="text-muted-foreground">{placeholder}</span>
+          ) : (
+            <>
+              {selected.slice(0, 2).map((item) => (
+                <Badge
+                  key={item}
+                  variant="secondary"
+                  className="text-xs"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleClear();
+                    handleRemove(item);
                   }}
                 >
-                  <X className="h-3 w-3" />
-                </Button>
+                  {item}
+                  <X className="ml-1 h-3 w-3 cursor-pointer" />
+                </Badge>
+              ))}
+              {selected.length > 2 && (
+                <Badge variant="secondary" className="text-xs">
+                  +{selected.length - 2} mais
+                </Badge>
               )}
-              <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-            </div>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] max-w-[400px] p-0 z-50 bg-popover" align="start">
-          <Command>
-            <CommandInput placeholder="Buscar..." className="h-9" />
-            <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
-            <CommandGroup className="max-h-64 overflow-auto">
-              {options.map((option) => (
-                <CommandItem
+            </>
+          )}
+        </div>
+        <div className="flex items-center gap-2 ml-2">
+          {selected.length > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClear();
+              }}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          )}
+          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+        </div>
+      </Button>
+
+      {open && (
+        <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-md max-h-60 overflow-hidden">
+          <div className="p-2 border-b border-border">
+            <input
+              type="text"
+              placeholder="Buscar..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-2 py-1 text-sm bg-background border border-border rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+          </div>
+          <div className="max-h-48 overflow-auto">
+            {filteredOptions.length === 0 ? (
+              <div className="p-3 text-sm text-muted-foreground text-center">
+                Nenhum item encontrado.
+              </div>
+            ) : (
+              filteredOptions.map((option) => (
+                <div
                   key={option}
-                  value={option}
-                  onSelect={() => handleSelect(option)}
-                  className="cursor-pointer"
+                  className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                  onClick={() => handleSelect(option)}
                 >
                   <Check
                     className={cn(
@@ -129,12 +149,12 @@ export function MultiSelect({
                     )}
                   />
                   {option}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </Command>
-        </PopoverContent>
-      </Popover>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
