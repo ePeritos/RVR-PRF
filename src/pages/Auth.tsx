@@ -37,8 +37,9 @@ const Auth = () => {
     try {
       setLoading(true);
       console.log('🚀 Iniciando login com Google...');
-      
-      const { error } = await supabase.auth.signInWithOAuth({
+      const {
+        error
+      } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/`,
@@ -47,12 +48,10 @@ const Auth = () => {
           }
         }
       });
-      
       if (error) {
         console.error('❌ Erro no OAuth:', error);
         throw error;
       }
-      
       console.log('✅ OAuth iniciado com sucesso');
     } catch (error: any) {
       const errorMessage = handleAuthError(error);
@@ -81,7 +80,7 @@ const Auth = () => {
         <CardHeader className="text-center px-6 md:px-16">
           <div className="flex flex-col items-center justify-center mb-4 space-y-3">
             <img src="/lovable-uploads/40767838-14cb-481f-9df0-efaa941d75a0.png" alt="SIGI-PRF Logo" className="h-8 md:h-12 w-auto dark:invert" />
-            <CardTitle className="text-xl md:text-2xl font-bold">SIGI-PRF</CardTitle>
+            <CardTitle className="text-4xl md:text-5xl font-bold">SIGI</CardTitle>
           </div>
           <CardDescription className="text-sm md:text-base">
             Faça login para acessar o Sistema de Gestão de Imóveis da PRF
