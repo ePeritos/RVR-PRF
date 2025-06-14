@@ -168,7 +168,7 @@ export const UserProfile = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="unidade_gestora">Unidade Gestora</Label>
+              <Label htmlFor="unidade_gestora">Unidade Gestora *</Label>
               <Input
                 id="unidade_gestora"
                 value={profile.unidade_gestora}
@@ -211,16 +211,13 @@ export const UserProfile = () => {
               />
             </div>
             
-            <div className="flex gap-2 pt-4">
+            <div className="pt-4">
               <Button 
                 type="submit" 
                 disabled={loading || !profile.nome_completo} 
-                className="flex-1"
+                className="w-full"
               >
                 {loading ? "Salvando..." : "Salvar Alterações"}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                Cancelar
               </Button>
             </div>
           </form>
