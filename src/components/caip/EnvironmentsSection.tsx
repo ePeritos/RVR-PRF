@@ -1,4 +1,4 @@
-import { UseFormRegister } from 'react-hook-form';
+import { UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -8,9 +8,10 @@ type DadosCAIP = Tables<'dados_caip'>;
 
 interface EnvironmentsSectionProps {
   register: UseFormRegister<DadosCAIP>;
+  setValue: UseFormSetValue<DadosCAIP>;
 }
 
-export const EnvironmentsSection = ({ register }: EnvironmentsSectionProps) => {
+export const EnvironmentsSection = ({ register, setValue }: EnvironmentsSectionProps) => {
   const environmentFields = [
     { key: 'almoxarifado', label: 'Almoxarifado' },
     { key: 'alojamento_feminino', label: 'Alojamento Feminino' },
@@ -63,8 +64,7 @@ export const EnvironmentsSection = ({ register }: EnvironmentsSectionProps) => {
 
   const handleSelectAll = (checked: boolean) => {
     environmentFields.forEach(({ key }) => {
-      const event = { target: { name: key, checked } };
-      register(key as keyof DadosCAIP).onChange(event);
+      setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não');
     });
   };
 
@@ -85,7 +85,10 @@ export const EnvironmentsSection = ({ register }: EnvironmentsSectionProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {environmentFields.map(({ key, label }) => (
           <div key={key} className="flex items-center space-x-2">
-            <Checkbox {...register(key as keyof DadosCAIP)} />
+            <Checkbox 
+              {...register(key as keyof DadosCAIP)}
+              onCheckedChange={(checked) => setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não')}
+            />
             <Label>{label}</Label>
           </div>
         ))}

@@ -208,13 +208,13 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
 
           <TechnicalDataSection register={register} />
 
-          <InfrastructureSection register={register} />
+          <InfrastructureSection register={register} setValue={setValue} />
 
-          <EnvironmentsSection register={register} />
+          <EnvironmentsSection register={register} setValue={setValue} />
 
-          <SystemsSection register={register} />
+          <SystemsSection register={register} setValue={setValue} />
 
-          <SecuritySection register={register} />
+          <SecuritySection register={register} setValue={setValue} />
 
           <NotesEvaluationSection 
             register={register}

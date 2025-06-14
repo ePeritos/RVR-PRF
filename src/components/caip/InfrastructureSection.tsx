@@ -1,4 +1,4 @@
-import { UseFormRegister } from 'react-hook-form';
+import { UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -8,9 +8,10 @@ type DadosCAIP = Tables<'dados_caip'>;
 
 interface InfrastructureSectionProps {
   register: UseFormRegister<DadosCAIP>;
+  setValue: UseFormSetValue<DadosCAIP>;
 }
 
-export const InfrastructureSection = ({ register }: InfrastructureSectionProps) => {
+export const InfrastructureSection = ({ register, setValue }: InfrastructureSectionProps) => {
   const infrastructureFields = [
     { key: 'fornecimento_de_agua', label: 'Fornecimento de Água' },
     { key: 'fornecimento_de_energia_eletrica', label: 'Fornecimento de Energia Elétrica' },
@@ -23,9 +24,7 @@ export const InfrastructureSection = ({ register }: InfrastructureSectionProps) 
 
   const handleSelectAll = (checked: boolean) => {
     infrastructureFields.forEach(({ key }) => {
-      // Set value for each checkbox
-      const event = { target: { name: key, checked } };
-      register(key as keyof DadosCAIP).onChange(event);
+      setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não');
     });
   };
 
@@ -46,7 +45,10 @@ export const InfrastructureSection = ({ register }: InfrastructureSectionProps) 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {infrastructureFields.map(({ key, label }) => (
           <div key={key} className="flex items-center space-x-2">
-            <Checkbox {...register(key as keyof DadosCAIP)} />
+            <Checkbox 
+              {...register(key as keyof DadosCAIP)}
+              onCheckedChange={(checked) => setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não')}
+            />
             <Label>{label}</Label>
           </div>
         ))}

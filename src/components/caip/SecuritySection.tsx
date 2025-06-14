@@ -1,4 +1,4 @@
-import { UseFormRegister } from 'react-hook-form';
+import { UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -8,9 +8,10 @@ type DadosCAIP = Tables<'dados_caip'>;
 
 interface SecuritySectionProps {
   register: UseFormRegister<DadosCAIP>;
+  setValue: UseFormSetValue<DadosCAIP>;
 }
 
-export const SecuritySection = ({ register }: SecuritySectionProps) => {
+export const SecuritySection = ({ register, setValue }: SecuritySectionProps) => {
   const securityFields = [
     { key: 'claviculario', label: 'Claviculário' },
     { key: 'sala_cofre', label: 'Sala Cofre' },
@@ -20,8 +21,7 @@ export const SecuritySection = ({ register }: SecuritySectionProps) => {
 
   const handleSelectAll = (checked: boolean) => {
     securityFields.forEach(({ key }) => {
-      const event = { target: { name: key, checked } };
-      register(key as keyof DadosCAIP).onChange(event);
+      setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não');
     });
   };
 
@@ -42,7 +42,10 @@ export const SecuritySection = ({ register }: SecuritySectionProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {securityFields.map(({ key, label }) => (
           <div key={key} className="flex items-center space-x-2">
-            <Checkbox {...register(key as keyof DadosCAIP)} />
+            <Checkbox 
+              {...register(key as keyof DadosCAIP)}
+              onCheckedChange={(checked) => setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não')}
+            />
             <Label>{label}</Label>
           </div>
         ))}
