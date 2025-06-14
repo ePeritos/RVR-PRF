@@ -212,7 +212,93 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
       salvarAvaliacaoNoBanco(campo, rating);
     } else {
       console.log('Novo registro - mantendo apenas local');
+      // Para novos registros, calcular a nota de manutenção local
+      calcularNotaManutencaoLocal(novasAvaliacoes);
     }
+  };
+
+  const calcularNotaManutencaoLocal = (avaliacoes: {[key: string]: number}) => {
+    if (!watchedValues?.tipo_de_unidade) return;
+
+    let potencialMaximo = 0;
+    let scoreEfetivo = 0;
+
+    // Pesos dos ambientes baseados no tipo de unidade
+    const pesosAmbientes: {[key: string]: number} = {
+      'almoxarifado': 4,
+      'alojamento_feminino': 5,
+      'alojamento_masculino': 5,
+      'alojamento_misto': 5,
+      'area_de_servico': 2,
+      'area_de_uso_compartilhado_com_outros_orgaos': 2,
+      'arquivo': 3,
+      'auditorio': 3,
+      'banheiro_para_zeladoria': 2,
+      'banheiro_feminino_para_servidoras': 5,
+      'banheiro_masculino_para_servidores': 5,
+      'banheiro_misto_para_servidores': 5,
+      'box_com_chuveiro_externo': 2,
+      'box_para_lavagem_de_veiculos': 2,
+      'canil': 2,
+      'casa_de_maquinas': 3,
+      'central_de_gas': 2,
+      'cobertura_para_aglomeracao_de_usuarios': 3,
+      'cobertura_para_fiscalizacao_de_veiculos': 4,
+      'copa_e_cozinha': 3,
+      'deposito_de_lixo': 1,
+      'deposito_de_materiais_de_descarte_e_baixa': 2,
+      'deposito_de_material_de_limpeza': 2,
+      'deposito_de_material_operacional': 3,
+      'estacionamento_para_usuarios': 2,
+      'garagem_para_servidores': 3,
+      'garagem_para_viaturas': 4,
+      'lavabo_para_servidores_sem_box_para_chuveiro': 3,
+      'local_para_custodia_temporaria_de_detidos': 4,
+      'local_para_guarda_provisoria_de_animais': 2,
+      'patio_de_retencao_de_veiculos': 3,
+      'plataforma_para_fiscalizacao_da_parte_superior_dos_veiculos': 3,
+      'ponto_de_pouso_para_aeronaves': 4,
+      'rampa_de_fiscalizacao_de_veiculos': 4,
+      'recepcao': 4,
+      'sala_administrativa_escritorio': 5,
+      'sala_de_assepsia': 3,
+      'sala_de_aula': 3,
+      'sala_de_reuniao': 3,
+      'sala_de_revista_pessoal': 3,
+      'sala_operacional_observatorio': 5,
+      'sala_tecnica': 3,
+      'sanitario_publico': 3,
+      'telefone_publico': 1,
+      'torre_de_telecomunicacoes': 3,
+      'vestiario_para_nao_policiais': 3,
+      'vestiario_para_policiais': 4
+    };
+
+    // Calcular apenas para ambientes selecionados (com "Sim")
+    Object.keys(avaliacoes).forEach(campo => {
+      const isSelected = watchedValues[campo as keyof typeof watchedValues] === 'Sim';
+      const avaliacao = avaliacoes[campo];
+      const peso = pesosAmbientes[campo] || 1;
+
+      if (isSelected && avaliacao > 0) {
+        potencialMaximo += peso * 5; // Máximo é peso * 5
+        scoreEfetivo += peso * avaliacao;
+      }
+    });
+
+    // Calcular a nota final
+    let notaFinal = 0;
+    if (potencialMaximo > 0) {
+      notaFinal = (scoreEfetivo / potencialMaximo) * 100;
+    }
+
+    // Garantir que não ultrapasse 100
+    notaFinal = Math.min(notaFinal, 100);
+    
+    // Atualizar o formulário
+    setValue('nota_para_manutencao', notaFinal.toFixed(2));
+    
+    console.log('Nota de manutenção calculada:', notaFinal.toFixed(2));
   };
 
   const salvarAvaliacaoNoBanco = async (campo: string, scoreConservacao: number) => {
@@ -247,6 +333,15 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
         });
 
       if (error) throw error;
+
+      // Recalcular a nota de manutenção via função do banco
+      const { data: notaData, error: notaError } = await supabase
+        .rpc('calcular_nota_manutencao', { p_imovel_id: watchedValues.id });
+
+      if (notaError) throw notaError;
+
+      // Atualizar o campo no formulário
+      setValue('nota_para_manutencao', notaData?.toFixed(2) || '0.00');
 
       toast({
         title: "Avaliação salva",
