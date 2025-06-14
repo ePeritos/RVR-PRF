@@ -14,6 +14,7 @@ interface BasicInformationSectionProps {
   errors: FieldErrors<DadosCAIP>;
   unidadesGestoras: string[];
   estadosConservacao: Array<{ value: string; label: string }>;
+  watchedValues?: any;
 }
 
 export const BasicInformationSection = ({ 
@@ -21,7 +22,8 @@ export const BasicInformationSection = ({
   setValue, 
   errors, 
   unidadesGestoras, 
-  estadosConservacao 
+  estadosConservacao,
+  watchedValues 
 }: BasicInformationSectionProps) => {
   return (
     <Card className="p-6">
@@ -59,7 +61,10 @@ export const BasicInformationSection = ({
         </div>
         <div>
           <Label htmlFor="unidade_gestora">Unidade Gestora *</Label>
-          <Select onValueChange={(value) => setValue('unidade_gestora', value)}>
+          <Select 
+            value={watchedValues?.unidade_gestora || ""}
+            onValueChange={(value) => setValue('unidade_gestora', value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Selecione uma unidade gestora" />
             </SelectTrigger>
@@ -76,7 +81,10 @@ export const BasicInformationSection = ({
         </div>
         <div>
           <Label htmlFor="tipo_de_unidade">Tipo de Unidade *</Label>
-          <Select onValueChange={(value) => setValue('tipo_de_unidade', value)}>
+          <Select 
+            value={watchedValues?.tipo_de_unidade || ""}
+            onValueChange={(value) => setValue('tipo_de_unidade', value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Selecione o tipo de unidade" />
             </SelectTrigger>

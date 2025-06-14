@@ -12,9 +12,10 @@ interface LocationPropertySectionProps {
   register: UseFormRegister<DadosCAIP>;
   setValue: UseFormSetValue<DadosCAIP>;
   estadosConservacao: Array<{ value: string; label: string }>;
+  watchedValues?: any;
 }
 
-export const LocationPropertySection = ({ register, setValue, estadosConservacao }: LocationPropertySectionProps) => {
+export const LocationPropertySection = ({ register, setValue, estadosConservacao, watchedValues }: LocationPropertySectionProps) => {
   return (
     <Card className="p-6">
       <h3 className="text-lg font-semibold mb-4">Localização e Dados do Imóvel</h3>
@@ -49,7 +50,10 @@ export const LocationPropertySection = ({ register, setValue, estadosConservacao
           </div>
           <div>
             <Label htmlFor="tipo_de_imovel">Tipo de Imóvel</Label>
-            <Select onValueChange={(value) => setValue('tipo_de_imovel', value)}>
+            <Select 
+              value={watchedValues?.tipo_de_imovel || ""}
+              onValueChange={(value) => setValue('tipo_de_imovel', value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
@@ -61,7 +65,10 @@ export const LocationPropertySection = ({ register, setValue, estadosConservacao
           </div>
           <div>
             <Label htmlFor="situacao_do_imovel">Situação do Imóvel</Label>
-            <Select onValueChange={(value) => setValue('situacao_do_imovel', value)}>
+            <Select 
+              value={watchedValues?.situacao_do_imovel || ""}
+              onValueChange={(value) => setValue('situacao_do_imovel', value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a situação" />
               </SelectTrigger>
@@ -78,7 +85,10 @@ export const LocationPropertySection = ({ register, setValue, estadosConservacao
           </div>
           <div>
             <Label htmlFor="estado_de_conservacao">Estado de Conservação</Label>
-            <Select onValueChange={(value) => setValue('estado_de_conservacao', value)}>
+            <Select 
+              value={watchedValues?.estado_de_conservacao || ""}
+              onValueChange={(value) => setValue('estado_de_conservacao', value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o estado de conservação" />
               </SelectTrigger>

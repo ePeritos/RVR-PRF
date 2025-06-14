@@ -139,6 +139,7 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
             errors={errors}
             unidadesGestoras={UNIDADES_GESTORAS}
             estadosConservacao={ESTADOS_CONSERVACAO}
+            watchedValues={watchedValues}
           />
 
           <ImagesSection 
@@ -151,6 +152,7 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
             register={register}
             setValue={setValue}
             estadosConservacao={ESTADOS_CONSERVACAO}
+            watchedValues={watchedValues}
           />
 
           <TechnicalDataSection register={register} />
