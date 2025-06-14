@@ -52,18 +52,34 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
         const imageUrl = watchedValues[key];
         console.log(`Verificando campo ${key}:`, imageUrl);
         
-        // Only load images that actually exist and are not null/empty
+        // Validação mais rigorosa para URLs reais de imagem
         if (imageUrl && 
             typeof imageUrl === 'string' && 
             imageUrl.trim() !== '' && 
             imageUrl !== 'null' && 
-            imageUrl !== 'undefined') {
-          existingPreviews[key] = {
-            url: imageUrl,
-            isExisting: true
-          };
-          hasExistingImages = true;
-          console.log(`✅ Imagem existente encontrada para ${key}`);
+            imageUrl !== 'undefined' &&
+            (imageUrl.startsWith('http') || imageUrl.startsWith('https') || imageUrl.startsWith('blob:')) &&
+            !imageUrl.toLowerCase().includes('placeholder') &&
+            !imageUrl.toLowerCase().includes('example') &&
+            !imageUrl.toLowerCase().includes('default')) {
+          
+          // Verificar se a URL parece válida (contém extensão de imagem ou domínio supabase)
+          const isValidImageUrl = imageUrl.includes('supabase') || 
+                                  /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(imageUrl) ||
+                                  imageUrl.startsWith('blob:');
+          
+          if (isValidImageUrl) {
+            existingPreviews[key] = {
+              url: imageUrl,
+              isExisting: true
+            };
+            hasExistingImages = true;
+            console.log(`✅ Imagem existente válida encontrada para ${key}: ${imageUrl}`);
+          } else {
+            console.log(`⚠️ URL rejeitada para ${key} (não parece ser uma imagem válida): ${imageUrl}`);
+          }
+        } else {
+          console.log(`❌ Campo ${key} não contém imagem válida:`, imageUrl);
         }
       });
       
@@ -71,11 +87,12 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
         console.log('Carregando imagens existentes:', existingPreviews);
         setImagePreviews(existingPreviews);
       } else {
-        console.log('Nenhuma imagem existente encontrada');
+        console.log('Nenhuma imagem existente válida encontrada');
         setImagePreviews({});
       }
     } else {
       // Clear previews when no ID (new record)
+      console.log('Novo registro - limpando previews de imagem');
       setImagePreviews({});
     }
   }, [watchedValues?.id]);
@@ -253,9 +270,12 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
                 ) : (
                   <label htmlFor={key} className="block cursor-pointer">
                     <div className="p-4 text-center h-32 flex flex-col justify-center">
-                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <Camera className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
-                        Clique para selecionar uma imagem
+                        Clique para selecionar ou tirar uma foto
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Máximo 5MB
                       </p>
                     </div>
                   </label>
@@ -265,6 +285,7 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
                   id={key}
                   type="file"
                   accept="image/*"
+                  capture="environment"
                   onChange={(e) => {
                     console.log(`Input onChange para campo ${key}:`, e.target.files);
                     handleImageChange(key, e.target.files);
