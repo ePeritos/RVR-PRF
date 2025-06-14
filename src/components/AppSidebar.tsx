@@ -135,7 +135,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <div className="flex items-center gap-2 px-2 py-1">
             <img 
-              src="/lovable-uploads/0c984027-ab7d-4e16-96fe-f7d523613cc5.png" 
+              src="/lovable-uploads/40767838-14cb-481f-9df0-efaa941d75a0.png" 
               alt="SIGI-PRF Logo" 
               className="h-6 w-auto"
             />
