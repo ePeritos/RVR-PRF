@@ -80,8 +80,7 @@ const Dashboard = () => {
         numeroImoveis: data.count,
         areaConstruidaMedia: Math.round(data.area / data.count)
       }))
-      .sort((a, b) => b.areaConstruidaMedia - a.areaConstruidaMedia) // Ordenar por área construída média (maior para menor)
-      .slice(0, 10); // Top 10 unidades
+      .sort((a, b) => b.areaConstruidaMedia - a.areaConstruidaMedia); // Ordenar por área construída média (maior para menor)
   };
 
   useEffect(() => {
@@ -268,7 +267,7 @@ const Dashboard = () => {
         <CardHeader>
           <CardTitle className="text-lg font-medium">Área Construída Média por Unidade Gestora</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Área construída média por imóvel (Top 10 unidades)
+            Área construída média por imóvel (todas as unidades)
           </p>
         </CardHeader>
         <CardContent>
