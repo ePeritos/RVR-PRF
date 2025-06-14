@@ -46,8 +46,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut({ scope: 'global' });
-    window.location.href = '/auth';
+    console.log('useAuth - Iniciando logout...');
+    setLoading(true);
+    
+    try {
+      // Limpar estado primeiro
+      setUser(null);
+      setSession(null);
+      
+      // Tentar logout global
+      await supabase.auth.signOut({ scope: 'global' });
+      console.log('useAuth - Logout realizado com sucesso');
+    } catch (error) {
+      console.error('useAuth - Erro no logout:', error);
+    } finally {
+      // Sempre redirecionar para auth, mesmo com erro
+      window.location.href = '/auth';
+    }
   };
 
   return (
