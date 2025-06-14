@@ -131,7 +131,9 @@ export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: 
           <thead className="bg-muted/30 border-b border-border">
             <tr>
               <th className="p-4 text-left">
+                <label htmlFor="select-all" className="sr-only">Selecionar todos os itens</label>
                 <Checkbox
+                  id="select-all"
                   checked={selectedItems.length === data.length && data.length > 0}
                   onCheckedChange={handleSelectAll}
                 />
@@ -246,7 +248,11 @@ export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: 
                 }`}
               >
                 <td className="p-4">
+                  <label htmlFor={`select-item-${row.id}`} className="sr-only">
+                    Selecionar item: {row['nome_da_unidade'] || 'Nome não informado'}
+                  </label>
                   <Checkbox
+                    id={`select-item-${row.id}`}
                     checked={selectedItems.includes(row.id)}
                     onCheckedChange={() => handleSelectItem(row.id)}
                   />
