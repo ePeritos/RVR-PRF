@@ -6,13 +6,19 @@ import { DataFilter } from '@/components/DataFilter';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface DashboardStats {
   totalImoveis: number;
   imoveisAvaliados: number;
   totalAreas: number;
   valorTotalAvaliado: number;
-  percentualPreenchimento: number;
+}
+
+interface UnidadeGestoraData {
+  unidade: string;
+  numeroImoveis: number;
+  areaConstruida: number;
 }
 
 const Dashboard = () => {
@@ -23,9 +29,9 @@ const Dashboard = () => {
     imoveisAvaliados: 0,
     totalAreas: 0,
     valorTotalAvaliado: 0,
-    percentualPreenchimento: 0,
   });
   const [filteredStats, setFilteredStats] = useState<DashboardStats>(stats);
+  const [unidadeGestoraData, setUnidadeGestoraData] = useState<UnidadeGestoraData[]>([]);
 
   // Função para formatar valores grandes de forma compacta
   const formatCurrency = (value: number) => {
@@ -45,35 +51,33 @@ const Dashboard = () => {
     }
   };
 
-  // Função para calcular percentual de preenchimento dos campos CAIP
-  const calculateFieldCompletion = (data: any[]) => {
-    if (data.length === 0) return 0;
-
-    // Lista de campos relevantes do CAIP para calcular o preenchimento
-    const relevantFields = [
-      'nome_da_unidade', 'unidade_gestora', 'tipo_de_unidade', 'endereco', 'zona',
-      'coordenadas', 'area_construida_m2', 'area_do_terreno_m2', 'idade_aparente_do_imovel',
-      'vida_util_estimada_anos', 'estado_de_conservacao', 'situacao_do_imovel',
-      'fornecimento_de_agua', 'fornecimento_de_energia_eletrica', 'esgotamento_sanitario',
-      'conexao_de_internet', 'possui_wireless_wifi', 'climatizacao_de_ambientes',
-      'sala_cofre', 'protecao_contra_incendios', 'protecao_contra_intrusao', 'muro_ou_alambrado'
-    ];
-
-    const totalFields = relevantFields.length;
-    let totalCompletion = 0;
-
+  // Função para calcular dados por unidade gestora
+  const calculateUnidadeGestoraData = (data: any[]) => {
+    const unidadeMap = new Map<string, { count: number; area: number }>();
+    
     data.forEach(item => {
-      let filledFields = 0;
-      relevantFields.forEach(field => {
-        const value = item[field];
-        if (value !== null && value !== undefined && value !== '' && value !== 'false') {
-          filledFields++;
-        }
-      });
-      totalCompletion += (filledFields / totalFields) * 100;
+      const unidade = item.unidade_gestora || 'Não informado';
+      const area = Number(item.area_construida_m2) || 0;
+      
+      if (unidadeMap.has(unidade)) {
+        const existing = unidadeMap.get(unidade)!;
+        unidadeMap.set(unidade, {
+          count: existing.count + 1,
+          area: existing.area + area
+        });
+      } else {
+        unidadeMap.set(unidade, { count: 1, area });
+      }
     });
 
-    return totalCompletion / data.length;
+    return Array.from(unidadeMap.entries())
+      .map(([unidade, data]) => ({
+        unidade: unidade.replace('SPRF/', ''), // Remove prefixo para melhor visualização
+        numeroImoveis: data.count,
+        areaConstruida: Math.round(data.area)
+      }))
+      .sort((a, b) => b.numeroImoveis - a.numeroImoveis)
+      .slice(0, 10); // Top 10 unidades
   };
 
   useEffect(() => {
@@ -91,18 +95,18 @@ const Dashboard = () => {
         acc + (Number(item.rvr) || 0), 0
       );
 
-      const percentualPreenchimento = calculateFieldCompletion(supabaseData);
+      const unidadeData = calculateUnidadeGestoraData(supabaseData);
 
       const newStats = {
         totalImoveis,
         imoveisAvaliados,
         totalAreas,
         valorTotalAvaliado,
-        percentualPreenchimento,
       };
       
       setStats(newStats);
       setFilteredStats(newStats);
+      setUnidadeGestoraData(unidadeData);
     }
   }, [supabaseData]);
 
@@ -141,15 +145,15 @@ const Dashboard = () => {
       acc + (Number(item.rvr) || 0), 0
     );
 
-    const percentualPreenchimento = calculateFieldCompletion(filtered);
+    const unidadeData = calculateUnidadeGestoraData(filtered);
 
     setFilteredStats({
       totalImoveis,
       imoveisAvaliados,
       totalAreas,
       valorTotalAvaliado,
-      percentualPreenchimento,
     });
+    setUnidadeGestoraData(unidadeData);
   };
 
   if (loading) {
@@ -187,7 +191,7 @@ const Dashboard = () => {
       </div>
 
       {/* Cards de Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total de Imóveis</CardTitle>
@@ -253,22 +257,67 @@ const Dashboard = () => {
             </p>
           </CardContent>
         </Card>
-
-        <Card className="bg-card border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Preenchimento CAIP</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {filteredStats.percentualPreenchimento.toFixed(1)}%
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Média de campos preenchidos
-            </p>
-          </CardContent>
-        </Card>
       </div>
+
+      {/* Gráfico de Unidades Gestoras */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="text-lg font-medium">Imóveis por Unidade Gestora</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Número de imóveis e área construída total (Top 10 unidades)
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="h-96">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={unidadeGestoraData}
+                margin={{
+                  top: 20,
+                  right: 30,
+                  left: 20,
+                  bottom: 60,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis 
+                  dataKey="unidade" 
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  fontSize={12}
+                />
+                <YAxis yAxisId="left" orientation="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Tooltip 
+                  formatter={(value: any, name: string) => [
+                    name === 'numeroImoveis' 
+                      ? `${value} imóveis`
+                      : `${Number(value).toLocaleString('pt-BR')} m²`,
+                    name === 'numeroImoveis' ? 'Número de Imóveis' : 'Área Construída'
+                  ]}
+                  labelFormatter={(label) => `Unidade: ${label}`}
+                />
+                <Legend />
+                <Bar 
+                  yAxisId="left"
+                  dataKey="numeroImoveis" 
+                  fill="hsl(var(--primary))" 
+                  name="Número de Imóveis"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar 
+                  yAxisId="right"
+                  dataKey="areaConstruida" 
+                  fill="hsl(var(--accent))" 
+                  name="Área Construída (m²)"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Filtros */}
       <div className="max-w-5xl mx-auto">
