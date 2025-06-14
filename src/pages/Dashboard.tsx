@@ -262,9 +262,9 @@ const Dashboard = () => {
       {/* Gráfico de Unidades Gestoras */}
       <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Imóveis por Unidade Gestora</CardTitle>
+          <CardTitle className="text-lg font-medium">Área Construída Média por Unidade Gestora</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Número de imóveis e área construída média por imóvel (Top 10 unidades)
+            Área construída média por imóvel (Top 10 unidades)
           </p>
         </CardHeader>
         <CardContent>
@@ -287,29 +287,17 @@ const Dashboard = () => {
                   height={80}
                   fontSize={12}
                 />
-                <YAxis yAxisId="left" orientation="left" />
-                <YAxis yAxisId="right" orientation="right" />
+                <YAxis />
                 <Tooltip 
-                  formatter={(value: any, name: string) => [
-                    name === 'numeroImoveis' 
-                      ? `${value} unidades`
-                      : `${Number(value).toLocaleString('pt-BR')} m²`,
-                    name === 'numeroImoveis' ? 'Número de Imóveis' : 'Área Construída Média'
+                  formatter={(value: any) => [
+                    `${Number(value).toLocaleString('pt-BR')} m²`,
+                    'Área Construída Média'
                   ]}
                   labelFormatter={(label) => `Unidade: ${label}`}
                 />
-                <Legend />
                 <Bar 
-                  yAxisId="left"
-                  dataKey="numeroImoveis" 
-                  fill="hsl(var(--primary))" 
-                  name="Número de Imóveis (unidades)"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar 
-                  yAxisId="right"
                   dataKey="areaConstruidaMedia" 
-                  fill="hsl(var(--accent))" 
+                  fill="hsl(var(--primary))" 
                   name="Área Construída Média (m²)"
                   radius={[4, 4, 0, 0]}
                 />
