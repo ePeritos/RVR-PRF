@@ -2,9 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Search, Edit } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Search, Edit, Trash2 } from 'lucide-react';
 import { Tables } from '@/integrations/supabase/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useProfile } from '@/hooks/useProfile';
 
 type DadosCAIP = Tables<'dados_caip'>;
 
@@ -13,14 +15,17 @@ interface ExistingRecordsListProps {
   setSearchTerm: (term: string) => void;
   filteredData: DadosCAIP[];
   handleEdit: (item: DadosCAIP) => void;
+  handleDelete?: (item: DadosCAIP) => void;
 }
 
 export const ExistingRecordsList = ({ 
   searchTerm, 
   setSearchTerm, 
   filteredData, 
-  handleEdit 
+  handleEdit,
+  handleDelete 
 }: ExistingRecordsListProps) => {
+  const { isAdmin } = useProfile();
   
   const calculateNotaTotal = (notaAdequacao: string | null, notaManutencao: string | null) => {
     const adequacao = parseFloat(notaAdequacao || '0');
@@ -93,14 +98,49 @@ export const ExistingRecordsList = ({
                     {item.rvr ? `R$ ${Number(item.rvr).toLocaleString('pt-BR')}` : 'N/A'}
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(item)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(item)}
+                        className="h-8 w-8 p-0"
+                        title="Editar registro"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      {isAdmin && handleDelete && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                              title="Deletar registro"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir o registro "{item.nome_da_unidade || 'Nome não informado'}"? 
+                                Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => handleDelete(item)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

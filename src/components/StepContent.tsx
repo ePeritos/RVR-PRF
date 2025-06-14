@@ -8,6 +8,8 @@ import { DataRow } from '@/hooks/useSupabaseData';
 import { useProfile } from '@/hooks/useProfile';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface StepContentProps {
   currentStep: number;
@@ -41,6 +43,35 @@ export const StepContent = ({
   currentParameters
 }: StepContentProps) => {
   const { isAdmin } = useProfile();
+  const { toast } = useToast();
+
+  const handleDelete = async (item: DataRow) => {
+    try {
+      const { error } = await supabase
+        .from('dados_caip')
+        .delete()
+        .eq('id', item.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Registro excluído com sucesso.",
+      });
+
+      if (onDataLoaded) {
+        onDataLoaded(); // Recarregar dados
+      }
+    } catch (error) {
+      console.error('Erro ao deletar:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir o registro.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -90,6 +121,7 @@ export const StepContent = ({
                 data={filteredData} 
                 selectedItems={selectedItems}
                 onSelectionChange={onSelectionChange}
+                onDelete={isAdmin ? handleDelete : undefined}
               />
             </div>
           </div>

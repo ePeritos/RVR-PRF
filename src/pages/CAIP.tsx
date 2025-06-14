@@ -47,6 +47,31 @@ const CAIP = () => {
     setDialogOpen(true);
   };
 
+  const handleDelete = async (item: DadosCAIP) => {
+    try {
+      const { error } = await supabase
+        .from('dados_caip')
+        .delete()
+        .eq('id', item.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Registro excluído com sucesso.",
+      });
+
+      fetchExistingData();
+    } catch (error) {
+      console.error('Erro ao deletar:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir o registro.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleNew = () => {
     setEditingItem(null);
     setDialogOpen(true);
@@ -127,6 +152,7 @@ const CAIP = () => {
             setSearchTerm={setSearchTerm}
             filteredData={filteredData}
             handleEdit={handleEdit}
+            handleDelete={handleDelete}
           />
         </div>
       </div>

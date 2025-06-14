@@ -1,21 +1,25 @@
 
 import { useState } from 'react';
-import { CheckCircle, Circle, ArrowUpAZ, ArrowDownAZ } from 'lucide-react';
+import { CheckCircle, Circle, ArrowUpAZ, ArrowDownAZ, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { DataRow } from '@/hooks/useSupabaseData';
+import { useProfile } from '@/hooks/useProfile';
 
 interface DataTableProps {
   data: DataRow[];
   selectedItems: string[];
   onSelectionChange: (selectedIds: string[]) => void;
+  onDelete?: (item: DataRow) => void;
 }
 
 type SortField = keyof DataRow;
 type SortDirection = 'asc' | 'desc' | null;
 
-export function DataTable({ data, selectedItems, onSelectionChange }: DataTableProps) {
+export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: DataTableProps) {
+  const { isAdmin } = useProfile();
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
@@ -224,12 +228,15 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
                 >
                   <span className="flex items-center gap-2">
                     Área Construída
-                    <SortIcon field="area_construida_m2" />
-                  </span>
-                </Button>
-              </th>
-            </tr>
-          </thead>
+                     <SortIcon field="area_construida_m2" />
+                   </span>
+                 </Button>
+               </th>
+               {isAdmin && onDelete && (
+                 <th className="p-4 text-left w-12">Ações</th>
+               )}
+             </tr>
+           </thead>
           <tbody>
             {sortedData.map((row, index) => (
               <tr 
@@ -267,10 +274,44 @@ export function DataTable({ data, selectedItems, onSelectionChange }: DataTableP
                 <td className="p-4 text-sm text-foreground">
                   {formatArea(row['area_do_terreno_m2'])}
                 </td>
-                <td className="p-4 text-sm text-foreground">
-                  {formatArea(row['area_construida_m2'])}
-                </td>
-              </tr>
+                 <td className="p-4 text-sm text-foreground">
+                   {formatArea(row['area_construida_m2'])}
+                 </td>
+                 {isAdmin && onDelete && (
+                   <td className="p-4">
+                     <AlertDialog>
+                       <AlertDialogTrigger asChild>
+                         <Button
+                           variant="ghost"
+                           size="sm"
+                           className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                           title="Deletar registro"
+                         >
+                           <Trash2 className="h-4 w-4" />
+                         </Button>
+                       </AlertDialogTrigger>
+                       <AlertDialogContent>
+                         <AlertDialogHeader>
+                           <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                           <AlertDialogDescription>
+                             Tem certeza que deseja excluir o registro "{row['nome_da_unidade'] || 'Nome não informado'}"? 
+                             Esta ação não pode ser desfeita.
+                           </AlertDialogDescription>
+                         </AlertDialogHeader>
+                         <AlertDialogFooter>
+                           <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                           <AlertDialogAction 
+                             onClick={() => onDelete(row)}
+                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                           >
+                             Excluir
+                           </AlertDialogAction>
+                         </AlertDialogFooter>
+                       </AlertDialogContent>
+                     </AlertDialog>
+                   </td>
+                 )}
+               </tr>
             ))}
           </tbody>
         </table>
