@@ -224,10 +224,16 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
   };
 
   const handleAvaliacaoChange = (campo: string, rating: number) => {
-    console.log(`=== AVALIAÇÃO CHANGED ===`);
+    console.log(`🌟 === AVALIAÇÃO CHANGED === 🌟`);
     console.log(`Campo: ${campo}, Rating: ${rating}`);
     console.log('ID do registro:', watchedValues?.id);
     console.log('Tipo de unidade:', watchedValues?.tipo_de_unidade);
+    console.log('Estado atual watchedValues:', {
+      id: watchedValues?.id,
+      tipo_de_unidade: watchedValues?.tipo_de_unidade,
+      nota_para_adequacao: watchedValues?.nota_para_adequacao,
+      nota_para_manutencao: watchedValues?.nota_para_manutencao
+    });
     
     // Atualizar estado local
     const novasAvaliacoes = {
@@ -235,15 +241,15 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
       [campo]: rating
     };
     
-    console.log('Novas avaliações locais:', novasAvaliacoes);
+    console.log('📊 Novas avaliações locais:', novasAvaliacoes);
     setAvaliacoesLocais(novasAvaliacoes);
 
     // Se o registro já existe (editando), salvar no banco imediatamente
     if (watchedValues?.id) {
-      console.log('Registro existente - salvando no banco...');
+      console.log('🏢 Registro existente - salvando no banco...');
       salvarAvaliacaoNoBanco(campo, rating);
     } else {
-      console.log('Novo registro - calculando nota local');
+      console.log('🆕 Novo registro - calculando nota local');
       // Para novos registros, calcular a nota de manutenção local
       calcularNotaManutencaoLocal(novasAvaliacoes);
     }
@@ -386,11 +392,13 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
 
   const salvarAvaliacaoNoBanco = async (campo: string, scoreConservacao: number) => {
     if (!watchedValues?.id || !watchedValues?.tipo_de_unidade) {
-      console.log('❌ ID do imóvel ou tipo de unidade não disponível');
+      console.log('❌ ERRO: ID do imóvel ou tipo de unidade não disponível');
+      console.log('watchedValues?.id:', watchedValues?.id);
+      console.log('watchedValues?.tipo_de_unidade:', watchedValues?.tipo_de_unidade);
       return;
     }
 
-    console.log('=== SALVANDO AVALIAÇÃO NO BANCO ===');
+    console.log('🔥 === SALVANDO AVALIAÇÃO NO BANCO === 🔥');
     console.log('Campo:', campo);
     console.log('Score:', scoreConservacao);
     console.log('ID do imóvel:', watchedValues.id);
