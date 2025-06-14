@@ -36,18 +36,21 @@ const Auth = () => {
     }
     try {
       setLoading(true);
-      
+
       // Limpar estado antes de tentar login
       cleanupAuthState();
-      
+
       // Tentar logout global primeiro (caso exista sessão anterior)
       try {
-        await supabase.auth.signOut({ scope: 'global' });
+        await supabase.auth.signOut({
+          scope: 'global'
+        });
       } catch (err) {
         console.log('Nenhuma sessão anterior para limpar');
       }
-      
-      const { error } = await supabase.auth.signInWithOAuth({
+      const {
+        error
+      } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: window.location.origin,
@@ -56,7 +59,6 @@ const Auth = () => {
           }
         }
       });
-      
       if (error) throw error;
     } catch (error: any) {
       const errorMessage = handleAuthError(error);
