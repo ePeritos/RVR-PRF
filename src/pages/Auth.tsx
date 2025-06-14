@@ -85,16 +85,16 @@ const Auth = () => {
       </div>
 
       <Card className="w-full max-w-md shadow-lg hover:shadow-xl transition-shadow duration-300 animate-scale-in">
-        <CardHeader className="text-center px-[105px]">
+        <CardHeader className="text-center px-6 md:px-16">
           <div className="relative flex items-center justify-center mb-4 h-12">
-            <img src="/lovable-uploads/0c984027-ab7d-4e16-96fe-f7d523613cc5.png" alt="SIGI-PRF Logo" className="h-12 w-auto absolute left-4" />
-            <CardTitle className="text-2xl font-bold">SIGI-PRF</CardTitle>
+            <img src="/lovable-uploads/0c984027-ab7d-4e16-96fe-f7d523613cc5.png" alt="SIGI-PRF Logo" className="h-8 md:h-12 w-auto absolute left-2 md:left-4" />
+            <CardTitle className="text-xl md:text-2xl font-bold">SIGI-PRF</CardTitle>
           </div>
-          <CardDescription>
+          <CardDescription className="text-sm md:text-base">
             Faça login para acessar o Sistema de Gestão de Imóveis da PRF
           </CardDescription>
         </CardHeader>
-        <CardContent className="px-[105px]">
+        <CardContent className="px-6 md:px-16">
           <div className="space-y-6">
             <Button variant="outline" onClick={handleSignInWithGoogle} disabled={loading || !termsAccepted} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">

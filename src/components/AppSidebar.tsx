@@ -104,6 +104,8 @@ export function AppSidebar() {
     <Sidebar
       className={state === "collapsed" ? "w-14" : "w-48"}
       collapsible="icon"
+      side="left"
+      variant="sidebar"
     >
       <div className="p-2">
         <SidebarTrigger />
