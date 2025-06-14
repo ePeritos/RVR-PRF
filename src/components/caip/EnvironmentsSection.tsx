@@ -296,9 +296,15 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
     notaFinal = Math.min(notaFinal, 100);
     
     // Atualizar o formulário
-    setValue('nota_para_manutencao', notaFinal.toFixed(2));
+    setValue('nota_para_manutencao', notaFinal.toFixed(2) as any);
+    
+    // Calcular e atualizar nota global
+    const notaAdequacao = parseFloat(watchedValues?.nota_para_adequacao || '0');
+    const notaGlobal = (notaAdequacao * 0.6) + (notaFinal * 0.4);
+    setValue('nota_global', notaGlobal.toFixed(2) as any);
     
     console.log('Nota de manutenção calculada:', notaFinal.toFixed(2));
+    console.log('Nota global calculada:', notaGlobal.toFixed(2));
   };
 
   const salvarAvaliacaoNoBanco = async (campo: string, scoreConservacao: number) => {
@@ -341,7 +347,12 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
       if (notaError) throw notaError;
 
       // Atualizar o campo no formulário
-      setValue('nota_para_manutencao', notaData?.toFixed(2) || '0.00');
+      setValue('nota_para_manutencao', (notaData?.toFixed(2) || '0.00') as any);
+      
+      // Calcular e atualizar nota global
+      const notaAdequacao = parseFloat(watchedValues?.nota_para_adequacao || '0');
+      const notaGlobal = (notaAdequacao * 0.6) + ((notaData || 0) * 0.4);
+      setValue('nota_global', notaGlobal.toFixed(2) as any);
 
       toast({
         title: "Avaliação salva",
