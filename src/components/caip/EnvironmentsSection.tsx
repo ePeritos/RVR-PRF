@@ -480,12 +480,16 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
 
       console.log('Dados atualizados do banco:', dadosAtualizados);
 
-      // Atualizar os campos no formulário
+      // Atualizar os campos no formulário com conversão correta de tipos
       if (dadosAtualizados.nota_para_manutencao !== null) {
-        setValue('nota_para_manutencao', parseFloat(dadosAtualizados.nota_para_manutencao.toString()).toFixed(2) as any);
+        const notaManutencao = Number(dadosAtualizados.nota_para_manutencao).toFixed(2);
+        setValue('nota_para_manutencao', notaManutencao as any);
+        console.log('✅ Nota de manutenção atualizada:', notaManutencao);
       }
       if (dadosAtualizados.nota_global !== null) {
-        setValue('nota_global', parseFloat(dadosAtualizados.nota_global.toString()).toFixed(2) as any);
+        const notaGlobal = Number(dadosAtualizados.nota_global).toFixed(2);
+        setValue('nota_global', notaGlobal as any);
+        console.log('✅ Nota global atualizada:', notaGlobal);
       }
 
       toast({
