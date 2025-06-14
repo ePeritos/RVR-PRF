@@ -160,12 +160,6 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               )}
 
-              {/* Botão toggle tema */}
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <ThemeToggle collapsed={state === "collapsed"} />
-                </SidebarMenuButton>
-              </SidebarMenuItem>
 
               {/* Botão editar perfil */}
               <SidebarMenuItem>

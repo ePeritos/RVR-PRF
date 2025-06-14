@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppSidebar } from "@/components/AppSidebar";
 import Dashboard from "./pages/Dashboard";
 import RVR from "./pages/RVR";
@@ -47,6 +48,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col">
+          <header className="border-b border-border bg-background/95 backdrop-blur">
+            <div className="flex items-center justify-end p-4">
+              <ThemeToggle />
+            </div>
+          </header>
           <main className="flex-1 overflow-auto">
             {children}
           </main>
