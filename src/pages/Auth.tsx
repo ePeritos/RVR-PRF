@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TermsAcceptanceDialog } from '@/components/TermsAcceptanceDialog';
+import { cleanupAuthState, handleAuthError } from '@/utils/authCleanup';
 const TERMS_STORAGE_KEY = 'sigi-prf-terms-accepted';
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -16,8 +17,11 @@ const Auth = () => {
   } = useToast();
   const navigate = useNavigate();
 
-  // Verificar se os termos já foram aceitos ao carregar a página
+  // Verificar se os termos já foram aceitos e limpar estado ao carregar
   useEffect(() => {
+    // Limpar estado de autenticação antes de verificar termos
+    cleanupAuthState();
+    
     const savedTermsAcceptance = localStorage.getItem(TERMS_STORAGE_KEY);
     if (savedTermsAcceptance === 'true') {
       setTermsAccepted(true);
@@ -35,9 +39,18 @@ const Auth = () => {
     }
     try {
       setLoading(true);
-      const {
-        error
-      } = await supabase.auth.signInWithOAuth({
+      
+      // Limpar estado antes de tentar login
+      cleanupAuthState();
+      
+      // Tentar logout global primeiro (caso exista sessão anterior)
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        console.log('Nenhuma sessão anterior para limpar');
+      }
+      
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: window.location.origin,
@@ -46,11 +59,13 @@ const Auth = () => {
           }
         }
       });
+      
       if (error) throw error;
     } catch (error: any) {
+      const errorMessage = handleAuthError(error);
       toast({
         title: "Erro ao fazer login",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
