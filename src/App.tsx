@@ -67,7 +67,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
                   />
                   <span className="font-bold text-lg lg:hidden">SIGI-PRF</span>
                 </div>
-                <ThemeToggle showText={false} />
               </div>
             </header>
             <main className="flex-1 overflow-auto">

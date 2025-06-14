@@ -219,6 +219,13 @@ export function AppSidebar() {
                   </Button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              {/* Botão de tema */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <ThemeToggle collapsed={state === "collapsed"} />
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
