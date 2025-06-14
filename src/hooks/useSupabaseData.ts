@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
+import { queryCache } from '@/utils/performanceUtils';
 
 type DadosCAIP = Tables<'dados_caip'>;
 
@@ -28,7 +29,7 @@ export const useSupabaseData = (unidadeGestoraFilter?: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const transformData = (supabaseData: DadosCAIP[]): DataRow[] => {
+  const transformData = (supabaseData: any[]): DataRow[] => {
     return supabaseData.map(item => ({
       id: item.id,
       'ano_caip': item.ano_caip || '',
@@ -49,70 +50,70 @@ export const useSupabaseData = (unidadeGestoraFilter?: string) => {
     }));
   };
 
-  const fetchAllData = async () => {
+  const fetchAllData = useCallback(async () => {
     try {
       setLoading(true);
-      let allData: DadosCAIP[] = [];
-      let from = 0;
-      const batchSize = 1000;
-      let hasMore = true;
+      
+      // Use cache for better performance
+      const cacheKey = `supabase-data-${unidadeGestoraFilter || 'all'}`;
+      const cachedData = queryCache.get(cacheKey);
+      
+      if (cachedData) {
+        console.log('🚀 Using cached supabase data');
+        setData(cachedData as DataRow[]);
+        setLoading(false);
+        return;
+      }
 
-      console.log('Iniciando busca de dados da tabela dados_caip...');
+      console.log('📊 Fetching supabase data optimized...');
       if (unidadeGestoraFilter) {
         console.log(`Aplicando filtro por unidade gestora: ${unidadeGestoraFilter}`);
       }
 
-      while (hasMore) {
-        let query = supabase
-          .from('dados_caip')
-          .select('*', { count: 'exact' });
+      // Optimized single query instead of batching
+      let query = supabase
+        .from('dados_caip')
+        .select(`
+          id, ano_caip, tipo_de_unidade, unidade_gestora, estado_de_conservacao,
+          vida_util_estimada_anos, area_do_terreno_m2, area_construida_m2,
+          nome_da_unidade, situacao_do_imovel, endereco, rip, matricula_do_imovel,
+          processo_sei, idade_aparente_do_imovel, rvr
+        `)
+        .order('created_at', { ascending: false })
+        .limit(2000); // Reasonable limit
 
-        // Aplicar filtro por unidade gestora se fornecido
-        if (unidadeGestoraFilter) {
-          query = query.eq('unidade_gestora', unidadeGestoraFilter);
-        }
-
-        const { data: batchData, error, count } = await query
-          .range(from, from + batchSize - 1);
-
-        if (error) {
-          console.error('Erro na consulta:', error);
-          throw error;
-        }
-
-        if (batchData) {
-          allData = [...allData, ...batchData];
-          console.log(`Carregados ${batchData.length} registros (total: ${allData.length})`);
-          
-          if (batchData.length < batchSize) {
-            hasMore = false;
-          } else {
-            from += batchSize;
-          }
-        } else {
-          hasMore = false;
-        }
-
-        if (from === 0 && count !== null) {
-          console.log(`Total de registros na tabela: ${count}`);
-        }
+      // Apply filter if provided
+      if (unidadeGestoraFilter) {
+        query = query.eq('unidade_gestora', unidadeGestoraFilter);
       }
 
-      console.log(`Busca finalizada. Total de registros carregados: ${allData.length}`);
-      
-      const transformedData = transformData(allData);
-      setData(transformedData);
+      const { data: fetchedData, error } = await query;
+
+      if (error) {
+        console.error('Erro na consulta:', error);
+        throw error;
+      }
+
+      if (fetchedData) {
+        console.log(`✅ Data fetched successfully: ${fetchedData.length} records`);
+        const transformedData = transformData(fetchedData);
+        
+        // Cache the results
+        queryCache.set(cacheKey, transformedData);
+        
+        setData(transformedData);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
       console.error('Erro ao buscar dados:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [unidadeGestoraFilter]);
 
   useEffect(() => {
     fetchAllData();
-  }, [unidadeGestoraFilter]);
+  }, [fetchAllData]);
 
   return { data, loading, error, refetch: fetchAllData };
 };

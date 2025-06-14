@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ProfileSetupDialog } from "@/components/ProfileSetupDialog";
+import { ProgressIndicator } from "@/components/ui/progress-indicator";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import Dashboard from "./pages/Dashboard";
 import RVR from "./pages/RVR";
@@ -72,6 +73,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
             <main className="flex-1 overflow-auto">
               {children}
             </main>
+            <ProgressIndicator show={loading} message="Carregando dados..." />
           </div>
         </div>
       </SidebarProvider>

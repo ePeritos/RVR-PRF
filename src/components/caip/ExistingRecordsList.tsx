@@ -1,3 +1,4 @@
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +9,7 @@ import { Tables } from '@/integrations/supabase/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useProfile } from '@/hooks/useProfile';
 import { useCAIPReport } from '@/hooks/useCAIPReport';
-import { useState, useMemo } from 'react';
+import { TableSkeleton } from '@/components/ui/loading-skeleton';
 
 type DadosCAIP = Tables<'dados_caip'>;
 
@@ -23,7 +24,7 @@ interface ExistingRecordsListProps {
   handleDelete?: (item: DadosCAIP) => void;
 }
 
-export const ExistingRecordsList = ({ 
+export const ExistingRecordsList = React.memo(({ 
   searchTerm, 
   setSearchTerm, 
   filteredData, 
@@ -308,4 +309,4 @@ export const ExistingRecordsList = ({
       </CardContent>
     </Card>
   );
-};
+});
