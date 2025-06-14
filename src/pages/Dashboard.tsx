@@ -292,7 +292,7 @@ const Dashboard = () => {
                 <Tooltip 
                   formatter={(value: any, name: string) => [
                     name === 'numeroImoveis' 
-                      ? `${value} imóveis`
+                      ? `${value} unidades`
                       : `${Number(value).toLocaleString('pt-BR')} m²`,
                     name === 'numeroImoveis' ? 'Número de Imóveis' : 'Área Construída'
                   ]}
@@ -303,7 +303,7 @@ const Dashboard = () => {
                   yAxisId="left"
                   dataKey="numeroImoveis" 
                   fill="hsl(var(--primary))" 
-                  name="Número de Imóveis"
+                  name="Número de Imóveis (unidades)"
                   radius={[4, 4, 0, 0]}
                 />
                 <Bar 
