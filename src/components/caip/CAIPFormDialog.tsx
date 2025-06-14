@@ -164,6 +164,7 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
             setValue={setValue} 
             watchedValues={watchedValues}
             onAvaliacoesChange={setAvaliacoesLocais}
+            editingItem={editingItem}
           />
 
           <SystemsSection register={register} setValue={setValue} watchedValues={watchedValues} />

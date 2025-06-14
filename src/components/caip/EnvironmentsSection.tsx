@@ -17,6 +17,7 @@ interface EnvironmentsSectionProps {
   setValue: UseFormSetValue<DadosCAIP>;
   watchedValues?: any;
   onAvaliacoesChange?: (avaliacoes: {[key: string]: number}) => void;
+  editingItem?: DadosCAIP | null;
 }
 
 interface AmbienteExistente {
@@ -28,7 +29,7 @@ interface AmbienteExistente {
   avaliacao?: ManutencaoAmbientes;
 }
 
-export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvaliacoesChange }: EnvironmentsSectionProps) => {
+export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvaliacoesChange, editingItem }: EnvironmentsSectionProps) => {
   const [avaliacoesLocais, setAvaliacoesLocais] = useState<{[key: string]: number}>({});
   const { toast } = useToast();
 
@@ -133,21 +134,21 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
     { campo: 'vestiario_para_policiais', nomeAmbiente: 'Vestiário para policiais' }
   ];
 
-  // Carregar avaliações existentes quando há ID do registro
+  // Carregar avaliações existentes quando há editingItem
   useEffect(() => {
-    if (watchedValues?.id) {
-      console.log('🔄 Carregando avaliações para ID:', watchedValues.id);
-      // Aguardar mais tempo para garantir que todos os useEffects do formulário sejam processados
+    if (editingItem?.id) {
+      console.log('🔄 Carregando avaliações para ID:', editingItem.id);
+      // Aguardar um pouco para garantir que o formulário seja populado primeiro
       const timer = setTimeout(() => {
         carregarAvaliacoesExistentes();
-      }, 1000);
+      }, 500);
       return () => clearTimeout(timer);
     } else {
       // Limpar avaliações quando não há ID (novo registro)
       console.log('🧹 Limpando avaliações para novo registro');
       setAvaliacoesLocais({});
     }
-  }, [watchedValues?.id]);
+  }, [editingItem?.id]);
 
   // Notificar mudanças nas avaliações para o componente pai
   useEffect(() => {
@@ -159,10 +160,11 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
   // O cálculo da nota agora é feito pelo hook useCAIPCalculations
 
   const carregarAvaliacoesExistentes = async () => {
-    if (!watchedValues?.id) return;
+    const imovelId = editingItem?.id || watchedValues?.id;
+    if (!imovelId) return;
 
     console.log('=== CARREGANDO AVALIAÇÕES EXISTENTES ===');
-    console.log('ID do imóvel:', watchedValues.id);
+    console.log('ID do imóvel:', imovelId);
 
     try {
       const { data: avaliacoes, error } = await supabase
@@ -174,7 +176,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
             tipos_imoveis!inner(nome_tipo)
           )
         `)
-        .eq('imovel_id', watchedValues.id);
+        .eq('imovel_id', imovelId);
 
       if (error) throw error;
 
