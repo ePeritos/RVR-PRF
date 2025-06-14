@@ -21,8 +21,16 @@ export const ExistingRecordsList = ({
   filteredData, 
   handleEdit 
 }: ExistingRecordsListProps) => {
+  
+  const calculateNotaTotal = (notaAdequacao: string | null, notaManutencao: string | null) => {
+    const adequacao = parseFloat(notaAdequacao || '0');
+    const manutencao = parseFloat(notaManutencao || '0');
+    const notaTotal = (adequacao * 0.6) + (manutencao * 0.4);
+    return notaTotal.toFixed(2);
+  };
+
   return (
-    <Card className="bg-card border-border">
+    <Card className="bg-card border-border w-full">
       <CardHeader>
         <CardTitle>Registros Existentes</CardTitle>
         <div className="relative">
@@ -35,17 +43,19 @@ export const ExistingRecordsList = ({
           />
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="max-h-96 overflow-auto">
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome da Unidade</TableHead>
-                <TableHead>Unidade Gestora</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Ano CAIP</TableHead>
-                <TableHead>Área Construída</TableHead>
-                <TableHead>RVR</TableHead>
+                <TableHead className="min-w-[200px]">Nome da Unidade</TableHead>
+                <TableHead className="min-w-[120px]">Unidade Gestora</TableHead>
+                <TableHead className="min-w-[100px]">Tipo</TableHead>
+                <TableHead className="min-w-[80px]">Ano CAIP</TableHead>
+                <TableHead className="min-w-[100px]">Nota Adequação</TableHead>
+                <TableHead className="min-w-[100px]">Nota Manutenção</TableHead>
+                <TableHead className="min-w-[90px]">Nota Total</TableHead>
+                <TableHead className="min-w-[100px]">RVR</TableHead>
                 <TableHead className="w-12">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -63,7 +73,21 @@ export const ExistingRecordsList = ({
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {item.area_construida_m2 ? `${item.area_construida_m2} m²` : 'N/A'}
+                    <Badge variant="secondary">
+                      {item.nota_para_adequacao ? `${item.nota_para_adequacao}%` : 'N/A'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">
+                      {item.nota_para_manutencao ? `${item.nota_para_manutencao}%` : 'N/A'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="default">
+                      {item.nota_para_adequacao || item.nota_para_manutencao 
+                        ? `${calculateNotaTotal(item.nota_para_adequacao, item.nota_para_manutencao)}%` 
+                        : 'N/A'}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     {item.rvr ? `R$ ${Number(item.rvr).toLocaleString('pt-BR')}` : 'N/A'}

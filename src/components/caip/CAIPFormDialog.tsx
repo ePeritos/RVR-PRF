@@ -190,8 +190,8 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
         }
       });
 
-      // Calcular nota final e arredondar para 2 casas decimais
-      const notaFinal = Math.round((pesoAlcancado / pesoTotalPossivel) * 100 * 100) / 100;
+      // Calcular nota final garantindo que não ultrapasse 100
+      const notaFinal = Math.min(100, Math.round((pesoAlcancado / pesoTotalPossivel) * 100 * 100) / 100);
       setValue('nota_para_adequacao', notaFinal.toString());
     }
   }, [watchedValues, setValue]);

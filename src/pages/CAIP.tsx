@@ -96,7 +96,7 @@ const CAIP = () => {
   }, [existingData]);
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="p-6 space-y-6 w-full mx-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Database className="h-6 w-6 text-primary" />
@@ -117,14 +117,18 @@ const CAIP = () => {
         </p>
       </div>
 
-      <div className="space-y-4">
-        <DataFilter onFilterChange={handleFilterChange} />
-        <ExistingRecordsList 
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          filteredData={filteredData}
-          handleEdit={handleEdit}
-        />
+      <div className="space-y-4 w-full">
+        <div className="w-full">
+          <DataFilter onFilterChange={handleFilterChange} />
+        </div>
+        <div className="w-full">
+          <ExistingRecordsList 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            filteredData={filteredData}
+            handleEdit={handleEdit}
+          />
+        </div>
       </div>
 
       <CAIPFormDialog
