@@ -40,31 +40,51 @@ export const ImagesSection = ({ register, setValue, watchedValues }: ImagesSecti
   // Load existing images when editing
   useEffect(() => {
     if (watchedValues) {
+      console.log('=== LOADING EXISTING IMAGES ===');
+      console.log('watchedValues:', watchedValues);
+      
       const existingPreviews: {[key: string]: ImagePreview} = {};
       let hasExistingImages = false;
       
       imageFields.forEach(({ key }) => {
         const imageUrl = watchedValues[key];
+        console.log(`Verificando campo ${key}:`, imageUrl);
+        
         if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim() !== '') {
           existingPreviews[key] = {
             url: imageUrl,
             isExisting: true
           };
           hasExistingImages = true;
+          console.log(`✅ Imagem existente encontrada para ${key}`);
         }
       });
       
       if (hasExistingImages) {
         console.log('Carregando imagens existentes:', existingPreviews);
         setImagePreviews(existingPreviews);
+      } else {
+        console.log('Nenhuma imagem existente encontrada');
+        // Reset previews if no existing images
+        setImagePreviews({});
       }
     }
   }, [watchedValues]);
 
   const handleImageChange = (fieldKey: string, files: FileList | null) => {
+    console.log(`=== IMAGE CHANGE ===`);
+    console.log(`Campo: ${fieldKey}`);
+    console.log('Files:', files);
+    
     if (files && files[0]) {
       const file = files[0];
       const url = URL.createObjectURL(file);
+      
+      console.log(`Processando imagem para campo ${fieldKey}:`, {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type
+      });
       
       // Update preview state
       setImagePreviews(prev => ({
@@ -74,7 +94,8 @@ export const ImagesSection = ({ register, setValue, watchedValues }: ImagesSecti
       
       // Update form value if setValue is available
       if (setValue) {
-        setValue(fieldKey, files[0]);
+        console.log(`Atualizando campo ${fieldKey} no formulário`);
+        setValue(fieldKey, file);
       }
     }
   };
@@ -155,7 +176,10 @@ export const ImagesSection = ({ register, setValue, watchedValues }: ImagesSecti
                   type="file"
                   accept="image/*"
                   {...register(key as keyof DadosCAIP)}
-                  onChange={(e) => handleImageChange(key, e.target.files)}
+                  onChange={(e) => {
+                    console.log(`Input onChange para campo ${key}:`, e.target.files);
+                    handleImageChange(key, e.target.files);
+                  }}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
               </div>

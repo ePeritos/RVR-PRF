@@ -179,16 +179,25 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
   };
 
   const handleAvaliacaoChange = (campo: string, rating: number) => {
+    console.log(`=== AVALIAÇÃO CHANGED ===`);
+    console.log(`Campo: ${campo}, Rating: ${rating}`);
+    
     // Atualizar estado local
-    setAvaliacoesLocais(prev => ({
-      ...prev,
+    const novasAvaliacoes = {
+      ...avaliacoesLocais,
       [campo]: rating
-    }));
+    };
+    
+    console.log('Novas avaliações locais:', novasAvaliacoes);
+    setAvaliacoesLocais(novasAvaliacoes);
 
     // Se o registro já existe (editando), salvar no banco
     // Para novos registros, apenas manter no estado local
     if (watchedValues?.id) {
+      console.log('Registro existente - salvando no banco...');
       salvarAvaliacaoNoBanco(campo, rating);
+    } else {
+      console.log('Novo registro - mantendo apenas local');
     }
   };
 

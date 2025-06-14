@@ -129,7 +129,8 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess }: UseC
         }
       }
 
-      const processedData = processFormData(data);
+      const processedData = await processFormData(data);
+      console.log('Dados processados para salvamento:', processedData);
 
       if (editingItem) {
         // Atualizar registro existente

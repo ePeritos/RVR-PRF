@@ -49,8 +49,10 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
 
   // Custom onSubmit with validation
   const onSubmit = async (data: any) => {
-    console.log('Tentando salvar formulário com dados:', data);
-    console.log('Avaliações locais:', avaliacoesLocais);
+    console.log('=== DEBUGGING FORM SUBMISSION ===');
+    console.log('Dados do formulário:', data);
+    console.log('Avaliações locais state:', avaliacoesLocais);
+    console.log('É novo registro?', !editingItem);
     
     // Validate environment evaluations for new records only if environments are selected
     if (!editingItem) {
@@ -78,22 +80,37 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
 
       // Só validar se há ambientes selecionados
       if (ambientesSelecionados.length > 0) {
-        const ambientesSemAvaliacao = ambientesSelecionados.filter(ambiente => !avaliacoesLocais[ambiente] || avaliacoesLocais[ambiente] === 0);
+        console.log('Verificando avaliações para ambientes selecionados...');
+        
+        // Verificar cada ambiente selecionado
+        const ambientesSemAvaliacao = [];
+        ambientesSelecionados.forEach(ambiente => {
+          const nota = avaliacoesLocais[ambiente];
+          console.log(`Ambiente ${ambiente}: nota = ${nota}`);
+          if (!nota || nota === 0) {
+            ambientesSemAvaliacao.push(ambiente);
+          }
+        });
+
         console.log('Ambientes sem avaliação:', ambientesSemAvaliacao);
 
         if (ambientesSemAvaliacao.length > 0) {
           toast({
             title: "Avaliações de manutenção obrigatórias",
-            description: `Por favor, avalie o estado de conservação dos ${ambientesSemAvaliacao.length} ambientes ainda não avaliados.`,
+            description: `Por favor, avalie o estado de conservação dos ${ambientesSemAvaliacao.length} ambientes ainda não avaliados: ${ambientesSemAvaliacao.join(', ')}`,
             variant: "destructive",
           });
           return;
         }
+        
+        console.log('✅ Todas as avaliações estão completas');
+      } else {
+        console.log('Nenhum ambiente selecionado, prosseguindo...');
       }
     }
 
     // Proceed with original submit
-    console.log('Prosseguindo para o salvamento...');
+    console.log('Prosseguindo para o salvamento original...');
     await originalOnSubmit(data);
   };
 
