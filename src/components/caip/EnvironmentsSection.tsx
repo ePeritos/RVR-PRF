@@ -233,13 +233,12 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
     console.log('Novas avaliações locais:', novasAvaliacoes);
     setAvaliacoesLocais(novasAvaliacoes);
 
-    // Se o registro já existe (editando), salvar no banco
-    // Para novos registros, apenas manter no estado local
+    // Se o registro já existe (editando), salvar no banco imediatamente
     if (watchedValues?.id) {
       console.log('Registro existente - salvando no banco...');
       salvarAvaliacaoNoBanco(campo, rating);
     } else {
-      console.log('Novo registro - mantendo apenas local');
+      console.log('Novo registro - calculando nota local');
       // Para novos registros, calcular a nota de manutenção local
       calcularNotaManutencaoLocal(novasAvaliacoes);
     }
@@ -381,7 +380,16 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
   };
 
   const salvarAvaliacaoNoBanco = async (campo: string, scoreConservacao: number) => {
-    if (!watchedValues?.id) return;
+    if (!watchedValues?.id || !watchedValues?.tipo_de_unidade) {
+      console.log('❌ ID do imóvel ou tipo de unidade não disponível');
+      return;
+    }
+
+    console.log('=== SALVANDO AVALIAÇÃO NO BANCO ===');
+    console.log('Campo:', campo);
+    console.log('Score:', scoreConservacao);
+    console.log('ID do imóvel:', watchedValues.id);
+    console.log('Tipo de unidade:', watchedValues.tipo_de_unidade);
 
     try {
       // Encontrar o ambiente_id baseado no campo e tipo de unidade
@@ -394,38 +402,82 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
         `)
         .eq('tipos_imoveis.nome_tipo', watchedValues.tipo_de_unidade);
 
-      if (errorCaderno) throw errorCaderno;
+      if (errorCaderno) {
+        console.error('Erro ao buscar caderno:', errorCaderno);
+        throw errorCaderno;
+      }
+
+      console.log('Caderno de ambientes encontrado:', cadernoAmbientes);
 
       const campoCorrespondente = camposAmbientes.find(c => c.campo === campo);
-      if (!campoCorrespondente) return;
+      if (!campoCorrespondente) {
+        console.log('❌ Campo correspondente não encontrado para:', campo);
+        return;
+      }
+
+      console.log('Campo correspondente:', campoCorrespondente);
 
       const ambiente = cadernoAmbientes?.find(a => a.nome_ambiente === campoCorrespondente.nomeAmbiente);
-      if (!ambiente) return;
+      if (!ambiente) {
+        console.log('❌ Ambiente não encontrado para:', campoCorrespondente.nomeAmbiente);
+        return;
+      }
 
-      const { error } = await supabase
-        .from('manutencao_ambientes')
-        .upsert({
-          imovel_id: watchedValues.id,
-          ambiente_id: ambiente.id,
-          score_conservacao: scoreConservacao,
-          observacoes: null
-        });
+      console.log('Ambiente encontrado:', ambiente);
 
-      if (error) throw error;
+      // Se score for 0, deletar a avaliação
+      if (scoreConservacao === 0) {
+        const { error: deleteError } = await supabase
+          .from('manutencao_ambientes')
+          .delete()
+          .eq('imovel_id', watchedValues.id)
+          .eq('ambiente_id', ambiente.id);
 
-      // Recalcular a nota de manutenção via função do banco
-      const { data: notaData, error: notaError } = await supabase
-        .rpc('calcular_nota_manutencao', { p_imovel_id: watchedValues.id });
+        if (deleteError) {
+          console.error('Erro ao deletar avaliação:', deleteError);
+          throw deleteError;
+        }
 
-      if (notaError) throw notaError;
+        console.log('✅ Avaliação deletada com sucesso');
+      } else {
+        // Inserir ou atualizar a avaliação
+        const { error } = await supabase
+          .from('manutencao_ambientes')
+          .upsert({
+            imovel_id: watchedValues.id,
+            ambiente_id: ambiente.id,
+            score_conservacao: scoreConservacao,
+            observacoes: null
+          });
 
-      // Atualizar o campo no formulário
-      setValue('nota_para_manutencao', (notaData?.toFixed(2) || '0.00') as any);
-      
-      // Calcular e atualizar nota global
-      const notaAdequacao = parseFloat(watchedValues?.nota_para_adequacao || '0');
-      const notaGlobal = (notaAdequacao * 0.6) + ((notaData || 0) * 0.4);
-      setValue('nota_global', notaGlobal.toFixed(2) as any);
+        if (error) {
+          console.error('Erro ao salvar avaliação:', error);
+          throw error;
+        }
+
+        console.log('✅ Avaliação salva com sucesso');
+      }
+
+      // Aguardar um pouco para garantir que o trigger processou
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Buscar a nota atualizada diretamente do banco
+      const { data: dadosAtualizados, error: errorBusca } = await supabase
+        .from('dados_caip')
+        .select('nota_para_manutencao, nota_global')
+        .eq('id', watchedValues.id)
+        .single();
+
+      if (errorBusca) {
+        console.error('Erro ao buscar dados atualizados:', errorBusca);
+        throw errorBusca;
+      }
+
+      console.log('Dados atualizados do banco:', dadosAtualizados);
+
+      // Atualizar os campos no formulário
+      setValue('nota_para_manutencao', (dadosAtualizados.nota_para_manutencao ? parseFloat(dadosAtualizados.nota_para_manutencao.toString()).toFixed(2) : '0.00') as any);
+      setValue('nota_global', (dadosAtualizados.nota_global ? parseFloat(dadosAtualizados.nota_global.toString()).toFixed(2) : '0.00') as any);
 
       toast({
         title: "Avaliação salva",

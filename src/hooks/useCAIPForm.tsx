@@ -179,7 +179,20 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
 
         // Salvar as avaliações de ambientes se existirem
         if (newRecord && avaliacoesLocais && Object.keys(avaliacoesLocais).length > 0) {
+          console.log('Salvando avaliações para novo registro...');
           await salvarAvaliacoesAmbientes(newRecord.id, processedData.tipo_de_unidade, avaliacoesLocais);
+          
+          // Aguardar um pouco para o trigger processar
+          await new Promise(resolve => setTimeout(resolve, 200));
+          
+          // Buscar as notas atualizadas
+          const { data: notasAtualizadas } = await supabase
+            .from('dados_caip')
+            .select('nota_para_manutencao, nota_global')
+            .eq('id', newRecord.id)
+            .single();
+            
+          console.log('Notas após salvamento:', notasAtualizadas);
         }
 
         toast({
