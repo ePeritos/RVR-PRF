@@ -219,6 +219,7 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
           <NotesEvaluationSection 
             register={register}
             setValue={setValue}
+            watchedValues={watchedValues}
           />
 
           <ProgressActionsSection 
