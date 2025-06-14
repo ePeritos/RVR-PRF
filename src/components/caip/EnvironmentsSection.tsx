@@ -137,8 +137,6 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
   useEffect(() => {
     if (watchedValues?.id) {
       console.log('Carregando avaliações para ID:', watchedValues.id);
-      // Force reload by clearing first, then loading
-      setAvaliacoesLocais({});
       carregarAvaliacoesExistentes();
     } else {
       // Limpar avaliações quando não há ID (novo registro)
@@ -177,24 +175,30 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
 
       console.log('Avaliações encontradas:', avaliacoes);
 
-      // Limpar avaliações locais primeiro
+      // Construir mapa de avaliações
       const avaliacoesMap: {[key: string]: number} = {};
       
-      avaliacoes?.forEach(avaliacao => {
-        const nomeAmbiente = avaliacao.caderno_ambientes?.nome_ambiente;
-        
-        // Encontrar o campo correspondente pelo nome do ambiente
-        const campoCorrespondente = camposAmbientes.find(c => 
-          c.nomeAmbiente === nomeAmbiente
-        );
-        
-        if (campoCorrespondente) {
-          avaliacoesMap[campoCorrespondente.campo] = avaliacao.score_conservacao;
-          console.log(`✅ Carregada avaliação para ${campoCorrespondente.campo}: ${avaliacao.score_conservacao}`);
-        }
-      });
+      if (avaliacoes && avaliacoes.length > 0) {
+        avaliacoes.forEach(avaliacao => {
+          const nomeAmbiente = avaliacao.caderno_ambientes?.nome_ambiente;
+          
+          // Encontrar o campo correspondente pelo nome do ambiente
+          const campoCorrespondente = camposAmbientes.find(c => 
+            c.nomeAmbiente === nomeAmbiente
+          );
+          
+          if (campoCorrespondente) {
+            avaliacoesMap[campoCorrespondente.campo] = avaliacao.score_conservacao;
+            console.log(`✅ Carregada avaliação para ${campoCorrespondente.campo}: ${avaliacao.score_conservacao}`);
+          }
+        });
+      }
 
       console.log('Mapa de avaliações carregado:', avaliacoesMap);
+      
+      // Aguardar um pouco para garantir que o componente esteja pronto
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       setAvaliacoesLocais(avaliacoesMap);
     } catch (error) {
       console.error('Erro ao carregar avaliações:', error);
