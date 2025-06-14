@@ -28,13 +28,6 @@ export const ProgressActionsSection = ({
       <input type="hidden" {...register('data_alteracao_preenchida')} />
       <input type="hidden" {...register('id_caip')} />
 
-      {/* Mostrar percentual de preenchimento */}
-      <div className="flex items-center justify-center p-4 bg-muted/20 rounded-lg">
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground">Progresso do preenchimento:</p>
-          <p className="text-2xl font-bold text-primary">{percentualPreenchimento}%</p>
-        </div>
-      </div>
 
       <div className="flex gap-4">
         <Button type="submit" disabled={isLoading}>
