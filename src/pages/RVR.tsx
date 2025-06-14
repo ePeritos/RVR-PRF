@@ -348,47 +348,51 @@ const RVR = () => {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center gap-2 mb-6">
-        <h1 className="text-2xl font-bold text-foreground">RVR - Relatórios de Valor de Reposição</h1>
+    <div className="p-3 sm:p-6 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">RVR - Relatórios de Valor de Reposição</h1>
       </div>
       
-      <div className="text-center mb-6">
+      <div className="text-center mb-4 sm:mb-6">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-1">
           Geração de Relatórios de Valor de Reposição
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground px-2">
           Selecione os parâmetros para gerar relatórios RVR baseados nos dados do CAIP
         </p>
       </div>
       
-      <div className="mb-4">
+      <div className="mb-4 px-2 sm:px-0">
         <StepIndicator currentStep={currentStep} totalSteps={4} />
       </div>
 
-      <StepContent
-        currentStep={currentStep}
-        uploadedFile={uploadedFile}
-        onFileUpload={handleFileUpload}
-        onDataLoaded={handleDataLoaded}
-        filteredData={filteredData.length > 0 ? filteredData : supabaseData}
-        onFilterChange={handleFilterChange}
-        selectedItems={selectedItems}
-        onSelectionChange={setSelectedItems}
-        onParameterSubmit={handleParameterSubmit}
-        results={results}
-        onViewPDF={handleViewPDF}
-        onDownloadPDF={handleDownloadPDF}
-        currentParameters={currentParameters}
-      />
+      <div className="mb-4 sm:mb-6">
+        <StepContent
+          currentStep={currentStep}
+          uploadedFile={uploadedFile}
+          onFileUpload={handleFileUpload}
+          onDataLoaded={handleDataLoaded}
+          filteredData={filteredData.length > 0 ? filteredData : supabaseData}
+          onFilterChange={handleFilterChange}
+          selectedItems={selectedItems}
+          onSelectionChange={setSelectedItems}
+          onParameterSubmit={handleParameterSubmit}
+          results={results}
+          onViewPDF={handleViewPDF}
+          onDownloadPDF={handleDownloadPDF}
+          currentParameters={currentParameters}
+        />
+      </div>
 
-      <NavigationButtons
-        currentStep={currentStep}
-        canProceed={canProceed()}
-        onNextStep={nextStep}
-        onPrevStep={prevStep}
-        onNewEvaluation={handleNewEvaluation}
-      />
+      <div className="px-2 sm:px-0">
+        <NavigationButtons
+          currentStep={currentStep}
+          canProceed={canProceed()}
+          onNextStep={nextStep}
+          onPrevStep={prevStep}
+          onNewEvaluation={handleNewEvaluation}
+        />
+      </div>
     </div>
   );
 };

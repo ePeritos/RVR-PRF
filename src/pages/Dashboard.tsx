@@ -175,26 +175,26 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <div className="flex items-center gap-2 mb-6">
-        <TrendingUp className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
+      <div className="flex items-center gap-2 mb-4 sm:mb-6">
+        <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Dashboard</h1>
       </div>
 
-      <div className="text-center mb-8">
-        <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
+      <div className="text-center mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
           SIGI-PRF
         </h2>
-        <p className="text-lg text-muted-foreground mb-1">
+        <p className="text-base sm:text-lg text-muted-foreground mb-1">
           Sistema de Gestão de Imóveis da PRF
         </p>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground px-2">
           Plataforma integrada para gestão completa do patrimônio imobiliário da Polícia Rodoviária Federal
         </p>
       </div>
 
       {/* Filtros */}
-      <div className="max-w-5xl mx-auto mb-8">
+      <div className="max-w-5xl mx-auto mb-6 sm:mb-8">
         <DataFilter onFilterChange={handleFilterChange} />
       </div>
 

@@ -117,9 +117,9 @@ export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: 
 
   return (
     <Card className="overflow-hidden bg-card border border-border w-full">
-      <div className="p-6 border-b border-border bg-muted/50">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-foreground">Dados da Base CAIP</h3>
+      <div className="p-3 sm:p-6 border-b border-border bg-muted/50">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <h3 className="text-base sm:text-lg font-semibold text-foreground">Dados da Base CAIP</h3>
           <div className="text-sm text-muted-foreground">
             {selectedItems.length} de {data.length} selecionados
           </div>
@@ -127,7 +127,7 @@ export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: 
       </div>
       
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-[800px]">
           <thead className="bg-muted/30 border-b border-border">
             <tr>
               <th className="p-4 text-left">

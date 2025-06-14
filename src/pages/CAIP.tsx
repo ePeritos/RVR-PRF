@@ -130,23 +130,23 @@ const CAIP = () => {
   }, [existingData]);
 
   return (
-    <div className="p-6 space-y-6 w-full mx-auto">
-      <div className="flex items-center justify-between">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 w-full mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Database className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">CAIP - Cadastro de Imóveis</h1>
+          <Database className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">CAIP - Cadastro de Imóveis</h1>
         </div>
-        <Button onClick={handleNew} className="flex items-center gap-2">
+        <Button onClick={handleNew} className="flex items-center gap-2 w-full sm:w-auto">
           <Plus className="h-4 w-4" />
           Novo Registro
         </Button>
       </div>
 
-      <div className="text-center mb-6">
+      <div className="text-center mb-4 sm:mb-6">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-1">
           Gerenciamento de Imóveis CAIP
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground px-2">
           Cadastro de Avaliação de Imóveis para Programação - Gerencie os registros de imóveis da PRF
         </p>
       </div>

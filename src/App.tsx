@@ -65,12 +65,12 @@ const AppRoutes = () => {
         <div className="min-h-screen flex w-full bg-background">
           <AppSidebar />
           <div className="flex-1 flex flex-col">
-            <header className="border-b border-border bg-background/95 backdrop-blur">
-              <div className="flex items-center justify-between p-4">
+            <header className="border-b border-border bg-background/95 backdrop-blur sticky top-0 z-40">
+              <div className="flex items-center justify-between p-2 sm:p-4">
                 <div className="flex items-center gap-2">
-                  <SidebarTrigger className="mr-2 lg:hidden" />
-                  <Building className="h-5 w-5 lg:hidden" />
-                  <span className="font-bold text-lg lg:hidden">SIGI-PRF</span>
+                  <SidebarTrigger className="mr-1 sm:mr-2 lg:hidden" />
+                  <Building className="h-4 w-4 sm:h-5 sm:w-5 lg:hidden" />
+                  <span className="font-bold text-sm sm:text-lg lg:hidden">SIGI-PRF</span>
                 </div>
               </div>
             </header>

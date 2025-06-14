@@ -107,22 +107,22 @@ export const ExistingRecordsList = ({
 
   return (
     <Card className="bg-card border-border w-full">
-      <CardHeader>
-        <CardTitle>Registros Existentes</CardTitle>
+      <CardHeader className="p-3 sm:p-6">
+        <CardTitle className="text-base sm:text-lg">Registros Existentes</CardTitle>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por nome, unidade gestora ou endereço..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 text-sm"
           />
         </div>
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader>
+            <TableHeader className="hidden sm:table-header-group">
               <TableRow>
                 <TableHead className="w-16 text-center">
                   <Button 
@@ -210,37 +210,105 @@ export const ExistingRecordsList = ({
             <TableBody>
               {sortedData.map((item) => (
                 <TableRow key={item.id} className="hover:bg-muted/50">
-                  <TableCell>
+                  {/* Mobile view: Stack information */}
+                  <TableCell className="sm:hidden" colSpan={9}>
+                    <div className="space-y-2 p-2">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className="text-xs">
+                          {item.ano_caip || 'Sem ano'}
+                        </Badge>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => generateReport(item)}
+                            disabled={isGenerating}
+                            className="h-6 w-6 p-0"
+                            title="Gerar relatório PDF"
+                          >
+                            <FileText className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(item)}
+                            className="h-6 w-6 p-0"
+                            title="Editar registro"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          {isAdmin && handleDelete && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(item)}
+                              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                              title="Deletar registro"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-sm font-medium">
+                        {item.nome_da_unidade || 'Nome não informado'}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {item.unidade_gestora || 'N/A'} • {item.tipo_de_unidade || 'N/A'}
+                      </div>
+                      <div className="flex gap-2 text-xs">
+                        <Badge variant="secondary">
+                          Adequação: {item.nota_para_adequacao ? `${item.nota_para_adequacao}%` : 'N/A'}
+                        </Badge>
+                        <Badge variant="secondary">
+                          Manutenção: {item.nota_para_manutencao ? `${item.nota_para_manutencao}%` : 'N/A'}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <Badge variant="default">
+                          Total: {item.nota_para_adequacao || item.nota_para_manutencao 
+                            ? `${calculateNotaTotal(item.nota_para_adequacao, item.nota_para_manutencao)}%` 
+                            : 'N/A'}
+                        </Badge>
+                        <span className="font-medium">
+                          RVR: {item.rvr ? `R$ ${Number(item.rvr).toLocaleString('pt-BR')}` : 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  
+                  {/* Desktop view: Table columns */}
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="outline">
                       {item.ano_caip || 'Sem ano'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{item.unidade_gestora || 'N/A'}</TableCell>
-                  <TableCell>{item.tipo_de_unidade || 'N/A'}</TableCell>
-                  <TableCell className="font-medium">
+                  <TableCell className="hidden sm:table-cell">{item.unidade_gestora || 'N/A'}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{item.tipo_de_unidade || 'N/A'}</TableCell>
+                  <TableCell className="hidden sm:table-cell font-medium">
                     {item.nome_da_unidade || 'Nome não informado'}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="secondary">
                       {item.nota_para_adequacao ? `${item.nota_para_adequacao}%` : 'N/A'}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="secondary">
                       {item.nota_para_manutencao ? `${item.nota_para_manutencao}%` : 'N/A'}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="default">
                       {item.nota_para_adequacao || item.nota_para_manutencao 
                         ? `${calculateNotaTotal(item.nota_para_adequacao, item.nota_para_manutencao)}%` 
                         : 'N/A'}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     {item.rvr ? `R$ ${Number(item.rvr).toLocaleString('pt-BR')}` : 'N/A'}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                      <div className="flex gap-1">
                        <Button
                          variant="ghost"
