@@ -1,4 +1,4 @@
-import { Home, Calculator, Database, LogOut, User } from "lucide-react";
+import { Home, Calculator, Database, LogOut, User, Menu } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SimpleSelect } from "@/components/ui/simple-select";
@@ -21,6 +22,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useState } from "react";
+import { useEffect } from "react";
 
 const menuItems = [
   { title: "Dashboard", url: "/", icon: Home },
@@ -123,7 +125,7 @@ export function AppSidebar() {
       className={state === "collapsed" ? "w-14" : "w-48"}
       collapsible="icon"
       side="left"
-      variant="sidebar"
+      variant="inset"
     >
       <div className="p-2">
         <SidebarTrigger />

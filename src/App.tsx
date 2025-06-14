@@ -3,7 +3,7 @@ import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
@@ -52,13 +52,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         open={needsSetup} 
         onComplete={refetchProfile}
       />
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={false}>
         <div className="min-h-screen flex w-full bg-background">
           <AppSidebar />
           <div className="flex-1 flex flex-col">
             <header className="border-b border-border bg-background/95 backdrop-blur lg:hidden">
               <div className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-2">
+                  <SidebarTrigger className="mr-2" />
                   <img 
                     src="/lovable-uploads/0c984027-ab7d-4e16-96fe-f7d523613cc5.png" 
                     alt="SIGI-PRF Logo" 
