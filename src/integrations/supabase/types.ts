@@ -166,6 +166,7 @@ export type Database = {
           matricula_do_imovel: string | null
           muro_ou_alambrado: string | null
           nome_da_unidade: string | null
+          nota_global: number | null
           nota_para_adequacao: string | null
           nota_para_manutencao: string | null
           o_trecho_e_concessionado: string | null
@@ -297,6 +298,7 @@ export type Database = {
           matricula_do_imovel?: string | null
           muro_ou_alambrado?: string | null
           nome_da_unidade?: string | null
+          nota_global?: number | null
           nota_para_adequacao?: string | null
           nota_para_manutencao?: string | null
           o_trecho_e_concessionado?: string | null
@@ -428,6 +430,7 @@ export type Database = {
           matricula_do_imovel?: string | null
           muro_ou_alambrado?: string | null
           nome_da_unidade?: string | null
+          nota_global?: number | null
           nota_para_adequacao?: string | null
           nota_para_manutencao?: string | null
           o_trecho_e_concessionado?: string | null
@@ -543,6 +546,51 @@ export type Database = {
             columns: ["imovel_id"]
             isOneToOne: false
             referencedRelation: "imoveis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manutencao_ambientes: {
+        Row: {
+          ambiente_id: string
+          created_at: string | null
+          data_avaliacao: string
+          id: string
+          imovel_id: string
+          observacoes: string | null
+          score_conservacao: number
+        }
+        Insert: {
+          ambiente_id: string
+          created_at?: string | null
+          data_avaliacao?: string
+          id?: string
+          imovel_id: string
+          observacoes?: string | null
+          score_conservacao: number
+        }
+        Update: {
+          ambiente_id?: string
+          created_at?: string | null
+          data_avaliacao?: string
+          id?: string
+          imovel_id?: string
+          observacoes?: string | null
+          score_conservacao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manutencao_ambientes_ambiente_id_fkey"
+            columns: ["ambiente_id"]
+            isOneToOne: false
+            referencedRelation: "caderno_ambientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manutencao_ambientes_imovel_id_fkey"
+            columns: ["imovel_id"]
+            isOneToOne: false
+            referencedRelation: "dados_caip"
             referencedColumns: ["id"]
           },
         ]
