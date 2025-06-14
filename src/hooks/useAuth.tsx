@@ -19,55 +19,86 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('useAuth - Configurando listener de auth state...');
+    console.log('🚀 useAuth - Inicializando configuração de auth...');
     let mounted = true;
     
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (!mounted) return;
+        if (!mounted) {
+          console.log('⚠️ useAuth - Componente não montado, ignorando evento');
+          return;
+        }
         
-        console.log('useAuth - Auth state changed:', event, 'Session exists:', !!session);
-        console.log('useAuth - User from session:', session?.user?.email);
+        console.log('🔄 useAuth - Auth state changed:', event, 'Session exists:', !!session);
+        console.log('📧 useAuth - User email:', session?.user?.email);
         
         // Limpar cache quando estado de auth muda
         if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-          console.log('🗑️ Limpando cache devido a mudança de auth:', event);
+          console.log('🗑️ useAuth - Limpando cache devido a mudança de auth:', event);
           queryCache.clear();
         }
         
-        // Evitar atualizações desnecessárias se o estado não mudou
+        // Log detalhado para eventos específicos
+        if (event === 'SIGNED_IN') {
+          console.log('✅ useAuth - Login bem-sucedido!', {
+            userId: session?.user?.id,
+            email: session?.user?.email,
+            metadata: session?.user?.user_metadata
+          });
+        }
+        
+        if (event === 'SIGNED_OUT') {
+          console.log('👋 useAuth - Logout realizado');
+        }
+        
+        // Evitar atualizações desnecessárias
         setSession(prevSession => {
           if (prevSession?.user?.id === session?.user?.id) {
+            console.log('⚡ useAuth - Session não mudou, mantendo estado atual');
             return prevSession;
           }
+          console.log('🔄 useAuth - Atualizando session state');
           return session;
         });
         
         setUser(prevUser => {
           if (prevUser?.id === session?.user?.id) {
+            console.log('⚡ useAuth - User não mudou, mantendo estado atual');
             return prevUser;
           }
+          console.log('🔄 useAuth - Atualizando user state');
           return session?.user ?? null;
         });
         
         setLoading(false);
+        console.log('⏸️ useAuth - Loading finalizado');
       }
     );
 
     // Check for existing session
-    console.log('useAuth - Verificando sessão existente...');
+    console.log('🔍 useAuth - Verificando sessão existente...');
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
       
-      console.log('useAuth - Sessão existente encontrada:', !!session);
-      console.log('useAuth - User existente:', session?.user?.email);
+      console.log('📋 useAuth - Sessão existente encontrada:', !!session);
+      if (session) {
+        console.log('👤 useAuth - Dados da sessão existente:', {
+          userId: session.user?.id,
+          email: session.user?.email
+        });
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);
+    }).catch(error => {
+      console.error('❌ useAuth - Erro ao verificar sessão existente:', error);
       setLoading(false);
     });
 
     return () => {
+      console.log('🧹 useAuth - Cleanup executado');
       mounted = false;
       subscription.unsubscribe();
     };

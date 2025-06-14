@@ -23,31 +23,39 @@ const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    const { user, loading, session } = useAuth();
+    const { user, loading: authLoading, session } = useAuth();
     const { needsSetup, refetchProfile } = useUserProfile();
     
-    console.log('ProtectedRoute - user:', user?.id, 'loading:', loading, 'session:', !!session);
-    console.log('ProtectedRoute - user details:', user?.email);
+    console.log('🔐 ProtectedRoute - Estado atual:', { 
+      userId: user?.id, 
+      userEmail: user?.email,
+      authLoading, 
+      hasSession: !!session,
+      needsSetup
+    });
     
-    if (loading) {
-      console.log('ProtectedRoute - Ainda carregando...');
+    // Estado de loading da autenticação
+    if (authLoading) {
+      console.log('⏳ ProtectedRoute - Aguardando autenticação...');
       return (
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-lg">Carregando...</p>
+            <p className="mt-4 text-lg">Autenticando...</p>
           </div>
         </div>
       );
     }
     
-    if (!user) {
-      console.log('ProtectedRoute - Redirecionando para /auth - usuário não encontrado');
+    // Sem usuário autenticado
+    if (!user || !session) {
+      console.log('❌ ProtectedRoute - Sem usuário, redirecionando para /auth');
       return <Navigate to="/auth" replace />;
     }
 
-    console.log('ProtectedRoute - Usuário autenticado, renderizando com sidebar');
+    console.log('✅ ProtectedRoute - Usuário autenticado, renderizando dashboard');
     
+    // Renderizar layout protegido
     return (
       <>
         <ProfileSetupDialog 
@@ -74,7 +82,7 @@ const AppRoutes = () => {
               <main className="flex-1 overflow-auto">
                 {children}
               </main>
-              <ProgressIndicator show={loading} message="Carregando dados..." />
+              <ProgressIndicator show={authLoading} message="Carregando dados..." />
             </div>
           </div>
         </SidebarProvider>
@@ -85,26 +93,26 @@ const AppRoutes = () => {
   const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     const { user, loading } = useAuth();
     
-    console.log('PublicRoute - user:', user, 'loading:', loading);
+    console.log('🌐 PublicRoute - Estado:', { hasUser: !!user, loading });
     
     if (loading) {
-      console.log('PublicRoute - Ainda carregando auth state...');
+      console.log('⏳ PublicRoute - Verificando estado de autenticação...');
       return (
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-lg">Carregando...</p>
+            <p className="mt-4 text-lg">Verificando login...</p>
           </div>
         </div>
       );
     }
     
     if (user) {
-      console.log('PublicRoute - Usuário encontrado, redirecionando para dashboard');
+      console.log('✅ PublicRoute - Usuário logado, redirecionando para dashboard');
       return <Navigate to="/" replace />;
     }
     
-    console.log('PublicRoute - Nenhum usuário, mostrando página de auth');
+    console.log('🔓 PublicRoute - Mostrando página de login');
     return <>{children}</>;
   };
 
