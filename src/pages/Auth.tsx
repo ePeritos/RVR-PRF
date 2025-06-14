@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TermsAcceptanceDialog } from '@/components/TermsAcceptanceDialog';
 
-const TERMS_STORAGE_KEY = 'rvr-terms-accepted';
+const TERMS_STORAGE_KEY = 'sigi-prf-terms-accepted';
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -74,9 +74,9 @@ const Auth = () => {
 
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Sistema RVR</CardTitle>
+          <CardTitle className="text-2xl font-bold">SIGI-PRF</CardTitle>
           <CardDescription>
-            Faça login para acessar o sistema de Relatório de Valor Referencial
+            Faça login para acessar o Sistema de Gestão de Imóveis da PRF
           </CardDescription>
         </CardHeader>
         <CardContent>
