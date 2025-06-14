@@ -15,7 +15,7 @@ interface Profile {
   nome_completo: string;
   cargo: string;
   matricula: string;
-  unidade_lotacao: string;
+  unidade_gestora: string;
   telefone: string;
 }
 
@@ -25,7 +25,7 @@ export const UserProfile = () => {
     nome_completo: '',
     cargo: '',
     matricula: '',
-    unidade_lotacao: '',
+    unidade_gestora: '',
     telefone: ''
   });
   const [loading, setLoading] = useState(false);
@@ -86,7 +86,7 @@ export const UserProfile = () => {
           nome_completo: data.nome_completo || '',
           cargo: data.cargo || '',
           matricula: data.matricula || '',
-          unidade_lotacao: data.unidade_lotacao || '',
+          unidade_gestora: data.unidade_gestora || '',
           telefone: data.telefone || ''
         });
       }
@@ -169,10 +169,10 @@ export const UserProfile = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="unidade_lotacao">Unidade de Lotação</Label>
+              <Label htmlFor="unidade_gestora">Unidade Gestora</Label>
               <Select
-                value={profile.unidade_lotacao}
-                onValueChange={(value) => setProfile(prev => ({ ...prev, unidade_lotacao: value }))}
+                value={profile.unidade_gestora}
+                onValueChange={(value) => setProfile(prev => ({ ...prev, unidade_gestora: value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione uma unidade" />

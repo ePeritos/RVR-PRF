@@ -19,6 +19,7 @@ export const useUserProfile = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [needsSetup, setNeedsSetup] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -38,11 +39,20 @@ export const useUserProfile = () => {
           .eq('id', user.id)
           .single();
 
-        if (profileError) {
+        if (profileError && profileError.code !== 'PGRST116') {
           throw profileError;
         }
 
-        setProfile(data);
+        if (data) {
+          setProfile(data);
+          // Verificar se o perfil precisa ser configurado (usuário padrão sem unidade gestora)
+          if (data.role === 'usuario_padrao' && !data.unidade_gestora) {
+            setNeedsSetup(true);
+          }
+        } else {
+          // Perfil não existe, precisa ser criado
+          setNeedsSetup(true);
+        }
       } catch (err) {
         console.error('Erro ao buscar perfil do usuário:', err);
         setError('Erro ao carregar perfil do usuário');
@@ -56,10 +66,35 @@ export const useUserProfile = () => {
 
   const isAdmin = profile?.role === 'admin';
 
+  const refetchProfile = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
+
+      if (data) {
+        setProfile(data);
+        setNeedsSetup(false);
+      }
+    } catch (err) {
+      console.error('Erro ao recarregar perfil:', err);
+    }
+  };
+
   return {
     profile,
     loading,
     error,
-    isAdmin
+    isAdmin,
+    needsSetup,
+    refetchProfile
   };
 };

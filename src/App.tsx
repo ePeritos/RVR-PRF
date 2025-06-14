@@ -10,6 +10,8 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppSidebar } from "@/components/AppSidebar";
+import { ProfileSetupDialog } from "@/components/ProfileSetupDialog";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import Dashboard from "./pages/Dashboard";
 import RVR from "./pages/RVR";
 import CAIP from "./pages/CAIP";
@@ -20,6 +22,7 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, session } = useAuth();
+  const { needsSetup, refetchProfile } = useUserProfile();
   
   console.log('ProtectedRoute - user:', user?.id, 'loading:', loading, 'session:', !!session);
   console.log('ProtectedRoute - user details:', user?.email);
@@ -44,29 +47,35 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   console.log('ProtectedRoute - Usuário autenticado, renderizando com sidebar');
   
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col">
-          <header className="border-b border-border bg-background/95 backdrop-blur lg:hidden">
-            <div className="flex items-center justify-between p-4">
-              <div className="flex items-center gap-2">
-                <img 
-                  src="/lovable-uploads/0c984027-ab7d-4e16-96fe-f7d523613cc5.png" 
-                  alt="SIGI-PRF Logo" 
-                  className="h-6 w-auto"
-                />
-                <span className="font-bold text-lg">SIGI-PRF</span>
+    <>
+      <ProfileSetupDialog 
+        open={needsSetup} 
+        onComplete={refetchProfile}
+      />
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-background">
+          <AppSidebar />
+          <div className="flex-1 flex flex-col">
+            <header className="border-b border-border bg-background/95 backdrop-blur lg:hidden">
+              <div className="flex items-center justify-between p-4">
+                <div className="flex items-center gap-2">
+                  <img 
+                    src="/lovable-uploads/0c984027-ab7d-4e16-96fe-f7d523613cc5.png" 
+                    alt="SIGI-PRF Logo" 
+                    className="h-6 w-auto"
+                  />
+                  <span className="font-bold text-lg">SIGI-PRF</span>
+                </div>
+                <ThemeToggle />
               </div>
-              <ThemeToggle />
-            </div>
-          </header>
-          <main className="flex-1 overflow-auto">
-            {children}
-          </main>
+            </header>
+            <main className="flex-1 overflow-auto">
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </>
   );
 };
 
