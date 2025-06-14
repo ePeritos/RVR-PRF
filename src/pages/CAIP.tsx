@@ -7,11 +7,13 @@ import { Tables } from '@/integrations/supabase/types';
 import { ExistingRecordsList } from '@/components/caip/ExistingRecordsList';
 import { DataFilter } from '@/components/DataFilter';
 import { CAIPFormDialog } from '@/components/caip/CAIPFormDialog';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 type DadosCAIP = Tables<'dados_caip'>;
 
 const CAIP = () => {
   const { toast } = useToast();
+  const { profile, isAdmin } = useUserProfile();
   const [existingData, setExistingData] = useState<DadosCAIP[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState<DadosCAIP[]>([]);
@@ -20,15 +22,22 @@ const CAIP = () => {
 
   useEffect(() => {
     fetchExistingData();
-  }, []);
+  }, [profile, isAdmin]);
 
   const fetchExistingData = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('dados_caip')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(1000);
+
+      // Apply unit filter for non-admin users
+      if (!isAdmin && profile?.unidade_gestora) {
+        query = query.eq('unidade_gestora', profile.unidade_gestora);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setExistingData(data || []);

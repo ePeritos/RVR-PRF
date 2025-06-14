@@ -23,7 +23,7 @@ export interface DataRow {
   'rvr': number;
 }
 
-export const useSupabaseData = () => {
+export const useSupabaseData = (unidadeGestoraFilter?: string) => {
   const [data, setData] = useState<DataRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,12 +57,22 @@ export const useSupabaseData = () => {
       const batchSize = 1000;
       let hasMore = true;
 
-      console.log('Iniciando busca de todos os dados da tabela dados_caip...');
+      console.log('Iniciando busca de dados da tabela dados_caip...');
+      if (unidadeGestoraFilter) {
+        console.log(`Aplicando filtro por unidade gestora: ${unidadeGestoraFilter}`);
+      }
 
       while (hasMore) {
-        const { data: batchData, error, count } = await supabase
+        let query = supabase
           .from('dados_caip')
-          .select('*', { count: 'exact' })
+          .select('*', { count: 'exact' });
+
+        // Aplicar filtro por unidade gestora se fornecido
+        if (unidadeGestoraFilter) {
+          query = query.eq('unidade_gestora', unidadeGestoraFilter);
+        }
+
+        const { data: batchData, error, count } = await query
           .range(from, from + batchSize - 1);
 
         if (error) {
@@ -102,7 +112,7 @@ export const useSupabaseData = () => {
 
   useEffect(() => {
     fetchAllData();
-  }, []);
+  }, [unidadeGestoraFilter]);
 
   return { data, loading, error, refetch: fetchAllData };
 };

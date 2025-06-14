@@ -6,6 +6,7 @@ import { DataFilter } from '@/components/DataFilter';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface DashboardStats {
@@ -23,7 +24,10 @@ interface UnidadeGestoraData {
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { data: supabaseData, loading } = useSupabaseData();
+  const { profile, isAdmin } = useUserProfile();
+  const { data: supabaseData, loading } = useSupabaseData(
+    isAdmin ? undefined : profile?.unidade_gestora
+  );
   const [stats, setStats] = useState<DashboardStats>({
     totalImoveis: 0,
     imoveisAvaliados: 0,

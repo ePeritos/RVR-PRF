@@ -8,12 +8,14 @@ import { useToast } from '@/hooks/use-toast';
 import { useSupabaseData, DataRow } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateRossHeidecke } from '@/utils/rossHeideckeCalculator';
 
 const RVR = () => {
   const { user } = useAuth();
   const { profile, loading: profileLoading, isAdmin, isUsuarioPadrao } = useProfile();
+  const { profile: userProfile, isAdmin: isUserAdmin } = useUserProfile();
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -23,8 +25,10 @@ const RVR = () => {
   const [currentParameters, setCurrentParameters] = useState<any>(null);
   const { toast } = useToast();
 
-  // Use real Supabase data
-  const { data: supabaseData, loading, error, refetch } = useSupabaseData();
+  // Use real Supabase data with unit filter for non-admin users
+  const { data: supabaseData, loading, error, refetch } = useSupabaseData(
+    isUserAdmin ? undefined : userProfile?.unidade_gestora
+  );
 
   const fetchUserProfile = async () => {
     if (!user) return null;
