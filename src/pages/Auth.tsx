@@ -79,7 +79,7 @@ const Auth = () => {
             Faça login para acessar o Sistema de Gestão de Imóveis da PRF
           </CardDescription>
         </CardHeader>
-        <CardContent className="px-4">
+        <CardContent className="px-[105px]">
           <div className="space-y-6">
             <Button variant="outline" onClick={handleSignInWithGoogle} disabled={loading || !termsAccepted} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
