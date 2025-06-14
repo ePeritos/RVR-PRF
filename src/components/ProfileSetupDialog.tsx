@@ -92,7 +92,7 @@ export const ProfileSetupDialog: React.FC<ProfileSetupDialogProps> = ({ open, on
           unidade_gestora: profile.unidade_gestora,
           telefone: profile.telefone,
           email: user?.email,
-          role: 'usuario_padrao'
+          role: 'usuario_padrao' as any
         });
 
       if (error) throw error;
