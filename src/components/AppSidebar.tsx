@@ -111,7 +111,16 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>SIGI-PRF</SidebarGroupLabel>
+          <div className="flex items-center gap-2 px-2 py-1">
+            <img 
+              src="/lovable-uploads/0c984027-ab7d-4e16-96fe-f7d523613cc5.png" 
+              alt="SIGI-PRF Logo" 
+              className="h-6 w-auto"
+            />
+            {state !== "collapsed" && (
+              <SidebarGroupLabel className="text-base font-bold">SIGI-PRF</SidebarGroupLabel>
+            )}
+          </div>
 
           <SidebarGroupContent>
             <SidebarMenu>
