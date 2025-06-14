@@ -3,12 +3,16 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Search, Edit, Trash2 } from 'lucide-react';
+import { Search, Edit, Trash2, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { Tables } from '@/integrations/supabase/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useProfile } from '@/hooks/useProfile';
+import { useState, useMemo } from 'react';
 
 type DadosCAIP = Tables<'dados_caip'>;
+
+type SortDirection = 'asc' | 'desc' | null;
+type SortColumn = keyof DadosCAIP | 'nota_total';
 
 interface ExistingRecordsListProps {
   searchTerm: string;
@@ -26,12 +30,77 @@ export const ExistingRecordsList = ({
   handleDelete 
 }: ExistingRecordsListProps) => {
   const { isAdmin } = useProfile();
+  const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   
   const calculateNotaTotal = (notaAdequacao: string | null, notaManutencao: string | null) => {
     const adequacao = parseFloat(notaAdequacao || '0');
     const manutencao = parseFloat(notaManutencao || '0');
     const notaTotal = (adequacao * 0.6) + (manutencao * 0.4);
     return notaTotal.toFixed(2);
+  };
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else if (sortDirection === 'desc') {
+        setSortDirection(null);
+        setSortColumn(null);
+      } else {
+        setSortDirection('asc');
+      }
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedData = useMemo(() => {
+    if (!sortColumn || !sortDirection) {
+      return filteredData;
+    }
+
+    return [...filteredData].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      if (sortColumn === 'nota_total') {
+        aValue = parseFloat(calculateNotaTotal(a.nota_para_adequacao, a.nota_para_manutencao));
+        bValue = parseFloat(calculateNotaTotal(b.nota_para_adequacao, b.nota_para_manutencao));
+      } else {
+        aValue = a[sortColumn];
+        bValue = b[sortColumn];
+      }
+
+      // Handle null/undefined values
+      if (aValue == null && bValue == null) return 0;
+      if (aValue == null) return sortDirection === 'asc' ? 1 : -1;
+      if (bValue == null) return sortDirection === 'asc' ? -1 : 1;
+
+      // Convert to string for comparison if not numbers
+      if (typeof aValue !== 'number' && typeof bValue !== 'number') {
+        aValue = String(aValue).toLowerCase();
+        bValue = String(bValue).toLowerCase();
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [filteredData, sortColumn, sortDirection]);
+
+  const getSortIcon = (column: SortColumn) => {
+    if (sortColumn !== column) {
+      return <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />;
+    }
+    if (sortDirection === 'asc') {
+      return <ChevronUp className="h-4 w-4 text-foreground" />;
+    }
+    if (sortDirection === 'desc') {
+      return <ChevronDown className="h-4 w-4 text-foreground" />;
+    }
+    return <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />;
   };
 
   return (
@@ -53,19 +122,91 @@ export const ExistingRecordsList = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[80px]">Ano CAIP</TableHead>
-                <TableHead className="min-w-[120px]">Unidade Gestora</TableHead>
-                <TableHead className="min-w-[100px]">Tipo de Unidade</TableHead>
-                <TableHead className="min-w-[200px]">Nome da Unidade</TableHead>
-                <TableHead className="min-w-[100px]">Nota Adequação</TableHead>
-                <TableHead className="min-w-[100px]">Nota Manutenção</TableHead>
-                <TableHead className="min-w-[90px]">Nota Total</TableHead>
-                <TableHead className="min-w-[100px]">RVR</TableHead>
-                <TableHead className="w-12">Ações</TableHead>
+                <TableHead className="min-w-[80px] text-center">
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-1 font-semibold justify-center w-full"
+                    onClick={() => handleSort('ano_caip')}
+                  >
+                    Ano CAIP
+                    {getSortIcon('ano_caip')}
+                  </Button>
+                </TableHead>
+                <TableHead className="min-w-[120px] text-center">
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-1 font-semibold justify-center w-full"
+                    onClick={() => handleSort('unidade_gestora')}
+                  >
+                    Unidade Gestora
+                    {getSortIcon('unidade_gestora')}
+                  </Button>
+                </TableHead>
+                <TableHead className="min-w-[100px] text-center">
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-1 font-semibold justify-center w-full"
+                    onClick={() => handleSort('tipo_de_unidade')}
+                  >
+                    Tipo de Unidade
+                    {getSortIcon('tipo_de_unidade')}
+                  </Button>
+                </TableHead>
+                <TableHead className="min-w-[200px] text-center">
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-1 font-semibold justify-center w-full"
+                    onClick={() => handleSort('nome_da_unidade')}
+                  >
+                    Nome da Unidade
+                    {getSortIcon('nome_da_unidade')}
+                  </Button>
+                </TableHead>
+                <TableHead className="min-w-[100px] text-center">
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-1 font-semibold justify-center w-full"
+                    onClick={() => handleSort('nota_para_adequacao')}
+                  >
+                    Nota Adequação
+                    {getSortIcon('nota_para_adequacao')}
+                  </Button>
+                </TableHead>
+                <TableHead className="min-w-[100px] text-center">
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-1 font-semibold justify-center w-full"
+                    onClick={() => handleSort('nota_para_manutencao')}
+                  >
+                    Nota Manutenção
+                    {getSortIcon('nota_para_manutencao')}
+                  </Button>
+                </TableHead>
+                <TableHead className="min-w-[90px] text-center">
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-1 font-semibold justify-center w-full"
+                    onClick={() => handleSort('nota_total')}
+                  >
+                    Nota Total
+                    {getSortIcon('nota_total')}
+                  </Button>
+                </TableHead>
+                <TableHead className="min-w-[100px] text-center">
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-1 font-semibold justify-center w-full"
+                    onClick={() => handleSort('rvr')}
+                  >
+                    RVR
+                    {getSortIcon('rvr')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-12 text-center">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredData.map((item) => (
+              {sortedData.map((item) => (
                 <TableRow key={item.id} className="hover:bg-muted/50">
                   <TableCell>
                     <Badge variant="outline">
@@ -146,7 +287,7 @@ export const ExistingRecordsList = ({
               ))}
             </TableBody>
           </Table>
-          {filteredData.length === 0 && (
+          {sortedData.length === 0 && (
             <p className="text-center text-muted-foreground py-8">
               Nenhum registro encontrado.
             </p>
