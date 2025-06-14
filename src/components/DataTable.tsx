@@ -145,7 +145,10 @@ export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: 
                   onClick={() => handleSort('ano_caip')}
                 >
                   <span className="flex items-center gap-2">
-                    Ano CAIP
+                    <div className="text-center leading-tight">
+                      <div>Ano</div>
+                      <div>CAIP</div>
+                    </div>
                     <SortIcon field="ano_caip" />
                   </span>
                 </Button>
@@ -157,7 +160,10 @@ export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: 
                   onClick={() => handleSort('nome_da_unidade')}
                 >
                   <span className="flex items-center gap-2">
-                    Nome da Unidade
+                    <div className="text-center leading-tight">
+                      <div>Nome da</div>
+                      <div>Unidade</div>
+                    </div>
                     <SortIcon field="nome_da_unidade" />
                   </span>
                 </Button>
@@ -169,7 +175,10 @@ export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: 
                   onClick={() => handleSort('unidade_gestora')}
                 >
                   <span className="flex items-center gap-2">
-                    Unidade Gestora
+                    <div className="text-center leading-tight">
+                      <div>Unidade</div>
+                      <div>Gestora</div>
+                    </div>
                     <SortIcon field="unidade_gestora" />
                   </span>
                 </Button>
@@ -181,7 +190,10 @@ export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: 
                   onClick={() => handleSort('tipo_de_unidade')}
                 >
                   <span className="flex items-center gap-2">
-                    Tipo de Unidade
+                    <div className="text-center leading-tight">
+                      <div>Tipo de</div>
+                      <div>Unidade</div>
+                    </div>
                     <SortIcon field="tipo_de_unidade" />
                   </span>
                 </Button>
@@ -193,7 +205,10 @@ export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: 
                   onClick={() => handleSort('estado_de_conservacao')}
                 >
                   <span className="flex items-center gap-2">
-                    Estado de Conservação
+                    <div className="text-center leading-tight">
+                      <div>Estado de</div>
+                      <div>Conservação</div>
+                    </div>
                     <SortIcon field="estado_de_conservacao" />
                   </span>
                 </Button>
@@ -205,7 +220,10 @@ export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: 
                   onClick={() => handleSort('vida_util_estimada_anos')}
                 >
                   <span className="flex items-center gap-2">
-                    Vida Útil (Anos)
+                    <div className="text-center leading-tight">
+                      <div>Vida Útil</div>
+                      <div>(Anos)</div>
+                    </div>
                     <SortIcon field="vida_util_estimada_anos" />
                   </span>
                 </Button>
@@ -217,7 +235,10 @@ export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: 
                   onClick={() => handleSort('area_do_terreno_m2')}
                 >
                   <span className="flex items-center gap-2">
-                    Área do Terreno
+                    <div className="text-center leading-tight">
+                      <div>Área do</div>
+                      <div>Terreno</div>
+                    </div>
                     <SortIcon field="area_do_terreno_m2" />
                   </span>
                 </Button>
@@ -229,9 +250,12 @@ export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: 
                   onClick={() => handleSort('area_construida_m2')}
                 >
                   <span className="flex items-center gap-2">
-                    Área Construída
-                     <SortIcon field="area_construida_m2" />
-                   </span>
+                    <div className="text-center leading-tight">
+                      <div>Área</div>
+                      <div>Construída</div>
+                    </div>
+                    <SortIcon field="area_construida_m2" />
+                  </span>
                  </Button>
                </th>
                {isAdmin && onDelete && (
