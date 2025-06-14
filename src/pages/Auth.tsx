@@ -17,11 +17,8 @@ const Auth = () => {
   } = useToast();
   const navigate = useNavigate();
 
-  // Verificar se os termos já foram aceitos e limpar estado ao carregar
+  // Verificar se os termos já foram aceitos
   useEffect(() => {
-    // Limpar estado de autenticação antes de verificar termos
-    cleanupAuthState();
-    
     const savedTermsAcceptance = localStorage.getItem(TERMS_STORAGE_KEY);
     if (savedTermsAcceptance === 'true') {
       setTermsAccepted(true);
