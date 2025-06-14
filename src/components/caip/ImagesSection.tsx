@@ -136,7 +136,7 @@ export const ImagesSection = ({ register, setValue, watchedValues }: ImagesSecti
           return (
             <div key={key} className="space-y-2">
               <Label htmlFor={key}>{label}</Label>
-              <div className="border-2 border-dashed border-border rounded-lg overflow-hidden bg-muted/20">
+              <div className="border-2 border-dashed border-border rounded-lg overflow-hidden bg-muted/20 relative">
                 {preview ? (
                   <div className="relative">
                     <img 
@@ -149,8 +149,12 @@ export const ImagesSection = ({ register, setValue, watchedValues }: ImagesSecti
                         type="button"
                         variant="destructive"
                         size="sm"
-                        onClick={() => removeImage(key)}
-                        className="flex items-center gap-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          removeImage(key);
+                        }}
+                        className="flex items-center gap-2 z-10"
                       >
                         <X className="h-4 w-4" />
                         Remover
@@ -163,12 +167,14 @@ export const ImagesSection = ({ register, setValue, watchedValues }: ImagesSecti
                     </div>
                   </div>
                 ) : (
-                  <div className="p-4 text-center">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Clique para selecionar uma imagem
-                    </p>
-                  </div>
+                  <label htmlFor={key} className="block cursor-pointer">
+                    <div className="p-4 text-center h-32 flex flex-col justify-center">
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        Clique para selecionar uma imagem
+                      </p>
+                    </div>
+                  </label>
                 )}
                 
                 <Input
@@ -180,7 +186,7 @@ export const ImagesSection = ({ register, setValue, watchedValues }: ImagesSecti
                     console.log(`Input onChange para campo ${key}:`, e.target.files);
                     handleImageChange(key, e.target.files);
                   }}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  className="hidden"
                 />
               </div>
             </div>
