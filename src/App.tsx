@@ -63,7 +63,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
                   <img 
                     src="/lovable-uploads/40767838-14cb-481f-9df0-efaa941d75a0.png" 
                     alt="SIGI-PRF Logo" 
-                    className="h-6 w-auto"
+                    className="h-5 w-auto dark:invert"
                   />
                   <span className="font-bold text-lg">SIGI-PRF</span>
                 </div>
