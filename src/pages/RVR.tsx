@@ -68,16 +68,16 @@ const RVR = () => {
     let filtered = supabaseData;
     
     // Apply filters sequentially
-    if (filters.anoCAIP) {
-      filtered = filtered.filter(item => item['ano_caip'] === filters.anoCAIP);
+    if (filters.anoCAIP && filters.anoCAIP.length > 0) {
+      filtered = filtered.filter(item => filters.anoCAIP.includes(item['ano_caip']));
     }
     
-    if (filters.unidadeGestora) {
-      filtered = filtered.filter(item => item['unidade_gestora'] === filters.unidadeGestora);
+    if (filters.unidadeGestora && filters.unidadeGestora.length > 0) {
+      filtered = filtered.filter(item => filters.unidadeGestora.includes(item['unidade_gestora']));
     }
     
-    if (filters.tipoUnidade) {
-      filtered = filtered.filter(item => item['tipo_de_unidade'] === filters.tipoUnidade);
+    if (filters.tipoUnidade && filters.tipoUnidade.length > 0) {
+      filtered = filtered.filter(item => filters.tipoUnidade.includes(item['tipo_de_unidade']));
     }
     
     // Apply nome da unidade filter (partial match, case insensitive)
