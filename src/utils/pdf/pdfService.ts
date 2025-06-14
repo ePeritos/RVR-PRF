@@ -2,6 +2,7 @@ import html2canvas from 'html2canvas';
 import { createRoot } from 'react-dom/client';
 import { PDFCreator } from './pdfCreator';
 import { RVRReportPDFTemplate } from '../../components/reports/RVRReportPDFTemplate';
+import { CAIPReportTemplate } from '../../components/caip/CAIPReportTemplate';
 import React from 'react';
 
 interface PDFGenerationOptions {
@@ -44,14 +45,24 @@ export class PDFService {
       // Cria o root do React para renderizar o componente
       const root = createRoot(container);
       
-      console.log('3. Renderizando componente RVRReportPDFTemplate...');
-      // Renderiza o RVRReportPDFTemplate (versão otimizada para PDF)
+      console.log('3. Renderizando componente...');
+      // Detecta o tipo de relatório e renderiza o componente apropriado
+      const isCAIPReport = data.ano_caip || data.unidade_gestora || data.tipo_de_unidade;
+      
       await new Promise<void>((resolve, reject) => {
         try {
-          root.render(React.createElement(RVRReportPDFTemplate, { 
-            data, 
-            className: 'print:text-black' 
-          }));
+          if (isCAIPReport) {
+            console.log('Renderizando CAIPReportTemplate...');
+            root.render(React.createElement(CAIPReportTemplate, { 
+              data
+            }));
+          } else {
+            console.log('Renderizando RVRReportPDFTemplate...');
+            root.render(React.createElement(RVRReportPDFTemplate, { 
+              data, 
+              className: 'print:text-black' 
+            }));
+          }
           
           console.log('4. Aguardando renderização...');
           // Aguarda a renderização

@@ -3,10 +3,11 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Search, Edit, Trash2, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { Search, Edit, Trash2, ChevronUp, ChevronDown, ChevronsUpDown, FileText } from 'lucide-react';
 import { Tables } from '@/integrations/supabase/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useProfile } from '@/hooks/useProfile';
+import { useCAIPReport } from '@/hooks/useCAIPReport';
 import { useState, useMemo } from 'react';
 
 type DadosCAIP = Tables<'dados_caip'>;
@@ -30,6 +31,7 @@ export const ExistingRecordsList = ({
   handleDelete 
 }: ExistingRecordsListProps) => {
   const { isAdmin } = useProfile();
+  const { generateReport, isGenerating } = useCAIPReport();
   const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   
@@ -239,16 +241,26 @@ export const ExistingRecordsList = ({
                     {item.rvr ? `R$ ${Number(item.rvr).toLocaleString('pt-BR')}` : 'N/A'}
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(item)}
-                        className="h-8 w-8 p-0"
-                        title="Editar registro"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                     <div className="flex gap-1">
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => generateReport(item)}
+                         disabled={isGenerating}
+                         className="h-8 w-8 p-0"
+                         title="Gerar relatório PDF"
+                       >
+                         <FileText className="h-4 w-4" />
+                       </Button>
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => handleEdit(item)}
+                         className="h-8 w-8 p-0"
+                         title="Editar registro"
+                       >
+                         <Edit className="h-4 w-4" />
+                       </Button>
                       {isAdmin && handleDelete && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
