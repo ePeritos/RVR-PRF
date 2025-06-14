@@ -1,9 +1,7 @@
-import { useState, useEffect } from 'react';
 import { UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { StarRating } from '@/components/ui/star-rating';
 import { Tables } from '@/integrations/supabase/types';
 
 type DadosCAIP = Tables<'dados_caip'>;
@@ -12,11 +10,9 @@ interface EnvironmentsSectionProps {
   register: UseFormRegister<DadosCAIP>;
   setValue: UseFormSetValue<DadosCAIP>;
   watchedValues?: any;
-  onEnvironmentRatingChange?: (environment: string, rating: number) => void;
 }
 
-export const EnvironmentsSection = ({ register, setValue, watchedValues, onEnvironmentRatingChange }: EnvironmentsSectionProps) => {
-  const [environmentRatings, setEnvironmentRatings] = useState<Record<string, number>>({});
+export const EnvironmentsSection = ({ register, setValue, watchedValues }: EnvironmentsSectionProps) => {
   const environmentFields = [
     { key: 'almoxarifado', label: 'Almoxarifado' },
     { key: 'alojamento_feminino', label: 'Alojamento Feminino' },
@@ -73,17 +69,6 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onEnvir
     });
   };
 
-  const handleRatingChange = (environment: string, rating: number) => {
-    setEnvironmentRatings(prev => ({
-      ...prev,
-      [environment]: rating
-    }));
-    
-    if (onEnvironmentRatingChange) {
-      onEnvironmentRatingChange(environment, rating);
-    }
-  };
-
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between mb-4">
@@ -98,34 +83,20 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onEnvir
           </Label>
         </div>
       </div>
+      <p className="text-sm text-muted-foreground mb-4">
+        Marque quais ambientes existem no imóvel. A avaliação de conservação será feita na seção específica abaixo.
+      </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {environmentFields.map(({ key, label }) => {
-          const isSelected = watchedValues?.[key as keyof DadosCAIP] === 'Sim';
-          
-          return (
-            <div key={key} className="border rounded-lg p-3 space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  {...register(key as keyof DadosCAIP)}
-                  checked={isSelected}
-                  onCheckedChange={(checked) => setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não')}
-                />
-                <Label className="font-medium">{label}</Label>
-              </div>
-              
-              {isSelected && (
-                <div className="ml-6 flex items-center space-x-3">
-                  <Label className="text-sm text-muted-foreground">Estado de conservação:</Label>
-                  <StarRating
-                    value={environmentRatings[key] || 0}
-                    onChange={(rating) => handleRatingChange(key, rating)}
-                    size={16}
-                  />
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {environmentFields.map(({ key, label }) => (
+          <div key={key} className="flex items-center space-x-2 p-2 border rounded">
+            <Checkbox 
+              {...register(key as keyof DadosCAIP)}
+              checked={watchedValues?.[key as keyof DadosCAIP] === 'Sim'}
+              onCheckedChange={(checked) => setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não')}
+            />
+            <Label className="text-sm">{label}</Label>
+          </div>
+        ))}
       </div>
     </Card>
   );
