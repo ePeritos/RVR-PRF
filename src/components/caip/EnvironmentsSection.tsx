@@ -98,7 +98,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onEnvir
           </Label>
         </div>
       </div>
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {environmentFields.map(({ key, label }) => {
           const isSelected = watchedValues?.[key as keyof DadosCAIP] === 'Sim';
           
