@@ -98,6 +98,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
     { campo: 'banheiro_misto_para_servidores', nomeAmbiente: 'Banheiro para servidores' },
     { campo: 'box_com_chuveiro_externo', nomeAmbiente: 'Box com chuveiro externo' },
     { campo: 'box_para_lavagem_de_veiculos', nomeAmbiente: 'Box para lavagem de veículos' },
+    { campo: 'canil', nomeAmbiente: 'Canil' },
     { campo: 'casa_de_maquinas', nomeAmbiente: 'Casa de máquinas' },
     { campo: 'central_de_gas', nomeAmbiente: 'Central de gás' },
     { campo: 'cobertura_para_aglomeracao_de_usuarios', nomeAmbiente: 'Cobertura para aglomeração de usuários' },
@@ -149,29 +150,42 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
   const carregarAvaliacoesExistentes = async () => {
     if (!watchedValues?.id) return;
 
+    console.log('=== CARREGANDO AVALIAÇÕES EXISTENTES ===');
+    console.log('ID do imóvel:', watchedValues.id);
+
     try {
       const { data: avaliacoes, error } = await supabase
         .from('manutencao_ambientes')
-        .select('*')
+        .select(`
+          *,
+          caderno_ambientes!inner(
+            nome_ambiente,
+            tipos_imoveis!inner(nome_tipo)
+          )
+        `)
         .eq('imovel_id', watchedValues.id);
 
       if (error) throw error;
 
+      console.log('Avaliações encontradas:', avaliacoes);
+
       // Converter avaliações para o formato local
       const avaliacoesMap: {[key: string]: number} = {};
       avaliacoes?.forEach(avaliacao => {
-        // Encontrar o campo correspondente pelo ambiente_id
-        const campoCorrespondente = camposAmbientes.find(c => {
-          // Aqui precisaríamos de uma forma de mapear ambiente_id para campo
-          // Por simplicidade, vamos usar o nome do ambiente
-          return c.nomeAmbiente === avaliacao.ambiente_id; // Isso precisa ser ajustado
-        });
+        const nomeAmbiente = avaliacao.caderno_ambientes?.nome_ambiente;
+        
+        // Encontrar o campo correspondente pelo nome do ambiente
+        const campoCorrespondente = camposAmbientes.find(c => 
+          c.nomeAmbiente === nomeAmbiente
+        );
         
         if (campoCorrespondente) {
           avaliacoesMap[campoCorrespondente.campo] = avaliacao.score_conservacao;
+          console.log(`✅ Carregada avaliação para ${campoCorrespondente.campo}: ${avaliacao.score_conservacao}`);
         }
       });
 
+      console.log('Mapa de avaliações carregado:', avaliacoesMap);
       setAvaliacoesLocais(avaliacoesMap);
     } catch (error) {
       console.error('Erro ao carregar avaliações:', error);

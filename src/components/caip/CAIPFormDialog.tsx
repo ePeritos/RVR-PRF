@@ -42,7 +42,7 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
     percentualPreenchimento,
     onSubmit: originalOnSubmit,
     handleNew
-  } = useCAIPForm({ editingItem, open, onOpenChange, onSuccess });
+  } = useCAIPForm({ editingItem, open, onOpenChange, onSuccess, avaliacoesLocais });
 
   // Use calculations hook
   useCAIPCalculations({ watchedValues, setValue });

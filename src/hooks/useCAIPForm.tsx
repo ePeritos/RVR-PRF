@@ -13,9 +13,10 @@ interface UseCAIPFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  avaliacoesLocais?: {[key: string]: number};
 }
 
-export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess }: UseCAIPFormProps) => {
+export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avaliacoesLocais }: UseCAIPFormProps) => {
   const { toast } = useToast();
   const { profile } = useProfile();
   const [isLoading, setIsLoading] = useState(false);
@@ -150,15 +151,22 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess }: UseC
         });
       } else {
         // Criar novo registro
-        const { error } = await supabase
+        const { data: newRecord, error } = await supabase
           .from('dados_caip')
           .insert([{
             ...processedData,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-          }]);
+          }])
+          .select()
+          .single();
 
         if (error) throw error;
+
+        // Salvar as avaliações de ambientes se existirem
+        if (newRecord && avaliacoesLocais && Object.keys(avaliacoesLocais).length > 0) {
+          await salvarAvaliacoesAmbientes(newRecord.id, processedData.tipo_de_unidade, avaliacoesLocais);
+        }
 
         toast({
           title: "Sucesso",
@@ -183,6 +191,126 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess }: UseC
 
   const handleNew = () => {
     reset();
+  };
+
+  const salvarAvaliacoesAmbientes = async (imovelId: string, tipoUnidade: string, avaliacoes: {[key: string]: number}) => {
+    console.log('=== SALVANDO AVALIAÇÕES DE AMBIENTES ===');
+    console.log('Imóvel ID:', imovelId);
+    console.log('Tipo de Unidade:', tipoUnidade);
+    console.log('Avaliações:', avaliacoes);
+
+    try {
+      // Mapear campos do formulário para nomes de ambientes
+      const camposAmbientes = [
+        { campo: 'almoxarifado', nomeAmbiente: 'Almoxarifado' },
+        { campo: 'alojamento_feminino', nomeAmbiente: 'Alojamento' },
+        { campo: 'alojamento_masculino', nomeAmbiente: 'Alojamento' },
+        { campo: 'alojamento_misto', nomeAmbiente: 'Alojamento' },
+        { campo: 'area_de_servico', nomeAmbiente: 'Área de serviço' },
+        { campo: 'area_de_uso_compartilhado_com_outros_orgaos', nomeAmbiente: 'Área de uso compartilhado' },
+        { campo: 'arquivo', nomeAmbiente: 'Arquivo' },
+        { campo: 'auditorio', nomeAmbiente: 'Auditório' },
+        { campo: 'banheiro_para_zeladoria', nomeAmbiente: 'Banheiro para zeladoria' },
+        { campo: 'banheiro_feminino_para_servidoras', nomeAmbiente: 'Banheiro para servidores' },
+        { campo: 'banheiro_masculino_para_servidores', nomeAmbiente: 'Banheiro para servidores' },
+        { campo: 'banheiro_misto_para_servidores', nomeAmbiente: 'Banheiro para servidores' },
+        { campo: 'box_com_chuveiro_externo', nomeAmbiente: 'Box com chuveiro externo' },
+        { campo: 'box_para_lavagem_de_veiculos', nomeAmbiente: 'Box para lavagem de veículos' },
+        { campo: 'canil', nomeAmbiente: 'Canil' },
+        { campo: 'casa_de_maquinas', nomeAmbiente: 'Casa de máquinas' },
+        { campo: 'central_de_gas', nomeAmbiente: 'Central de gás' },
+        { campo: 'cobertura_para_aglomeracao_de_usuarios', nomeAmbiente: 'Cobertura para aglomeração de usuários' },
+        { campo: 'cobertura_para_fiscalizacao_de_veiculos', nomeAmbiente: 'Cobertura para fiscalização de veículos' },
+        { campo: 'copa_e_cozinha', nomeAmbiente: 'Copa e cozinha' },
+        { campo: 'deposito_de_lixo', nomeAmbiente: 'Depósito de lixo' },
+        { campo: 'deposito_de_materiais_de_descarte_e_baixa', nomeAmbiente: 'Depósito de materiais de descarte e baixa' },
+        { campo: 'deposito_de_material_de_limpeza', nomeAmbiente: 'Depósito de material de limpeza' },
+        { campo: 'deposito_de_material_operacional', nomeAmbiente: 'Depósito de material operacional' },
+        { campo: 'estacionamento_para_usuarios', nomeAmbiente: 'Estacionamento para usuários' },
+        { campo: 'garagem_para_servidores', nomeAmbiente: 'Garagem para servidores' },
+        { campo: 'garagem_para_viaturas', nomeAmbiente: 'Garagem para viaturas' },
+        { campo: 'lavabo_para_servidores_sem_box_para_chuveiro', nomeAmbiente: 'Lavabo para servidores sem box para chuveiro' },
+        { campo: 'local_para_custodia_temporaria_de_detidos', nomeAmbiente: 'Local para custódia temporária de detidos' },
+        { campo: 'local_para_guarda_provisoria_de_animais', nomeAmbiente: 'Local para guarda provisória de animais' },
+        { campo: 'patio_de_retencao_de_veiculos', nomeAmbiente: 'Pátio de retenção de veículos' },
+        { campo: 'plataforma_para_fiscalizacao_da_parte_superior_dos_veiculos', nomeAmbiente: 'Plataforma para fiscalização da parte superior dos veículos' },
+        { campo: 'ponto_de_pouso_para_aeronaves', nomeAmbiente: 'Ponto de pouso para aeronaves' },
+        { campo: 'rampa_de_fiscalizacao_de_veiculos', nomeAmbiente: 'Rampa de fiscalização de veículos' },
+        { campo: 'recepcao', nomeAmbiente: 'Recepção' },
+        { campo: 'sala_administrativa_escritorio', nomeAmbiente: 'Sala administrativa/escritório' },
+        { campo: 'sala_de_assepsia', nomeAmbiente: 'Sala de assepsia' },
+        { campo: 'sala_de_aula', nomeAmbiente: 'Sala de aula' },
+        { campo: 'sala_de_reuniao', nomeAmbiente: 'Sala de reunião' },
+        { campo: 'sala_de_revista_pessoal', nomeAmbiente: 'Sala de revista pessoal' },
+        { campo: 'sala_operacional_observatorio', nomeAmbiente: 'Sala operacional/observatório' },
+        { campo: 'sala_tecnica', nomeAmbiente: 'Sala técnica' },
+        { campo: 'sanitario_publico', nomeAmbiente: 'Sanitário público' },
+        { campo: 'telefone_publico', nomeAmbiente: 'Telefone público' },
+        { campo: 'torre_de_telecomunicacoes', nomeAmbiente: 'Torre de telecomunicações' },
+        { campo: 'vestiario_para_nao_policiais', nomeAmbiente: 'Vestiário para não policiais' },
+        { campo: 'vestiario_para_policiais', nomeAmbiente: 'Vestiário para policiais' }
+      ];
+
+      // Buscar ambientes do caderno baseado no tipo de unidade
+      const { data: cadernoAmbientes, error: errorCaderno } = await supabase
+        .from('caderno_ambientes')
+        .select(`
+          id,
+          nome_ambiente,
+          tipos_imoveis!inner(nome_tipo)
+        `)
+        .eq('tipos_imoveis.nome_tipo', tipoUnidade);
+
+      if (errorCaderno) {
+        console.error('Erro ao buscar caderno de ambientes:', errorCaderno);
+        return;
+      }
+
+      console.log('Caderno de ambientes encontrado:', cadernoAmbientes);
+
+      // Preparar dados para inserção
+      const avaliacoesParaInserir = [];
+      
+      for (const [campo, score] of Object.entries(avaliacoes)) {
+        if (score > 0) { // Só salvar avaliações válidas
+          const campoCorrespondente = camposAmbientes.find(c => c.campo === campo);
+          if (campoCorrespondente) {
+            const ambiente = cadernoAmbientes?.find(a => a.nome_ambiente === campoCorrespondente.nomeAmbiente);
+            if (ambiente) {
+              avaliacoesParaInserir.push({
+                imovel_id: imovelId,
+                ambiente_id: ambiente.id,
+                score_conservacao: score,
+                observacoes: null
+              });
+              console.log(`✅ Preparada avaliação para ${campo}: ${score}`);
+            } else {
+              console.log(`❌ Ambiente não encontrado para ${campo} (${campoCorrespondente.nomeAmbiente})`);
+            }
+          }
+        }
+      }
+
+      console.log('Avaliações para inserir:', avaliacoesParaInserir);
+
+      // Inserir avaliações em lote
+      if (avaliacoesParaInserir.length > 0) {
+        const { error: errorInsert } = await supabase
+          .from('manutencao_ambientes')
+          .insert(avaliacoesParaInserir);
+
+        if (errorInsert) {
+          console.error('Erro ao inserir avaliações:', errorInsert);
+          throw errorInsert;
+        }
+
+        console.log(`✅ ${avaliacoesParaInserir.length} avaliações salvas com sucesso`);
+      }
+
+    } catch (error) {
+      console.error('Erro ao salvar avaliações de ambientes:', error);
+      throw error;
+    }
   };
 
   return {
