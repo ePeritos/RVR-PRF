@@ -320,7 +320,15 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
 
           <InfrastructureSection register={register} setValue={setValue} watchedValues={watchedValues} />
 
-          <EnvironmentsSection register={register} setValue={setValue} watchedValues={watchedValues} />
+          <EnvironmentsSection 
+            register={register} 
+            setValue={setValue} 
+            watchedValues={watchedValues}
+            onEnvironmentRatingChange={(environment, rating) => {
+              console.log(`Rating changed for ${environment}: ${rating}`);
+              // Here you could save to database or update form state
+            }}
+          />
 
           <SystemsSection register={register} setValue={setValue} watchedValues={watchedValues} />
 
