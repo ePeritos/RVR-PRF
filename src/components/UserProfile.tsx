@@ -145,37 +145,52 @@ export const UserProfile = () => {
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-md mx-2">
-          <DialogHeader>
-            <DialogTitle>Perfil do Usuário</DialogTitle>
+          <DialogHeader className="text-center">
+            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Settings className="h-6 w-6 text-primary" />
+            </div>
+            <DialogTitle className="text-xl">Editar Perfil</DialogTitle>
+            <p className="text-sm text-muted-foreground mt-2">
+              Atualize suas informações pessoais. A unidade gestora não pode ser alterada.
+            </p>
           </DialogHeader>
-          <form onSubmit={handleSave} className="space-y-4">
+          
+          <form onSubmit={handleSave} className="space-y-4 mt-6">
             <div className="space-y-2">
-              <Label htmlFor="nome_completo">Nome Completo</Label>
+              <Label htmlFor="nome_completo">Nome Completo *</Label>
               <Input
                 id="nome_completo"
                 value={profile.nome_completo}
                 onChange={(e) => setProfile(prev => ({ ...prev, nome_completo: e.target.value }))}
                 required
+                placeholder="Seu nome completo"
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="unidade_gestora">Unidade Gestora</Label>
+              <Input
+                id="unidade_gestora"
+                value={profile.unidade_gestora}
+                disabled
+                className="bg-muted text-muted-foreground cursor-not-allowed"
+                placeholder="Unidade gestora não pode ser alterada"
+              />
+              <p className="text-xs text-muted-foreground">
+                A unidade gestora não pode ser alterada após o primeiro acesso.
+              </p>
+            </div>
+            
             <div className="space-y-2">
               <Label htmlFor="matricula">Matrícula</Label>
               <Input
                 id="matricula"
                 value={profile.matricula}
                 onChange={(e) => setProfile(prev => ({ ...prev, matricula: e.target.value }))}
-                placeholder="Ex: CREA/XX 123456"
+                placeholder="Sua matrícula funcional"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="unidade_gestora">Unidade Gestora</Label>
-              <SimpleSelect
-                options={unidadesGestoras}
-                value={profile.unidade_gestora}
-                onChange={(value) => setProfile(prev => ({ ...prev, unidade_gestora: value }))}
-                placeholder="Selecione uma unidade"
-              />
-            </div>
+            
             <div className="space-y-2">
               <Label htmlFor="formacao">Formação</Label>
               <SimpleSelect
@@ -185,18 +200,24 @@ export const UserProfile = () => {
                 placeholder="Selecione sua formação"
               />
             </div>
+            
             <div className="space-y-2">
               <Label htmlFor="telefone">Telefone</Label>
               <Input
                 id="telefone"
                 value={profile.telefone}
                 onChange={(e) => setProfile(prev => ({ ...prev, telefone: e.target.value }))}
-                placeholder="Ex: (11) 99999-9999"
+                placeholder="(11) 99999-9999"
               />
             </div>
-            <div className="flex gap-2">
-              <Button type="submit" disabled={loading} className="flex-1">
-                {loading ? "Salvando..." : "Salvar"}
+            
+            <div className="flex gap-2 pt-4">
+              <Button 
+                type="submit" 
+                disabled={loading || !profile.nome_completo} 
+                className="flex-1"
+              >
+                {loading ? "Salvando..." : "Salvar Alterações"}
               </Button>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Cancelar
