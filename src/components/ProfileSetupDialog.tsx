@@ -144,13 +144,16 @@ export const ProfileSetupDialog: React.FC<ProfileSetupDialogProps> = ({ open, on
             <Label htmlFor="unidade_gestora">Unidade Gestora *</Label>
             <Select
               value={profile.unidade_gestora}
-              onValueChange={(value) => setProfile(prev => ({ ...prev, unidade_gestora: value }))}
+              onValueChange={(value) => {
+                console.log('Selecionando unidade gestora:', value);
+                setProfile(prev => ({ ...prev, unidade_gestora: value }));
+              }}
               required
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione sua unidade gestora" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-60 overflow-y-auto">
                 {unidadesGestoras.map((unidade) => (
                   <SelectItem key={unidade} value={unidade}>
                     {unidade}
