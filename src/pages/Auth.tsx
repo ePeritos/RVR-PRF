@@ -82,9 +82,8 @@ const Auth = () => {
             <img src="/lovable-uploads/40767838-14cb-481f-9df0-efaa941d75a0.png" alt="SIGI-PRF Logo" className="h-8 md:h-12 w-auto dark:invert" />
             <CardTitle className="text-4xl md:text-5xl font-bold">SIGI</CardTitle>
           </div>
-          <CardDescription className="text-sm md:text-base">
-            Faça login para acessar o Sistema de Gestão de Imóveis da PRF
-          </CardDescription>
+          <CardDescription className="text-sm md:text-base">Faça login para acessar o 
+Sistema de Gestão de Imóveis da PRF</CardDescription>
         </CardHeader>
         <CardContent className="px-6 md:px-16">
           <div className="space-y-6">
