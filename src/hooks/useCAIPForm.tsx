@@ -64,6 +64,79 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess }: UseC
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     try {
+      // Validações obrigatórias
+      if (!data.unidade_gestora) {
+        toast({
+          title: "Campo obrigatório",
+          description: "Por favor, selecione a Unidade Gestora.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (!data.tipo_de_unidade) {
+        toast({
+          title: "Campo obrigatório", 
+          description: "Por favor, selecione o Tipo de Unidade.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Validar notas de manutenção para ambientes selecionados
+      const ambientesSelecionados = [];
+      const environmentFields = [
+        'almoxarifado', 'alojamento_feminino', 'alojamento_masculino', 'alojamento_misto',
+        'area_de_servico', 'area_de_uso_compartilhado_com_outros_orgaos', 'arquivo', 'auditorio',
+        'banheiro_para_zeladoria', 'banheiro_feminino_para_servidoras', 'banheiro_masculino_para_servidores',
+        'banheiro_misto_para_servidores', 'box_com_chuveiro_externo', 'box_para_lavagem_de_veiculos',
+        'canil', 'casa_de_maquinas', 'central_de_gas', 'cobertura_para_aglomeracao_de_usuarios',
+        'cobertura_para_fiscalizacao_de_veiculos', 'copa_e_cozinha', 'deposito_de_lixo',
+        'deposito_de_materiais_de_descarte_e_baixa', 'deposito_de_material_de_limpeza',
+        'deposito_de_material_operacional', 'estacionamento_para_usuarios', 'garagem_para_servidores',
+        'garagem_para_viaturas', 'lavabo_para_servidores_sem_box_para_chuveiro',
+        'local_para_custodia_temporaria_de_detidos', 'local_para_guarda_provisoria_de_animais',
+        'patio_de_retencao_de_veiculos', 'plataforma_para_fiscalizacao_da_parte_superior_dos_veiculos',
+        'ponto_de_pouso_para_aeronaves', 'rampa_de_fiscalizacao_de_veiculos', 'recepcao',
+        'sala_administrativa_escritorio', 'sala_de_assepsia', 'sala_de_aula', 'sala_de_reuniao',
+        'sala_de_revista_pessoal', 'sala_operacional_observatorio', 'sala_tecnica',
+        'sanitario_publico', 'telefone_publico', 'torre_de_telecomunicacoes',
+        'vestiario_para_nao_policiais', 'vestiario_para_policiais'
+      ];
+
+      environmentFields.forEach(campo => {
+        if (data[campo] === 'Sim') {
+          ambientesSelecionados.push(campo);
+        }
+      });
+
+      // Verificar se há avaliações de manutenção para ambientes selecionados
+      if (ambientesSelecionados.length > 0 && data.id) {
+        try {
+          const { data: avaliacoes, error: errorAvaliacoes } = await supabase
+            .from('manutencao_ambientes')
+            .select('*')
+            .eq('imovel_id', data.id);
+
+          if (errorAvaliacoes) throw errorAvaliacoes;
+
+          const avaliacoesCount = avaliacoes?.length || 0;
+          if (avaliacoesCount < ambientesSelecionados.length) {
+            toast({
+              title: "Avaliações de manutenção obrigatórias",
+              description: `Por favor, avalie o estado de conservação de todos os ${ambientesSelecionados.length} ambientes selecionados.`,
+              variant: "destructive",
+            });
+            setIsLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error('Erro ao verificar avaliações:', error);
+        }
+      }
+
       // Validate Ano CAIP
       if (data.ano_caip) {
         const validation = validateAnoCAIP(data.ano_caip);

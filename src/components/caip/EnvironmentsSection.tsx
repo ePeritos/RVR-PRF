@@ -274,13 +274,16 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues }: Envir
               </div>
               
               {isSelected && (
-                <div className="ml-6 space-y-2">
-                  <Label className="text-xs text-muted-foreground">Estado de conservação:</Label>
+                <div className="ml-6 space-y-2 bg-muted/50 p-3 rounded-md">
+                  <Label className="text-xs font-medium text-foreground">Estado de conservação (obrigatório):</Label>
                   <StarRating
                     value={avaliacaoAtual}
                     onChange={(rating) => handleAvaliacaoChange(key, rating)}
-                    size={16}
+                    size={18}
                   />
+                  {avaliacaoAtual === 0 && (
+                    <p className="text-xs text-destructive">Por favor, avalie o estado de conservação deste ambiente</p>
+                  )}
                 </div>
               )}
             </div>

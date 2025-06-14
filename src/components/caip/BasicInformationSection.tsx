@@ -69,12 +69,13 @@ export const BasicInformationSection = ({
               ))}
             </SelectContent>
           </Select>
+          <input type="hidden" {...register('unidade_gestora', { required: "Campo obrigatório" })} />
           {errors.unidade_gestora && (
             <p className="text-sm text-destructive mt-1">{errors.unidade_gestora.message}</p>
           )}
         </div>
         <div>
-          <Label htmlFor="tipo_de_unidade">Tipo de Unidade</Label>
+          <Label htmlFor="tipo_de_unidade">Tipo de Unidade *</Label>
           <Select onValueChange={(value) => setValue('tipo_de_unidade', value)}>
             <SelectTrigger>
               <SelectValue placeholder="Selecione o tipo de unidade" />
@@ -90,6 +91,10 @@ export const BasicInformationSection = ({
               <SelectItem value="Outros">Outros</SelectItem>
             </SelectContent>
           </Select>
+          <input type="hidden" {...register('tipo_de_unidade', { required: "Campo obrigatório" })} />
+          {errors.tipo_de_unidade && (
+            <p className="text-sm text-destructive mt-1">{errors.tipo_de_unidade.message}</p>
+          )}
         </div>
         <div className="md:col-span-2">
           <Label htmlFor="nome_da_unidade">Nome da Unidade *</Label>
