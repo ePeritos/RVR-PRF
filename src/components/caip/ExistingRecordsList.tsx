@@ -122,80 +122,80 @@ export const ExistingRecordsList = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[80px] text-center">
+                <TableHead className="w-16 text-center">
                   <Button 
                     variant="ghost" 
-                    className="h-auto p-1 font-semibold justify-center w-full"
+                    className="h-auto p-1 font-semibold justify-center w-full text-xs leading-tight"
                     onClick={() => handleSort('ano_caip')}
                   >
-                    Ano CAIP
+                    <span className="text-center">Ano<br />CAIP</span>
                     {getSortIcon('ano_caip')}
                   </Button>
                 </TableHead>
-                <TableHead className="min-w-[120px] text-center">
+                <TableHead className="w-20 text-center">
                   <Button 
                     variant="ghost" 
-                    className="h-auto p-1 font-semibold justify-center w-full"
+                    className="h-auto p-1 font-semibold justify-center w-full text-xs leading-tight"
                     onClick={() => handleSort('unidade_gestora')}
                   >
-                    Unidade Gestora
+                    <span className="text-center">Unidade<br />Gestora</span>
                     {getSortIcon('unidade_gestora')}
                   </Button>
                 </TableHead>
-                <TableHead className="min-w-[100px] text-center">
+                <TableHead className="w-20 text-center">
                   <Button 
                     variant="ghost" 
-                    className="h-auto p-1 font-semibold justify-center w-full"
+                    className="h-auto p-1 font-semibold justify-center w-full text-xs leading-tight"
                     onClick={() => handleSort('tipo_de_unidade')}
                   >
-                    Tipo de Unidade
+                    <span className="text-center">Tipo de<br />Unidade</span>
                     {getSortIcon('tipo_de_unidade')}
                   </Button>
                 </TableHead>
-                <TableHead className="min-w-[200px] text-center">
+                <TableHead className="w-32 text-center">
                   <Button 
                     variant="ghost" 
-                    className="h-auto p-1 font-semibold justify-center w-full"
+                    className="h-auto p-1 font-semibold justify-center w-full text-xs leading-tight"
                     onClick={() => handleSort('nome_da_unidade')}
                   >
-                    Nome da Unidade
+                    <span className="text-center">Nome da<br />Unidade</span>
                     {getSortIcon('nome_da_unidade')}
                   </Button>
                 </TableHead>
-                <TableHead className="min-w-[100px] text-center">
+                <TableHead className="w-20 text-center">
                   <Button 
                     variant="ghost" 
-                    className="h-auto p-1 font-semibold justify-center w-full"
+                    className="h-auto p-1 font-semibold justify-center w-full text-xs leading-tight"
                     onClick={() => handleSort('nota_para_adequacao')}
                   >
-                    Nota Adequação
+                    <span className="text-center">Nota<br />Adequação</span>
                     {getSortIcon('nota_para_adequacao')}
                   </Button>
                 </TableHead>
-                <TableHead className="min-w-[100px] text-center">
+                <TableHead className="w-20 text-center">
                   <Button 
                     variant="ghost" 
-                    className="h-auto p-1 font-semibold justify-center w-full"
+                    className="h-auto p-1 font-semibold justify-center w-full text-xs leading-tight"
                     onClick={() => handleSort('nota_para_manutencao')}
                   >
-                    Nota Manutenção
+                    <span className="text-center">Nota<br />Manutenção</span>
                     {getSortIcon('nota_para_manutencao')}
                   </Button>
                 </TableHead>
-                <TableHead className="min-w-[90px] text-center">
+                <TableHead className="w-16 text-center">
                   <Button 
                     variant="ghost" 
-                    className="h-auto p-1 font-semibold justify-center w-full"
+                    className="h-auto p-1 font-semibold justify-center w-full text-xs leading-tight"
                     onClick={() => handleSort('nota_total')}
                   >
-                    Nota Total
+                    <span className="text-center">Nota<br />Total</span>
                     {getSortIcon('nota_total')}
                   </Button>
                 </TableHead>
-                <TableHead className="min-w-[100px] text-center">
+                <TableHead className="w-20 text-center">
                   <Button 
                     variant="ghost" 
-                    className="h-auto p-1 font-semibold justify-center w-full"
+                    className="h-auto p-1 font-semibold justify-center w-full text-xs leading-tight"
                     onClick={() => handleSort('rvr')}
                   >
                     RVR
