@@ -366,6 +366,17 @@ const RVR = () => {
         <StepIndicator currentStep={currentStep} totalSteps={4} />
       </div>
 
+      {/* Navigation buttons at top */}
+      <div className="px-2 sm:px-0 mb-4">
+        <NavigationButtons
+          currentStep={currentStep}
+          canProceed={canProceed()}
+          onNextStep={nextStep}
+          onPrevStep={prevStep}
+          onNewEvaluation={handleNewEvaluation}
+        />
+      </div>
+
       <div className="mb-4 sm:mb-6">
         <StepContent
           currentStep={currentStep}
