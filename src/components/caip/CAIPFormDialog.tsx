@@ -49,8 +49,8 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
     handleNew
   } = useCAIPForm({ editingItem, open, onOpenChange, onSuccess, avaliacoesLocais });
 
-  // Use calculations hook
-  useCAIPCalculations({ watchedValues, setValue });
+  // Use calculations hook with maintenance evaluations
+  useCAIPCalculations({ watchedValues, setValue, avaliacoesManutencao: avaliacoesLocais });
 
   // Custom onSubmit with validation
   const onSubmit = async (data: any) => {
