@@ -93,7 +93,7 @@ export const UserProfile = () => {
         setProfile({
           nome_completo: data.nome_completo || '',
           matricula: data.matricula || '',
-          unidade_gestora: data.unidade_gestora || '',
+          unidade_gestora: data.unidade_lotacao || '', // mapear unidade_lotacao para unidade_gestora
           telefone: data.telefone || '',
           formacao: data.formacao || ''
         });
@@ -107,11 +107,20 @@ export const UserProfile = () => {
     e.preventDefault();
     try {
       setLoading(true);
+      // Mapear os campos do formulário para o formato do perfil
+      const profileUpdate = {
+        nome_completo: profile.nome_completo,
+        matricula: profile.matricula,
+        unidade_lotacao: profile.unidade_gestora, // mapear unidade_gestora para unidade_lotacao
+        telefone: profile.telefone,
+        formacao: profile.formacao
+      };
+      
       const { error } = await supabase
         .from('profiles')
         .upsert({
           id: user?.id,
-          ...profile,
+          ...profileUpdate,
           email: user?.email
         });
 
