@@ -76,7 +76,7 @@ const Dashboard = () => {
         numeroImoveis: data.count,
         areaConstruidaMedia: Math.round(data.area / data.count)
       }))
-      .sort((a, b) => b.numeroImoveis - a.numeroImoveis)
+      .sort((a, b) => b.areaConstruidaMedia - a.areaConstruidaMedia) // Ordenar por área construída média (maior para menor)
       .slice(0, 10); // Top 10 unidades
   };
 
