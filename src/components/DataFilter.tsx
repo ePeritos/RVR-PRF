@@ -247,10 +247,10 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">
             Unidade Gestora
-            {!isAdmin && profile?.unidade_gestora && (
-              <span className="text-xs text-muted-foreground ml-2">(Fixo para seu perfil)</span>
-            )}
           </Label>
+          {!isAdmin && profile?.unidade_gestora && (
+            <p className="text-xs text-muted-foreground -mt-1 mb-1">(Fixo para seu perfil)</p>
+          )}
           <MultiSelect
             options={unidadesGestoras}
             selected={filters.unidadeGestora}
