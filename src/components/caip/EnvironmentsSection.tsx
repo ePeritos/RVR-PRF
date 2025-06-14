@@ -226,6 +226,8 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
   const handleAvaliacaoChange = (campo: string, rating: number) => {
     console.log(`=== AVALIAÇÃO CHANGED ===`);
     console.log(`Campo: ${campo}, Rating: ${rating}`);
+    console.log('ID do registro:', watchedValues?.id);
+    console.log('Tipo de unidade:', watchedValues?.tipo_de_unidade);
     
     // Atualizar estado local
     const novasAvaliacoes = {
