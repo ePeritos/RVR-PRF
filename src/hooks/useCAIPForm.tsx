@@ -42,13 +42,19 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
     if (editingItem && open) {
       console.log('Preenchendo formulário com dados existentes:', editingItem.id);
       
-      // Load each field from the editing item
-      Object.keys(editingItem).forEach(key => {
-        const value = editingItem[key as keyof DadosCAIP];
-        if (value !== null && value !== undefined) {
-          setValue(key as keyof DadosCAIP, value);
-        }
-      });
+      // Reset primeiro para limpar todos os campos
+      reset();
+      
+      // Aguardar um pouco antes de preencher para garantir que o reset foi processado
+      setTimeout(() => {
+        // Load each field from the editing item
+        Object.keys(editingItem).forEach(key => {
+          const value = editingItem[key as keyof DadosCAIP];
+          if (value !== null && value !== undefined) {
+            setValue(key as keyof DadosCAIP, value);
+          }
+        });
+      }, 100);
     } else if (!editingItem && open) {
       console.log('Novo registro - resetando formulário...');
       reset();

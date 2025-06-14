@@ -137,10 +137,10 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
   useEffect(() => {
     if (watchedValues?.id) {
       console.log('🔄 Carregando avaliações para ID:', watchedValues.id);
-      // Aguardar um pouco para garantir que o formulário esteja pronto
+      // Aguardar mais tempo para garantir que todos os useEffects do formulário sejam processados
       const timer = setTimeout(() => {
         carregarAvaliacoesExistentes();
-      }, 200);
+      }, 1000);
       return () => clearTimeout(timer);
     } else {
       // Limpar avaliações quando não há ID (novo registro)
