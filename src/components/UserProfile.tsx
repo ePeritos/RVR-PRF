@@ -155,7 +155,7 @@ export const UserProfile = () => {
             </span>
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-md mx-2">
+        <DialogContent className="sm:max-w-lg mx-2">
           <DialogHeader className="text-center">
             <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
               <Settings className="h-6 w-6 text-primary" />
@@ -167,62 +167,69 @@ export const UserProfile = () => {
           </DialogHeader>
           
           <form onSubmit={handleSave} className="space-y-4 mt-6">
-            <div className="space-y-2">
-              <Label htmlFor="nome_completo">Nome Completo *</Label>
-              <Input
-                id="nome_completo"
-                value={profile.nome_completo}
-                onChange={(e) => setProfile(prev => ({ ...prev, nome_completo: e.target.value }))}
-                required
-                placeholder="Seu nome completo"
-              />
+            {/* Primeira linha - Nome e Unidade Gestora */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nome_completo">Nome Completo *</Label>
+                <Input
+                  id="nome_completo"
+                  value={profile.nome_completo}
+                  onChange={(e) => setProfile(prev => ({ ...prev, nome_completo: e.target.value }))}
+                  required
+                  placeholder="Seu nome completo"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="unidade_gestora">Unidade Gestora *</Label>
+                {userProfile?.role === 'admin' ? (
+                  <SimpleSelect
+                    options={unidadesGestoras}
+                    value={profile.unidade_gestora}
+                    onChange={(value) => setProfile(prev => ({ ...prev, unidade_gestora: value }))}
+                    placeholder="Selecione uma unidade gestora"
+                  />
+                ) : (
+                  <div className="space-y-2">
+                    <Input
+                      id="unidade_gestora"
+                      value={profile.unidade_gestora}
+                      disabled
+                      className="bg-muted text-muted-foreground cursor-not-allowed"
+                      placeholder="Unidade gestora não pode ser alterada"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      A unidade gestora não pode ser alterada após o primeiro acesso.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="unidade_gestora">Unidade Gestora *</Label>
-              {userProfile?.role === 'admin' ? (
-                <SimpleSelect
-                  options={unidadesGestoras}
-                  value={profile.unidade_gestora}
-                  onChange={(value) => setProfile(prev => ({ ...prev, unidade_gestora: value }))}
-                  placeholder="Selecione uma unidade gestora"
+            {/* Segunda linha - Matrícula e Formação */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="matricula">Matrícula</Label>
+                <Input
+                  id="matricula"
+                  value={profile.matricula}
+                  onChange={(e) => setProfile(prev => ({ ...prev, matricula: e.target.value }))}
+                  placeholder="Sua matrícula funcional"
                 />
-              ) : (
-                <>
-                  <Input
-                    id="unidade_gestora"
-                    value={profile.unidade_gestora}
-                    disabled
-                    className="bg-muted text-muted-foreground cursor-not-allowed"
-                    placeholder="Unidade gestora não pode ser alterada"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    A unidade gestora não pode ser alterada após o primeiro acesso.
-                  </p>
-                </>
-              )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="formacao">Formação</Label>
+                <SimpleSelect
+                  options={opcoesFormacao}
+                  value={profile.formacao}
+                  onChange={(value) => setProfile(prev => ({ ...prev, formacao: value }))}
+                  placeholder="Selecione sua formação"
+                />
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="matricula">Matrícula</Label>
-              <Input
-                id="matricula"
-                value={profile.matricula}
-                onChange={(e) => setProfile(prev => ({ ...prev, matricula: e.target.value }))}
-                placeholder="Sua matrícula funcional"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="formacao">Formação</Label>
-              <SimpleSelect
-                options={opcoesFormacao}
-                value={profile.formacao}
-                onChange={(value) => setProfile(prev => ({ ...prev, formacao: value }))}
-                placeholder="Selecione sua formação"
-              />
-            </div>
-            
+
+            {/* Terceira linha - Telefone em linha completa */}
             <div className="space-y-2">
               <Label htmlFor="telefone">Telefone</Label>
               <Input
