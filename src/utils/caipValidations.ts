@@ -47,29 +47,19 @@ export const processFormData = async (data: any) => {
     'imagem_interna_plantao_uop'
   ];
 
-  // Process image files
+  // Process image fields - now they should contain URLs or null
   for (const field of imageFields) {
-    const fileValue = data[field];
-    console.log(`Processando campo ${field}:`, fileValue);
+    const value = data[field];
+    console.log(`Processando campo de imagem ${field}:`, value);
     
-    if (fileValue && fileValue instanceof File) {
-      try {
-        console.log(`Convertendo arquivo ${fileValue.name} para base64...`);
-        const base64 = await fileToBase64(fileValue);
-        processedData[field] = base64;
-        console.log(`✅ Campo ${field} convertido para base64`);
-      } catch (error) {
-        console.error(`Erro ao converter ${field}:`, error);
-        processedData[field] = null;
-      }
-    } else if (fileValue && typeof fileValue === 'string') {
-      // Keep existing URLs/base64 strings
-      console.log(`Campo ${field} já é string, mantendo valor`);
-      processedData[field] = fileValue;
-    } else if (!fileValue || fileValue === null) {
+    if (value && typeof value === 'string' && value.trim() !== '') {
+      // Keep URLs (both storage URLs and base64)
+      processedData[field] = value;
+      console.log(`✅ Campo ${field} mantido como URL`);
+    } else {
       // Remove empty values
-      console.log(`Campo ${field} vazio, definindo como null`);
       processedData[field] = null;
+      console.log(`Campo ${field} vazio, definindo como null`);
     }
   }
 
