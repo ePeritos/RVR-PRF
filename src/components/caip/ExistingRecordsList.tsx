@@ -7,7 +7,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Search, Edit, Trash2, ChevronUp, ChevronDown, ChevronsUpDown, FileText } from 'lucide-react';
 import { Tables } from '@/integrations/supabase/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { useCAIPReport } from '@/hooks/useCAIPReport';
 import { TableSkeleton } from '@/components/ui/loading-skeleton';
 
@@ -31,7 +31,7 @@ export const ExistingRecordsList = React.memo(({
   handleEdit,
   handleDelete 
 }: ExistingRecordsListProps) => {
-  const { isAdmin } = useProfile();
+  const { isAdmin } = useUserProfile();
   const { generateReport, isGenerating } = useCAIPReport();
   const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);

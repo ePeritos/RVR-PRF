@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { DataRow } from '@/hooks/useSupabaseData';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface DataTableProps {
   data: DataRow[];
@@ -19,7 +19,7 @@ type SortField = keyof DataRow;
 type SortDirection = 'asc' | 'desc' | null;
 
 export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: DataTableProps) {
-  const { isAdmin } = useProfile();
+  const { isAdmin } = useUserProfile();
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 

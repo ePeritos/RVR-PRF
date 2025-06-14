@@ -2,6 +2,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { queryCache } from '@/utils/performanceUtils';
 
 interface AuthContextType {
   user: User | null;
@@ -19,15 +20,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     console.log('useAuth - Configurando listener de auth state...');
+    let mounted = true;
     
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (!mounted) return;
+        
         console.log('useAuth - Auth state changed:', event, 'Session exists:', !!session);
         console.log('useAuth - User from session:', session?.user?.email);
         
-        setSession(session);
-        setUser(session?.user ?? null);
+        // Limpar cache quando estado de auth muda
+        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+          console.log('🗑️ Limpando cache devido a mudança de auth:', event);
+          queryCache.clear();
+        }
+        
+        // Evitar atualizações desnecessárias se o estado não mudou
+        setSession(prevSession => {
+          if (prevSession?.user?.id === session?.user?.id) {
+            return prevSession;
+          }
+          return session;
+        });
+        
+        setUser(prevUser => {
+          if (prevUser?.id === session?.user?.id) {
+            return prevUser;
+          }
+          return session?.user ?? null;
+        });
+        
         setLoading(false);
       }
     );
@@ -35,6 +58,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Check for existing session
     console.log('useAuth - Verificando sessão existente...');
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
       console.log('useAuth - Sessão existente encontrada:', !!session);
       console.log('useAuth - User existente:', session?.user?.email);
       setSession(session);
@@ -42,7 +67,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {

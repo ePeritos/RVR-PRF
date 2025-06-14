@@ -19,7 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SimpleSelect } from "@/components/ui/simple-select";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -74,7 +75,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const { signOut, user } = useAuth();
-  const { profile, loading, updateProfile } = useProfile();
+  const { profile, loading, refetchProfile } = useUserProfile();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
     nome_completo: '',
@@ -94,7 +95,7 @@ export function AppSidebar() {
       setProfileForm({
         nome_completo: profile.nome_completo || '',
         matricula: profile.matricula || '',
-        unidade_gestora: profile.unidade_lotacao || '', // usar unidade_lotacao como unidade_gestora
+        unidade_gestora: profile.unidade_gestora || profile.unidade_lotacao || '',
         telefone: profile.telefone || '',
         formacao: (profile as any).formacao || ''
       });
@@ -105,18 +106,25 @@ export function AppSidebar() {
   const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Mapear os campos do formulário para o formato do perfil
-    const profileUpdate = {
-      nome_completo: profileForm.nome_completo,
-      matricula: profileForm.matricula,
-      unidade_lotacao: profileForm.unidade_gestora, // mapear unidade_gestora para unidade_lotacao
-      telefone: profileForm.telefone,
-      formacao: profileForm.formacao
-    };
-    
-    const success = await updateProfile(profileUpdate);
-    if (success) {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          nome_completo: profileForm.nome_completo,
+          matricula: profileForm.matricula,
+          unidade_gestora: profileForm.unidade_gestora,
+          unidade_lotacao: profileForm.unidade_gestora, // Manter ambos sincronizados
+          telefone: profileForm.telefone,
+          formacao: profileForm.formacao
+        })
+        .eq('id', user?.id);
+
+      if (error) throw error;
+
+      await refetchProfile(); // Recarregar perfil
       setIsProfileOpen(false);
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error);
     }
   };
 
@@ -182,9 +190,9 @@ export function AppSidebar() {
                     <div className="text-xs text-muted-foreground truncate">
                      {profile?.role === 'admin' ? 'ADMIN' : 'Usuário Padrão'}
                     </div>
-                    {profile?.unidade_lotacao && (
+                    {(profile?.unidade_gestora || profile?.unidade_lotacao) && (
                       <div className="text-xs text-muted-foreground truncate">
-                        {profile.unidade_lotacao}
+                        {profile.unidade_gestora || profile.unidade_lotacao}
                       </div>
                     )}
                   </div>

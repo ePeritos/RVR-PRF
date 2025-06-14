@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useToast } from '@/hooks/use-toast';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { validateAnoCAIP, processFormData } from '@/utils/caipValidations';
@@ -18,7 +18,7 @@ interface UseCAIPFormProps {
 
 export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avaliacoesLocais }: UseCAIPFormProps) => {
   const { toast } = useToast();
-  const { profile } = useProfile();
+  const { profile } = useUserProfile();
   const [isLoading, setIsLoading] = useState(false);
   const [percentualPreenchimento, setPercentualPreenchimento] = useState(0);
 
