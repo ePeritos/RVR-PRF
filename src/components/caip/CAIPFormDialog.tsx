@@ -221,12 +221,19 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
         }
       }
 
+      // Garantir que as notas não ultrapassem 100
+      const processedData = {
+        ...data,
+        nota_para_adequacao: data.nota_para_adequacao ? Math.min(100, parseFloat(data.nota_para_adequacao)).toString() : data.nota_para_adequacao,
+        nota_para_manutencao: data.nota_para_manutencao ? Math.min(100, parseFloat(data.nota_para_manutencao)).toString() : data.nota_para_manutencao,
+      };
+
       if (editingItem) {
         // Atualizar registro existente
         const { error } = await supabase
           .from('dados_caip')
           .update({
-            ...data,
+            ...processedData,
             updated_at: new Date().toISOString(),
           })
           .eq('id', editingItem.id);
@@ -242,7 +249,7 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
         const { error } = await supabase
           .from('dados_caip')
           .insert([{
-            ...data,
+            ...processedData,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           }]);
