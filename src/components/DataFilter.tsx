@@ -186,8 +186,12 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
 
   // Atualizar filtros quando qualquer valor mudar
   useEffect(() => {
-    onFilterChange(filters);
-  }, [filters, onFilterChange]);
+    const timeoutId = setTimeout(() => {
+      onFilterChange(filters);
+    }, 100); // Debounce para evitar chamadas excessivas
+    
+    return () => clearTimeout(timeoutId);
+  }, [filters]);
 
   const handleFilterChange = (key: keyof FilterData, value: string[] | string) => {
     setFilters(prev => ({
