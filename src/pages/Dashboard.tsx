@@ -18,7 +18,7 @@ interface DashboardStats {
 interface UnidadeGestoraData {
   unidade: string;
   numeroImoveis: number;
-  areaConstruida: number;
+  areaConstruidaMedia: number;
 }
 
 const Dashboard = () => {
@@ -74,7 +74,7 @@ const Dashboard = () => {
       .map(([unidade, data]) => ({
         unidade: unidade.replace('SPRF/', ''), // Remove prefixo para melhor visualização
         numeroImoveis: data.count,
-        areaConstruida: Math.round(data.area)
+        areaConstruidaMedia: Math.round(data.area / data.count)
       }))
       .sort((a, b) => b.numeroImoveis - a.numeroImoveis)
       .slice(0, 10); // Top 10 unidades
@@ -264,7 +264,7 @@ const Dashboard = () => {
         <CardHeader>
           <CardTitle className="text-lg font-medium">Imóveis por Unidade Gestora</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Número de imóveis e área construída total (Top 10 unidades)
+            Número de imóveis e área construída média por imóvel (Top 10 unidades)
           </p>
         </CardHeader>
         <CardContent>
@@ -294,7 +294,7 @@ const Dashboard = () => {
                     name === 'numeroImoveis' 
                       ? `${value} unidades`
                       : `${Number(value).toLocaleString('pt-BR')} m²`,
-                    name === 'numeroImoveis' ? 'Número de Imóveis' : 'Área Construída'
+                    name === 'numeroImoveis' ? 'Número de Imóveis' : 'Área Construída Média'
                   ]}
                   labelFormatter={(label) => `Unidade: ${label}`}
                 />
@@ -308,9 +308,9 @@ const Dashboard = () => {
                 />
                 <Bar 
                   yAxisId="right"
-                  dataKey="areaConstruida" 
+                  dataKey="areaConstruidaMedia" 
                   fill="hsl(var(--accent))" 
-                  name="Área Construída (m²)"
+                  name="Área Construída Média (m²)"
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
