@@ -9,9 +9,10 @@ type DadosCAIP = Tables<'dados_caip'>;
 interface InfrastructureSectionProps {
   register: UseFormRegister<DadosCAIP>;
   setValue: UseFormSetValue<DadosCAIP>;
+  watchedValues?: any;
 }
 
-export const InfrastructureSection = ({ register, setValue }: InfrastructureSectionProps) => {
+export const InfrastructureSection = ({ register, setValue, watchedValues }: InfrastructureSectionProps) => {
   const infrastructureFields = [
     { key: 'fornecimento_de_agua', label: 'Fornecimento de Água' },
     { key: 'fornecimento_de_energia_eletrica', label: 'Fornecimento de Energia Elétrica' },
@@ -47,6 +48,7 @@ export const InfrastructureSection = ({ register, setValue }: InfrastructureSect
           <div key={key} className="flex items-center space-x-2">
             <Checkbox 
               {...register(key as keyof DadosCAIP)}
+              checked={watchedValues?.[key as keyof DadosCAIP] === 'Sim'}
               onCheckedChange={(checked) => setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não')}
             />
             <Label>{label}</Label>

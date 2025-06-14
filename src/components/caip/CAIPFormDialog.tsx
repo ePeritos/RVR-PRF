@@ -139,11 +139,11 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
         pesoAlcancado += 5; // Meia pontuação
       }
 
-      // Demais ambientes - aplicar peso baseado no tipo de unidade
+      // Demais ambientes - aplicar peso baseado no tipo de unidade (EXCLUINDO alojamentos e banheiros já calculados)
       const ambientesUOP = {
         almoxarifado: 6, area_de_servico: 6, area_de_uso_compartilhado_com_outros_orgaos: 0,
         arquivo: 6, auditorio: 0, banheiro_para_zeladoria: 0, box_com_chuveiro_externo: 0,
-        box_para_lavagem_de_veiculos: 3, casa_de_maquinas: 6, central_de_gas: 6,
+        box_para_lavagem_de_veiculos: 3, canil: 0, casa_de_maquinas: 6, central_de_gas: 6,
         cobertura_para_aglomeracao_de_usuarios: 6, cobertura_para_fiscalizacao_de_veiculos: 6,
         copa_e_cozinha: 6, deposito_de_lixo: 0, deposito_de_materiais_de_descarte_e_baixa: 3,
         deposito_de_material_de_limpeza: 6, deposito_de_material_operacional: 6,
@@ -161,7 +161,7 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
       const ambientesDelegacia = {
         almoxarifado: 10, area_de_servico: 6, area_de_uso_compartilhado_com_outros_orgaos: 0,
         arquivo: 0, auditorio: 3, banheiro_para_zeladoria: 3, box_com_chuveiro_externo: 3,
-        box_para_lavagem_de_veiculos: 0, casa_de_maquinas: 6, central_de_gas: 6,
+        box_para_lavagem_de_veiculos: 0, canil: 0, casa_de_maquinas: 6, central_de_gas: 6,
         cobertura_para_aglomeracao_de_usuarios: 0, cobertura_para_fiscalizacao_de_veiculos: 0,
         copa_e_cozinha: 6, deposito_de_lixo: 6, deposito_de_materiais_de_descarte_e_baixa: 0,
         deposito_de_material_de_limpeza: 3, deposito_de_material_operacional: 3,
@@ -178,8 +178,14 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
 
       const ambientes = tipoUnidade === 'UOP' ? ambientesUOP : ambientesDelegacia;
 
+      // Campos já calculados nas regras especiais - não somar novamente
+      const camposJaCalculados = [
+        'alojamento_masculino', 'alojamento_feminino', 'alojamento_misto',
+        'banheiro_masculino_para_servidores', 'banheiro_feminino_para_servidoras', 'banheiro_misto_para_servidores'
+      ];
+
       Object.keys(ambientes).forEach(ambiente => {
-        if (watchedValues[ambiente as keyof DadosCAIP] === 'Sim') {
+        if (!camposJaCalculados.includes(ambiente) && watchedValues[ambiente as keyof DadosCAIP] === 'Sim') {
           pesoAlcancado += ambientes[ambiente as keyof typeof ambientes];
         }
       });
@@ -300,13 +306,13 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
 
           <TechnicalDataSection register={register} />
 
-          <InfrastructureSection register={register} setValue={setValue} />
+          <InfrastructureSection register={register} setValue={setValue} watchedValues={watchedValues} />
 
-          <EnvironmentsSection register={register} setValue={setValue} />
+          <EnvironmentsSection register={register} setValue={setValue} watchedValues={watchedValues} />
 
-          <SystemsSection register={register} setValue={setValue} />
+          <SystemsSection register={register} setValue={setValue} watchedValues={watchedValues} />
 
-          <SecuritySection register={register} setValue={setValue} />
+          <SecuritySection register={register} setValue={setValue} watchedValues={watchedValues} />
 
           <NotesEvaluationSection 
             register={register}

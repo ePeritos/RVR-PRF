@@ -9,9 +9,10 @@ type DadosCAIP = Tables<'dados_caip'>;
 interface SystemsSectionProps {
   register: UseFormRegister<DadosCAIP>;
   setValue: UseFormSetValue<DadosCAIP>;
+  watchedValues?: any;
 }
 
-export const SystemsSection = ({ register, setValue }: SystemsSectionProps) => {
+export const SystemsSection = ({ register, setValue, watchedValues }: SystemsSectionProps) => {
   const systemFields = [
     { key: 'abastecimento_de_agua', label: 'Abastecimento de Água' },
     { key: 'aterramento_e_protecao_contra_descargas_atmosfericas', label: 'Aterramento e Proteção contra Descargas Atmosféricas' },
@@ -50,6 +51,7 @@ export const SystemsSection = ({ register, setValue }: SystemsSectionProps) => {
           <div key={key} className="flex items-center space-x-2">
             <Checkbox 
               {...register(key as keyof DadosCAIP)}
+              checked={watchedValues?.[key as keyof DadosCAIP] === 'Sim'}
               onCheckedChange={(checked) => setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não')}
             />
             <Label>{label}</Label>

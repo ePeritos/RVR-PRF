@@ -9,9 +9,10 @@ type DadosCAIP = Tables<'dados_caip'>;
 interface SecuritySectionProps {
   register: UseFormRegister<DadosCAIP>;
   setValue: UseFormSetValue<DadosCAIP>;
+  watchedValues?: any;
 }
 
-export const SecuritySection = ({ register, setValue }: SecuritySectionProps) => {
+export const SecuritySection = ({ register, setValue, watchedValues }: SecuritySectionProps) => {
   const securityFields = [
     { key: 'claviculario', label: 'Claviculário' },
     { key: 'sala_cofre', label: 'Sala Cofre' },
@@ -44,6 +45,7 @@ export const SecuritySection = ({ register, setValue }: SecuritySectionProps) =>
           <div key={key} className="flex items-center space-x-2">
             <Checkbox 
               {...register(key as keyof DadosCAIP)}
+              checked={watchedValues?.[key as keyof DadosCAIP] === 'Sim'}
               onCheckedChange={(checked) => setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não')}
             />
             <Label>{label}</Label>

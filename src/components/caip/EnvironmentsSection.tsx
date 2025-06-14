@@ -9,9 +9,10 @@ type DadosCAIP = Tables<'dados_caip'>;
 interface EnvironmentsSectionProps {
   register: UseFormRegister<DadosCAIP>;
   setValue: UseFormSetValue<DadosCAIP>;
+  watchedValues?: any;
 }
 
-export const EnvironmentsSection = ({ register, setValue }: EnvironmentsSectionProps) => {
+export const EnvironmentsSection = ({ register, setValue, watchedValues }: EnvironmentsSectionProps) => {
   const environmentFields = [
     { key: 'almoxarifado', label: 'Almoxarifado' },
     { key: 'alojamento_feminino', label: 'Alojamento Feminino' },
@@ -87,6 +88,7 @@ export const EnvironmentsSection = ({ register, setValue }: EnvironmentsSectionP
           <div key={key} className="flex items-center space-x-2">
             <Checkbox 
               {...register(key as keyof DadosCAIP)}
+              checked={watchedValues?.[key as keyof DadosCAIP] === 'Sim'}
               onCheckedChange={(checked) => setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não')}
             />
             <Label>{label}</Label>
