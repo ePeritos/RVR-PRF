@@ -86,8 +86,8 @@ const Auth = () => {
 
       <Card className="w-full max-w-md shadow-lg hover:shadow-xl transition-shadow duration-300 animate-scale-in">
         <CardHeader className="text-center px-6 md:px-16">
-          <div className="relative flex items-center justify-center mb-4 h-12">
-            <img src="/lovable-uploads/40767838-14cb-481f-9df0-efaa941d75a0.png" alt="SIGI-PRF Logo" className="h-8 md:h-12 w-auto absolute left-2 md:left-4" />
+          <div className="flex flex-col items-center justify-center mb-4 space-y-3">
+            <img src="/lovable-uploads/40767838-14cb-481f-9df0-efaa941d75a0.png" alt="SIGI-PRF Logo" className="h-12 md:h-16 w-auto" />
             <CardTitle className="text-xl md:text-2xl font-bold">SIGI-PRF</CardTitle>
           </div>
           <CardDescription className="text-sm md:text-base">
