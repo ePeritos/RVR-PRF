@@ -13,7 +13,7 @@ export function ThemeToggle({ collapsed = false }: ThemeToggleProps) {
     <Button
       variant="ghost"
       onClick={toggleTheme}
-      className="w-full justify-start"
+      className="w-full justify-start px-3 py-2"
     >
       {theme === "dark" ? (
         <Sun className="mr-2 h-4 w-4" />
