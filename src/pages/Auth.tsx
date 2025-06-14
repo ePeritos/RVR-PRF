@@ -6,14 +6,14 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TermsAcceptanceDialog } from '@/components/TermsAcceptanceDialog';
-
 const TERMS_STORAGE_KEY = 'sigi-prf-terms-accepted';
-
 const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showTermsDialog, setShowTermsDialog] = useState(true);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
 
   // Verificar se os termos já foram aceitos ao carregar a página
@@ -24,7 +24,6 @@ const Auth = () => {
       setShowTermsDialog(false);
     }
   }, []);
-
   const handleSignInWithGoogle = async () => {
     if (!termsAccepted) {
       toast({
@@ -34,10 +33,11 @@ const Auth = () => {
       });
       return;
     }
-
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithOAuth({
+      const {
+        error
+      } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: window.location.origin,
@@ -57,16 +57,13 @@ const Auth = () => {
       setLoading(false);
     }
   };
-
   const handleTermsAccept = () => {
     setTermsAccepted(true);
     setShowTermsDialog(false);
     // Salvar no localStorage para persistir entre sessões
     localStorage.setItem(TERMS_STORAGE_KEY, 'true');
   };
-
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
+  return <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
       {/* Theme toggle button in top right corner */}
       <div className="absolute top-4 right-4">
         <ThemeToggle />
@@ -75,12 +72,8 @@ const Auth = () => {
       <Card className="w-full max-w-md shadow-lg hover:shadow-xl transition-shadow duration-300 animate-scale-in">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <img 
-              src="/lovable-uploads/0c984027-ab7d-4e16-96fe-f7d523613cc5.png" 
-              alt="SIGI-PRF Logo" 
-              className="h-12 w-auto"
-            />
-            <CardTitle className="text-2xl font-bold">SIGI-PRF</CardTitle>
+            <img src="/lovable-uploads/0c984027-ab7d-4e16-96fe-f7d523613cc5.png" alt="SIGI-PRF Logo" className="h-12 w-auto" />
+            <CardTitle className="text-2xl font-bold mx-0 px-0 bg-slate-900">SIGI-PRF</CardTitle>
           </div>
           <CardDescription>
             Faça login para acessar o Sistema de Gestão de Imóveis da PRF
@@ -88,12 +81,7 @@ const Auth = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            <Button 
-              variant="outline" 
-              onClick={handleSignInWithGoogle} 
-              disabled={loading || !termsAccepted} 
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-            >
+            <Button variant="outline" onClick={handleSignInWithGoogle} disabled={loading || !termsAccepted} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                 <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -103,21 +91,14 @@ const Auth = () => {
               {loading ? "Conectando..." : "Entrar com Google"}
             </Button>
             
-            {!termsAccepted && (
-              <p className="text-sm text-muted-foreground text-center">
+            {!termsAccepted && <p className="text-sm text-muted-foreground text-center">
                 Aceite os termos de uso e política de privacidade para fazer login
-              </p>
-            )}
+              </p>}
           </div>
         </CardContent>
       </Card>
 
-      <TermsAcceptanceDialog
-        open={showTermsDialog && !termsAccepted}
-        onAccept={handleTermsAccept}
-      />
-    </div>
-  );
+      <TermsAcceptanceDialog open={showTermsDialog && !termsAccepted} onAccept={handleTermsAccept} />
+    </div>;
 };
-
 export default Auth;
