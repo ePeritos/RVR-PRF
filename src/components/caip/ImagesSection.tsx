@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { UseFormRegister } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,14 +11,17 @@ type DadosCAIP = Tables<'dados_caip'>;
 
 interface ImagesSectionProps {
   register: UseFormRegister<DadosCAIP>;
+  setValue?: any;
+  watchedValues?: any;
 }
 
 interface ImagePreview {
-  file: File;
+  file?: File;
   url: string;
+  isExisting?: boolean;
 }
 
-export const ImagesSection = ({ register }: ImagesSectionProps) => {
+export const ImagesSection = ({ register, setValue, watchedValues }: ImagesSectionProps) => {
   const [imagePreviews, setImagePreviews] = useState<{[key: string]: ImagePreview}>({});
 
   const imageFields = [
@@ -34,21 +37,52 @@ export const ImagesSection = ({ register }: ImagesSectionProps) => {
     { key: 'imagem_interna_plantao_uop', label: 'Imagem Interna Plantão UOP' }
   ];
 
+  // Load existing images when editing
+  useEffect(() => {
+    if (watchedValues) {
+      const existingPreviews: {[key: string]: ImagePreview} = {};
+      let hasExistingImages = false;
+      
+      imageFields.forEach(({ key }) => {
+        const imageUrl = watchedValues[key];
+        if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim() !== '') {
+          existingPreviews[key] = {
+            url: imageUrl,
+            isExisting: true
+          };
+          hasExistingImages = true;
+        }
+      });
+      
+      if (hasExistingImages) {
+        console.log('Carregando imagens existentes:', existingPreviews);
+        setImagePreviews(existingPreviews);
+      }
+    }
+  }, [watchedValues]);
+
   const handleImageChange = (fieldKey: string, files: FileList | null) => {
     if (files && files[0]) {
       const file = files[0];
       const url = URL.createObjectURL(file);
       
+      // Update preview state
       setImagePreviews(prev => ({
         ...prev,
         [fieldKey]: { file, url }
       }));
+      
+      // Update form value if setValue is available
+      if (setValue) {
+        setValue(fieldKey, files[0]);
+      }
     }
   };
 
   const removeImage = (fieldKey: string) => {
-    if (imagePreviews[fieldKey]) {
-      URL.revokeObjectURL(imagePreviews[fieldKey].url);
+    const preview = imagePreviews[fieldKey];
+    if (preview && preview.url && !preview.isExisting) {
+      URL.revokeObjectURL(preview.url);
     }
     
     setImagePreviews(prev => {
@@ -57,10 +91,14 @@ export const ImagesSection = ({ register }: ImagesSectionProps) => {
       return newPreviews;
     });
     
-    // Reset the file input
+    // Reset the file input and form value
     const input = document.getElementById(fieldKey) as HTMLInputElement;
     if (input) {
       input.value = '';
+    }
+    
+    if (setValue) {
+      setValue(fieldKey, null);
     }
   };
 
@@ -99,7 +137,7 @@ export const ImagesSection = ({ register }: ImagesSectionProps) => {
                     </div>
                     <div className="p-2 bg-background">
                       <p className="text-xs text-muted-foreground truncate">
-                        {preview.file.name}
+                        {preview.file?.name || (preview.isExisting ? 'Imagem existente' : 'Imagem')}
                       </p>
                     </div>
                   </div>

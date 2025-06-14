@@ -49,7 +49,10 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
 
   // Custom onSubmit with validation
   const onSubmit = async (data: any) => {
-    // Validate environment evaluations for new records
+    console.log('Tentando salvar formulário com dados:', data);
+    console.log('Avaliações locais:', avaliacoesLocais);
+    
+    // Validate environment evaluations for new records only if environments are selected
     if (!editingItem) {
       const environmentFields = [
         'almoxarifado', 'alojamento_feminino', 'alojamento_masculino', 'alojamento_misto',
@@ -71,19 +74,26 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
       ];
 
       const ambientesSelecionados = environmentFields.filter(campo => data[campo] === 'Sim');
-      const ambientesSemAvaliacao = ambientesSelecionados.filter(ambiente => !avaliacoesLocais[ambiente] || avaliacoesLocais[ambiente] === 0);
+      console.log('Ambientes selecionados:', ambientesSelecionados);
 
-      if (ambientesSemAvaliacao.length > 0) {
-        toast({
-          title: "Avaliações de manutenção obrigatórias",
-          description: `Por favor, avalie o estado de conservação de todos os ${ambientesSelecionados.length} ambientes selecionados.`,
-          variant: "destructive",
-        });
-        return;
+      // Só validar se há ambientes selecionados
+      if (ambientesSelecionados.length > 0) {
+        const ambientesSemAvaliacao = ambientesSelecionados.filter(ambiente => !avaliacoesLocais[ambiente] || avaliacoesLocais[ambiente] === 0);
+        console.log('Ambientes sem avaliação:', ambientesSemAvaliacao);
+
+        if (ambientesSemAvaliacao.length > 0) {
+          toast({
+            title: "Avaliações de manutenção obrigatórias",
+            description: `Por favor, avalie o estado de conservação dos ${ambientesSemAvaliacao.length} ambientes ainda não avaliados.`,
+            variant: "destructive",
+          });
+          return;
+        }
       }
     }
 
     // Proceed with original submit
+    console.log('Prosseguindo para o salvamento...');
     await originalOnSubmit(data);
   };
 
@@ -109,7 +119,11 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
             estadosConservacao={ESTADOS_CONSERVACAO}
           />
 
-          <ImagesSection register={register} />
+          <ImagesSection 
+            register={register} 
+            setValue={setValue} 
+            watchedValues={watchedValues} 
+          />
 
           <LocationPropertySection 
             register={register}
