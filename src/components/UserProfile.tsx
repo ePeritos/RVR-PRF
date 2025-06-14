@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SimpleSelect } from '@/components/ui/simple-select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -181,39 +181,21 @@ export const UserProfile = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="unidade_gestora">Unidade Gestora</Label>
-              <Select
+              <SimpleSelect
+                options={unidadesGestoras}
                 value={profile.unidade_gestora}
-                onValueChange={(value) => setProfile(prev => ({ ...prev, unidade_gestora: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma unidade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {unidadesGestoras.map((unidade) => (
-                    <SelectItem key={unidade} value={unidade}>
-                      {unidade}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={(value) => setProfile(prev => ({ ...prev, unidade_gestora: value }))}
+                placeholder="Selecione uma unidade"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="formacao">Formação</Label>
-              <Select
+              <SimpleSelect
+                options={opcoesFormacao}
                 value={profile.formacao}
-                onValueChange={(value) => setProfile(prev => ({ ...prev, formacao: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione sua formação" />
-                </SelectTrigger>
-                <SelectContent className="max-h-60 overflow-y-auto">
-                  {opcoesFormacao.map((formacao) => (
-                    <SelectItem key={formacao} value={formacao}>
-                      {formacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={(value) => setProfile(prev => ({ ...prev, formacao: value }))}
+                placeholder="Selecione sua formação"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="telefone">Telefone</Label>

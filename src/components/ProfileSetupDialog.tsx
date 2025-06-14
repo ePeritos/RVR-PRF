@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SimpleSelect } from '@/components/ui/simple-select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -153,25 +153,15 @@ export const ProfileSetupDialog: React.FC<ProfileSetupDialogProps> = ({ open, on
 
           <div className="space-y-2">
             <Label htmlFor="unidade_gestora">Unidade Gestora *</Label>
-            <Select
+            <SimpleSelect
+              options={unidadesGestoras}
               value={profile.unidade_gestora}
-              onValueChange={(value) => {
+              onChange={(value) => {
                 console.log('Selecionando unidade gestora:', value);
                 setProfile(prev => ({ ...prev, unidade_gestora: value }));
               }}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione sua unidade gestora" />
-              </SelectTrigger>
-              <SelectContent className="max-h-60 overflow-y-auto">
-                {unidadesGestoras.map((unidade) => (
-                  <SelectItem key={unidade} value={unidade}>
-                    {unidade}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="Selecione sua unidade gestora"
+            />
           </div>
           
           <div className="space-y-2">
@@ -196,21 +186,12 @@ export const ProfileSetupDialog: React.FC<ProfileSetupDialogProps> = ({ open, on
           
           <div className="space-y-2">
             <Label htmlFor="formacao">Formação</Label>
-            <Select
+            <SimpleSelect
+              options={opcoesFormacao}
               value={profile.formacao}
-              onValueChange={(value) => setProfile(prev => ({ ...prev, formacao: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione sua formação" />
-              </SelectTrigger>
-              <SelectContent className="max-h-60 overflow-y-auto">
-                {opcoesFormacao.map((formacao) => (
-                  <SelectItem key={formacao} value={formacao}>
-                    {formacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(value) => setProfile(prev => ({ ...prev, formacao: value }))}
+              placeholder="Selecione sua formação"
+            />
           </div>
           
           <div className="space-y-2">
