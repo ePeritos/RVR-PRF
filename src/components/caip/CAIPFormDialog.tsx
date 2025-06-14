@@ -17,6 +17,7 @@ import { EnvironmentsSection } from './EnvironmentsSection';
 import { SystemsSection } from './SystemsSection';
 import { SecuritySection } from './SecuritySection';
 import { NotesEvaluationSection } from './NotesEvaluationSection';
+import { EnvironmentMaintenanceEvaluation } from './EnvironmentMaintenanceEvaluation';
 import { ProgressActionsSection } from './ProgressActionsSection';
 
 type DadosCAIP = Tables<'dados_caip'>;
@@ -327,7 +328,12 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
             watchedValues={watchedValues}
           />
 
-          <ProgressActionsSection 
+          <EnvironmentMaintenanceEvaluation 
+            imovelData={watchedValues}
+            onNotaManutencaoChange={(nota) => setValue('nota_para_manutencao', nota.toString())}
+          />
+
+          <ProgressActionsSection
             register={register}
             percentualPreenchimento={percentualPreenchimento}
             isLoading={isLoading}

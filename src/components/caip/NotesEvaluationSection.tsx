@@ -33,25 +33,17 @@ export const NotesEvaluationSection = ({ register, setValue, watchedValues }: No
           </p>
         </div>
         <div>
-          <Label htmlFor="nota_para_manutencao">Nota para MANUTENÇÃO (0-100)</Label>
-          <Select onValueChange={(value) => setValue('nota_para_manutencao', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione a nota de manutenção" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0">0 - Péssimo Estado</SelectItem>
-              <SelectItem value="10">10 - Muito Ruim</SelectItem>
-              <SelectItem value="20">20 - Ruim</SelectItem>
-              <SelectItem value="30">30 - Regular Inferior</SelectItem>
-              <SelectItem value="40">40 - Regular</SelectItem>
-              <SelectItem value="50">50 - Regular Superior</SelectItem>
-              <SelectItem value="60">60 - Bom</SelectItem>
-              <SelectItem value="70">70 - Muito Bom</SelectItem>
-              <SelectItem value="80">80 - Excelente</SelectItem>
-              <SelectItem value="90">90 - Quase Novo</SelectItem>
-              <SelectItem value="100">100 - Novo/Perfeito</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label htmlFor="nota_para_manutencao">Nota para MANUTENÇÃO (Calculada Automaticamente)</Label>
+          <Input 
+            {...register('nota_para_manutencao')}
+            disabled
+            placeholder="Será calculada automaticamente"
+            className="bg-muted text-muted-foreground cursor-not-allowed"
+            value={watchedValues?.nota_para_manutencao || ''}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Esta nota é calculada automaticamente com base na avaliação dos ambientes existentes no imóvel.
+          </p>
         </div>
       </div>
       <div className="mt-4">
