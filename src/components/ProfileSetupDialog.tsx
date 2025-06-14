@@ -24,6 +24,8 @@ interface ProfileData {
 
 export const ProfileSetupDialog: React.FC<ProfileSetupDialogProps> = ({ open, onComplete }) => {
   const { user } = useAuth();
+  
+  console.log('🔍 ProfileSetupDialog - open:', open, 'user:', user?.email);
   const [profile, setProfile] = useState<ProfileData>({
     nome_completo: user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || '',
     matricula: '',

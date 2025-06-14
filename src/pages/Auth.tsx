@@ -30,6 +30,19 @@ const Auth = () => {
     }
   }, []);
 
+  // Verificar se o usuário já está logado e redirecionar
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        console.log('👤 Usuário já logado, redirecionando para dashboard');
+        navigate('/', { replace: true });
+      }
+    };
+
+    checkAuthStatus();
+  }, [navigate]);
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -89,7 +102,10 @@ const Auth = () => {
           title: "Login realizado com sucesso!",
           description: "Redirecionando para o dashboard...",
         });
-        // O redirecionamento será feito pelo useAuth
+        // Redirecionar para o dashboard
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 1000);
       }
 
     } catch (error: any) {

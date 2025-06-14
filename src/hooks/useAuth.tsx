@@ -30,12 +30,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Se usuário logou com sucesso, redirecionar para dashboard
+        // Log quando usuário faz login com sucesso
         if (event === 'SIGNED_IN' && session?.user) {
-          console.log('✅ Login bem-sucedido, redirecionando...');
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 100);
+          console.log('✅ Login bem-sucedido');
         }
       }
     );

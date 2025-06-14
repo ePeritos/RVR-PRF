@@ -23,6 +23,7 @@ export const useUserProfile = () => {
 
   useEffect(() => {
     if (!user) {
+      console.log('🔍 useUserProfile - Usuário não existe');
       setProfile(null);
       setLoading(false);
       return;
@@ -30,6 +31,7 @@ export const useUserProfile = () => {
 
     const fetchProfile = async () => {
       try {
+        console.log('🔍 useUserProfile - Buscando perfil para usuário:', user.email);
         setLoading(true);
         setError(null);
 
@@ -40,21 +42,27 @@ export const useUserProfile = () => {
           .single();
 
         if (profileError && profileError.code !== 'PGRST116') {
+          console.error('❌ useUserProfile - Erro ao buscar perfil:', profileError);
           throw profileError;
         }
 
         if (data) {
+          console.log('✅ useUserProfile - Perfil encontrado:', data);
           setProfile(data);
           // Verificar se o perfil precisa ser configurado (usuário padrão sem unidade gestora)
           if (data.role === 'usuario_padrao' && !data.unidade_gestora) {
+            console.log('⚠️ useUserProfile - Perfil precisa de configuração (sem unidade gestora)');
             setNeedsSetup(true);
+          } else {
+            console.log('✅ useUserProfile - Perfil completo, não precisa de configuração');
+            setNeedsSetup(false);
           }
         } else {
-          // Perfil não existe, precisa ser criado
+          console.log('⚠️ useUserProfile - Perfil não existe, precisa ser criado');
           setNeedsSetup(true);
         }
       } catch (err) {
-        console.error('Erro ao buscar perfil do usuário:', err);
+        console.error('❌ useUserProfile - Erro ao buscar perfil do usuário:', err);
         setError('Erro ao carregar perfil do usuário');
       } finally {
         setLoading(false);

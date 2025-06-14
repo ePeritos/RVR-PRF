@@ -26,6 +26,7 @@ const AppRoutes = () => {
   const { needsSetup, refetchProfile } = useUserProfile();
   
   console.log('🔍 AppRoutes - user:', user?.email, 'loading:', loading);
+  console.log('🔍 AppRoutes - needsSetup:', needsSetup);
   
   if (loading) {
     console.log('⏳ AppRoutes - Carregando estado de auth...');
