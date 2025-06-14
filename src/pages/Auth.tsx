@@ -72,7 +72,7 @@ const Auth = () => {
         <ThemeToggle />
       </div>
 
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md shadow-lg hover:shadow-xl transition-shadow duration-300 animate-scale-in">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
             <img 
