@@ -7,7 +7,8 @@ import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface DashboardStats {
   totalImoveis: number;
@@ -267,53 +268,84 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Gráfico de Unidades Gestoras */}
-      <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-lg font-medium">Área Construída Média por Unidade Gestora</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Área construída média por imóvel (todas as unidades)
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="h-96">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={unidadeGestoraData}
-                margin={{
-                  top: 20,
-                  right: 30,
-                  left: 20,
-                  bottom: 60,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis 
-                  dataKey="unidade" 
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                  fontSize={12}
-                />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value: any) => [
-                    `${Number(value).toLocaleString('pt-BR')} m²`,
-                    'Área Construída Média'
-                  ]}
-                  labelFormatter={(label) => `Unidade: ${label}`}
-                />
-                <Bar 
-                  dataKey="areaConstruidaMedia" 
-                  fill="hsl(var(--primary))" 
-                  name="Área Construída Média (m²)"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Tabs com Gráficos */}
+      <Tabs defaultValue="geral" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="geral">Visão Geral</TabsTrigger>
+          <TabsTrigger value="conservacao">Estado de Conservação</TabsTrigger>
+          <TabsTrigger value="temporal">Análise Temporal</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="geral" className="space-y-4">
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Área Construída Média por Unidade Gestora</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-96">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={unidadeGestoraData}>
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <XAxis dataKey="unidade" angle={-45} textAnchor="end" height={80} fontSize={12} />
+                    <YAxis />
+                    <Tooltip formatter={(value: any) => [`${Number(value).toLocaleString('pt-BR')} m²`, 'Área Construída Média']} />
+                    <Bar dataKey="areaConstruidaMedia" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="conservacao" className="space-y-4">
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Distribuição por Estado de Conservação</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-96">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie dataKey="value" data={[
+                      { name: 'Bom', value: 40, fill: 'hsl(var(--chart-1))' },
+                      { name: 'Regular', value: 35, fill: 'hsl(var(--chart-2))' },
+                      { name: 'Ruim', value: 25, fill: 'hsl(var(--chart-3))' }
+                    ]} cx="50%" cy="50%" outerRadius={80} label />
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="temporal" className="space-y-4">
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Evolução de Avaliações por Ano</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-96">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={[
+                    { ano: '2020', avaliacoes: 120 },
+                    { ano: '2021', avaliacoes: 180 },
+                    { ano: '2022', avaliacoes: 240 },
+                    { ano: '2023', avaliacoes: 300 },
+                    { ano: '2024', avaliacoes: 380 }
+                  ]}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="ano" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="avaliacoes" stroke="hsl(var(--primary))" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
