@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { PDFCreator } from './pdfCreator';
 import { RVRReportPDFTemplate } from '../../components/reports/RVRReportPDFTemplate';
 import { CAIPReportTemplate } from '../../components/caip/CAIPReportTemplate';
+import { CustomReportPDFTemplate } from '../../components/reports/CustomReportPDFTemplate';
 import React from 'react';
 
 interface PDFGenerationOptions {
@@ -47,11 +48,17 @@ export class PDFService {
       
       console.log('3. Renderizando componente...');
       // Detecta o tipo de relatório e renderiza o componente apropriado
+      const isCustomReport = data.titulo && data.dados && data.campos_incluidos;
       const isCAIPReport = data.ano_caip || data.unidade_gestora || data.tipo_de_unidade;
       
       await new Promise<void>((resolve, reject) => {
         try {
-          if (isCAIPReport) {
+          if (isCustomReport) {
+            console.log('Renderizando CustomReportPDFTemplate...');
+            root.render(React.createElement(CustomReportPDFTemplate, { 
+              data
+            }));
+          } else if (isCAIPReport) {
             console.log('Renderizando CAIPReportTemplate...');
             root.render(React.createElement(CAIPReportTemplate, { 
               data

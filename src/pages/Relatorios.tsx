@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { FileText, Download, Search, Filter, Image, Building, MapPin } from 'lucide-react';
 import { DataFilter } from '@/components/DataFilter';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
@@ -31,24 +32,71 @@ const Relatorios = () => {
   const [includeImages, setIncludeImages] = useState(true);
   const [reportFormat, setReportFormat] = useState('pdf');
 
-  // Campos disponíveis para incluir no relatório
+  // Todos os campos disponíveis do CAIP organizados por categoria
   const availableFields = [
-    { id: 'nome_da_unidade', label: 'Nome da Unidade', category: 'Básico' },
-    { id: 'tipo_de_unidade', label: 'Tipo de Unidade', category: 'Básico' },
-    { id: 'unidade_gestora', label: 'Unidade Gestora', category: 'Básico' },
-    { id: 'endereco', label: 'Endereço', category: 'Básico' },
-    { id: 'area_construida_m2', label: 'Área Construída (m²)', category: 'Dimensões' },
-    { id: 'area_do_terreno_m2', label: 'Área do Terreno (m²)', category: 'Dimensões' },
-    { id: 'estado_de_conservacao', label: 'Estado de Conservação', category: 'Avaliação' },
-    { id: 'idade_aparente_do_imovel', label: 'Idade Aparente', category: 'Avaliação' },
-    { id: 'rvr', label: 'RVR', category: 'Financeiro' },
-    { id: 'nota_global', label: 'Nota Global', category: 'Avaliação' },
-    { id: 'coordenadas', label: 'Coordenadas', category: 'Localização' },
-    { id: 'zona', label: 'Zona', category: 'Localização' },
-    { id: 'fornecimento_de_agua', label: 'Fornecimento de Água', category: 'Infraestrutura' },
-    { id: 'fornecimento_de_energia_eletrica', label: 'Energia Elétrica', category: 'Infraestrutura' },
-    { id: 'esgotamento_sanitario', label: 'Esgotamento Sanitário', category: 'Infraestrutura' },
-    { id: 'conexao_de_internet', label: 'Conexão de Internet', category: 'Infraestrutura' },
+    // Básico
+    'nome_da_unidade', 'tipo_de_unidade', 'unidade_gestora', 'endereco', 'ano_caip',
+    'processo_sei', 'servo2_pdi', 'coordenadas', 'zona', 'rip', 'matricula_do_imovel',
+    
+    // Dimensões
+    'area_construida_m2', 'area_do_terreno_m2', 'area_do_patio_para_retencao_de_veiculos_m2',
+    'area_da_cobertura_de_pista_m2', 'area_da_cobertura_para_fiscalizacao_de_veiculos_m2',
+    
+    // Avaliação
+    'estado_de_conservacao', 'idade_aparente_do_imovel', 'nota_global', 'vida_util_estimada_anos',
+    'nota_para_adequacao', 'nota_para_manutencao',
+    
+    // Financeiro
+    'rvr',
+    
+    // Propriedade
+    'tipo_de_imovel', 'situacao_do_imovel', 'implantacao_da_unidade',
+    
+    // Infraestrutura
+    'fornecimento_de_agua', 'fornecimento_de_energia_eletrica', 'esgotamento_sanitario',
+    'conexao_de_internet', 'possui_wireless_wifi', 'abastecimento_de_agua',
+    'energia_eletrica_de_emergencia', 'iluminacao_externa', 'radiocomunicacao',
+    'cabeamento_estruturado',
+    
+    // Segurança
+    'blindagem', 'protecao_contra_incendios', 'protecao_contra_intrusao',
+    'aterramento_e_protecao_contra_descargas_atmosfericas', 'claviculario',
+    'sala_cofre', 'concertina', 'muro_ou_alambrado',
+    
+    // Sustentabilidade
+    'acessibilidade', 'sustentabilidade', 'aproveitamento_da_agua_da_chuva', 'energia_solar',
+    
+    // Manutenção
+    'ano_da_ultima_reavaliacao_rvr', 'ano_da_ultima_intervencao_na_infraestrutura_do_imovel',
+    'tempo_de_intervencao', 'ha_contrato_de_manutencao_predial', 'ha_plano_de_manutencao_do_imovel',
+    'precisaria_de_qual_intervencao',
+    
+    // Ambientes
+    'almoxarifado', 'alojamento_feminino', 'alojamento_masculino', 'alojamento_misto',
+    'area_de_servico', 'area_de_uso_compartilhado_com_outros_orgaos', 'arquivo', 'auditorio',
+    'banheiro_para_zeladoria', 'banheiro_feminino_para_servidoras', 'banheiro_masculino_para_servidores',
+    'banheiro_misto_para_servidores', 'box_com_chuveiro_externo', 'box_para_lavagem_de_veiculos',
+    'canil', 'casa_de_maquinas', 'central_de_gas', 'cobertura_para_aglomeracao_de_usuarios',
+    'cobertura_para_fiscalizacao_de_veiculos', 'copa_e_cozinha', 'deposito_de_lixo',
+    'deposito_de_materiais_de_descarte_e_baixa', 'deposito_de_material_de_limpeza',
+    'deposito_de_material_operacional', 'estacionamento_para_usuarios', 'garagem_para_servidores',
+    'garagem_para_viaturas', 'lavabo_para_servidores_sem_box_para_chuveiro',
+    'local_para_custodia_temporaria_de_detidos', 'local_para_guarda_provisoria_de_animais',
+    'patio_de_retencao_de_veiculos', 'plataforma_para_fiscalizacao_da_parte_superior_dos_veiculos',
+    'ponto_de_pouso_para_aeronaves', 'rampa_de_fiscalizacao_de_veiculos', 'recepcao',
+    'sala_administrativa_escritorio', 'sala_de_assepsia', 'sala_de_aula', 'sala_de_reuniao',
+    'sala_de_revista_pessoal', 'sala_operacional_observatorio', 'sala_tecnica', 'sanitario_publico',
+    'telefone_publico', 'torre_de_telecomunicacoes', 'vestiario_para_nao_policiais',
+    'vestiario_para_policiais',
+    
+    // Imagens
+    'imagem_geral', 'imagem_fachada', 'imagem_lateral_1', 'imagem_lateral_2', 'imagem_fundos',
+    'imagem_sala_cofre', 'imagem_cofre', 'imagem_interna_alojamento_masculino',
+    'imagem_interna_alojamento_feminino', 'imagem_interna_plantao_uop',
+    
+    // Outras
+    'o_trecho_e_concessionado', 'adere_ao_pgprf_teletrabalho', 'identidade_visual',
+    'climatizacao_de_ambientes', 'coleta_de_lixo', 'observacoes'
   ];
 
   const [selectedFields, setSelectedFields] = useState<string[]>([
@@ -84,13 +132,107 @@ const Relatorios = () => {
     setFilteredData(filtered);
   };
 
-  const handleFieldToggle = (fieldId: string) => {
-    setSelectedFields(prev => 
-      prev.includes(fieldId) 
-        ? prev.filter(f => f !== fieldId)
-        : [...prev, fieldId]
-    );
+  // Criar labels amigáveis para os campos
+  const fieldLabels: Record<string, string> = {
+    // Básico
+    'nome_da_unidade': 'Nome da Unidade',
+    'tipo_de_unidade': 'Tipo de Unidade', 
+    'unidade_gestora': 'Unidade Gestora',
+    'endereco': 'Endereço',
+    'ano_caip': 'Ano CAIP',
+    'processo_sei': 'Processo SEI',
+    'servo2_pdi': 'Servo2/PDI',
+    'coordenadas': 'Coordenadas',
+    'zona': 'Zona',
+    'rip': 'RIP',
+    'matricula_do_imovel': 'Matrícula do Imóvel',
+    
+    // Dimensões
+    'area_construida_m2': 'Área Construída (m²)',
+    'area_do_terreno_m2': 'Área do Terreno (m²)',
+    'area_do_patio_para_retencao_de_veiculos_m2': 'Área do Pátio para Retenção (m²)',
+    'area_da_cobertura_de_pista_m2': 'Área da Cobertura de Pista (m²)',
+    'area_da_cobertura_para_fiscalizacao_de_veiculos_m2': 'Área Cobertura Fiscalização (m²)',
+    
+    // Avaliação
+    'estado_de_conservacao': 'Estado de Conservação',
+    'idade_aparente_do_imovel': 'Idade Aparente (anos)',
+    'nota_global': 'Nota Global',
+    'vida_util_estimada_anos': 'Vida Útil Estimada (anos)',
+    'nota_para_adequacao': 'Nota para Adequação',
+    'nota_para_manutencao': 'Nota para Manutenção',
+    
+    // Financeiro
+    'rvr': 'RVR',
+    
+    // Propriedade
+    'tipo_de_imovel': 'Tipo de Imóvel',
+    'situacao_do_imovel': 'Situação do Imóvel',
+    'implantacao_da_unidade': 'Implantação da Unidade',
+    
+    // Infraestrutura
+    'fornecimento_de_agua': 'Fornecimento de Água',
+    'fornecimento_de_energia_eletrica': 'Energia Elétrica',
+    'esgotamento_sanitario': 'Esgotamento Sanitário',
+    'conexao_de_internet': 'Conexão de Internet',
+    'possui_wireless_wifi': 'WiFi',
+    'abastecimento_de_agua': 'Abastecimento de Água',
+    'energia_eletrica_de_emergencia': 'Energia de Emergência',
+    'iluminacao_externa': 'Iluminação Externa',
+    'radiocomunicacao': 'Radiocomunicação',
+    'cabeamento_estruturado': 'Cabeamento Estruturado',
+    
+    // Segurança
+    'blindagem': 'Blindagem',
+    'protecao_contra_incendios': 'Proteção Contra Incêndios',
+    'protecao_contra_intrusao': 'Proteção Contra Intrusão',
+    'aterramento_e_protecao_contra_descargas_atmosfericas': 'Proteção Descargas',
+    'claviculario': 'Claviculário',
+    'sala_cofre': 'Sala Cofre',
+    'concertina': 'Concertina',
+    'muro_ou_alambrado': 'Muro/Alambrado',
+    
+    // Sustentabilidade
+    'acessibilidade': 'Acessibilidade',
+    'sustentabilidade': 'Sustentabilidade',
+    'aproveitamento_da_agua_da_chuva': 'Aproveitamento Água da Chuva',
+    'energia_solar': 'Energia Solar',
+    
+    // Manutenção
+    'ano_da_ultima_reavaliacao_rvr': 'Última Reavaliação RVR',
+    'ano_da_ultima_intervencao_na_infraestrutura_do_imovel': 'Última Intervenção',
+    'tempo_de_intervencao': 'Tempo de Intervenção',
+    'ha_contrato_de_manutencao_predial': 'Contrato Manutenção',
+    'ha_plano_de_manutencao_do_imovel': 'Plano de Manutenção',
+    'precisaria_de_qual_intervencao': 'Intervenção Necessária',
+    
+    // Ambientes (simplificados)
+    'almoxarifado': 'Almoxarifado',
+    'alojamento_feminino': 'Alojamento Feminino',
+    'alojamento_masculino': 'Alojamento Masculino',
+    'recepcao': 'Recepção',
+    'sala_administrativa_escritorio': 'Sala Administrativa',
+    'garagem_para_viaturas': 'Garagem para Viaturas',
+    
+    // Imagens
+    'imagem_geral': 'Imagem Geral',
+    'imagem_fachada': 'Imagem da Fachada',
+    'imagem_lateral_1': 'Imagem Lateral 1',
+    'imagem_lateral_2': 'Imagem Lateral 2',
+    'imagem_fundos': 'Imagem dos Fundos',
+    'imagem_sala_cofre': 'Imagem Sala Cofre',
+    'imagem_cofre': 'Imagem do Cofre',
+    
+    // Outras
+    'o_trecho_e_concessionado': 'Trecho Concessionado',
+    'adere_ao_pgprf_teletrabalho': 'PGPRF Teletrabalho',
+    'identidade_visual': 'Identidade Visual',
+    'climatizacao_de_ambientes': 'Climatização',
+    'coleta_de_lixo': 'Coleta de Lixo',
+    'observacoes': 'Observações'
   };
+
+  const fieldOptions = availableFields.map(field => fieldLabels[field] || field);
 
   const handleGenerateReport = async () => {
     if (selectedItems.length === 0) {
@@ -127,10 +269,8 @@ const Relatorios = () => {
         gerado_por: profile?.nome_completo || user?.email
       };
 
-      // Por enquanto, usar o hook existente para um dos itens
-      if (selectedData.length > 0) {
-        await generateReport(selectedData[0]);
-      }
+      // Gerar relatório customizado
+      await generateReport(reportData);
 
       toast({
         title: "Sucesso",
@@ -161,11 +301,14 @@ const Relatorios = () => {
     );
   }
 
-  const fieldsByCategory = availableFields.reduce((acc, field) => {
-    if (!acc[field.category]) acc[field.category] = [];
-    acc[field.category].push(field);
-    return acc;
-  }, {} as Record<string, typeof availableFields>);
+  const handleFieldsChange = (selectedLabels: string[]) => {
+    // Converter labels de volta para field IDs
+    const selectedFieldIds = selectedLabels.map(label => {
+      const field = Object.entries(fieldLabels).find(([_, fieldLabel]) => fieldLabel === label);
+      return field ? field[0] : label;
+    });
+    setSelectedFields(selectedFieldIds);
+  };
 
   return (
     <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
@@ -243,27 +386,21 @@ const Relatorios = () => {
           <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-lg">Campos a Incluir</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Selecione os campos que deseja incluir no relatório
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              {Object.entries(fieldsByCategory).map(([category, fields]) => (
-                <div key={category} className="space-y-2">
-                  <h4 className="font-medium text-sm text-muted-foreground">{category}</h4>
-                  <div className="space-y-2">
-                    {fields.map(field => (
-                      <div key={field.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={field.id}
-                          checked={selectedFields.includes(field.id)}
-                          onCheckedChange={() => handleFieldToggle(field.id)}
-                        />
-                        <Label htmlFor={field.id} className="text-sm">
-                          {field.label}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+              <MultiSelect
+                options={fieldOptions}
+                selected={selectedFields.map(field => fieldLabels[field] || field)}
+                onChange={handleFieldsChange}
+                placeholder="Selecione os campos para incluir..."
+                className="w-full"
+              />
+              <div className="text-xs text-muted-foreground">
+                {selectedFields.length} campos selecionados
+              </div>
             </CardContent>
           </Card>
         </div>
