@@ -14,9 +14,35 @@ const RelatorioPreview: React.FC = () => {
   const reportData = location.state?.reportData;
 
   console.log('=== DEBUG RelatorioPreview COMPLETO ===');
+  console.log('Location object completo:', location);
   console.log('Location state:', location.state);
   console.log('Report data:', reportData);
   console.log('Report data type:', typeof reportData);
+  
+  if (reportData) {
+    console.log('=== ESTRUTURA DOS DADOS ===');
+    console.log('Título:', reportData.titulo);
+    console.log('Campos incluídos:', reportData.campos_incluidos);
+    console.log('Incluir imagens:', reportData.incluir_imagens);
+    console.log('Total imóveis:', reportData.total_imoveis);
+    console.log('Dados length:', reportData.dados?.length);
+    console.log('Primeiro imóvel:', reportData.dados?.[0]);
+    
+    if (reportData.dados && reportData.dados.length > 0) {
+      const primeiro = reportData.dados[0];
+      console.log('=== CAMPOS DO PRIMEIRO IMÓVEL ===');
+      console.log('ID:', primeiro.id);
+      console.log('Nome:', primeiro.nome_da_unidade);
+      console.log('Tipo:', primeiro.tipo_de_unidade);
+      console.log('Alojamento feminino:', primeiro.alojamento_feminino);
+      console.log('Alojamento masculino:', primeiro.alojamento_masculino);
+      console.log('Área construída:', primeiro.area_construida_m2);
+      console.log('Estado conservação:', primeiro.estado_de_conservacao);
+      console.log('Imagem geral:', primeiro.imagem_geral);
+      console.log('Imagem fachada:', primeiro.imagem_fachada);
+      console.log('Todas as chaves:', Object.keys(primeiro));
+    }
+  }
 
   if (!reportData) {
     return (
@@ -84,14 +110,31 @@ const RelatorioPreview: React.FC = () => {
   };
 
   const formatValue = (value: any, field: string): string => {
-    if (value === null || value === undefined || value === '') return 'Não informado';
+    // Verificações mais robustas para valores vazios
+    if (value === null || value === undefined) return 'Não informado';
+    if (typeof value === 'string' && value.trim() === '') return 'Não informado';
+    if (typeof value === 'string' && (value.toLowerCase() === 'não' || value.toLowerCase() === 'nao')) return 'Não';
+    if (typeof value === 'string' && value.toLowerCase() === 'sim') return 'Sim';
     
+    // Formatação para campos de área
     if (field.includes('area_') || field.includes('m2')) {
-      return `${Number(value).toLocaleString('pt-BR')} m²`;
+      const numValue = Number(value);
+      if (isNaN(numValue) || numValue === 0) return 'Não informado';
+      return `${numValue.toLocaleString('pt-BR')} m²`;
     }
     
+    // Formatação para RVR
     if (field === 'rvr') {
-      return `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+      const numValue = Number(value);
+      if (isNaN(numValue) || numValue === 0) return 'Não informado';
+      return `R$ ${numValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    }
+    
+    // Formatação para anos
+    if (field.includes('ano') || field.includes('idade')) {
+      const numValue = Number(value);
+      if (isNaN(numValue) || numValue === 0) return 'Não informado';
+      return `${numValue} anos`;
     }
     
     return String(value);
@@ -187,14 +230,21 @@ const RelatorioPreview: React.FC = () => {
                   {reportData.campos_incluidos
                     ?.filter((campo: string) => !campo.startsWith('imagem_'))
                     ?.map((campo: string) => {
-                      console.log(`Campo ${campo}: ${imovel[campo]}`);
+                      const valor = imovel[campo];
+                      console.log(`=== CAMPO ${campo.toUpperCase()} ===`);
+                      console.log('Valor original:', valor);
+                      console.log('Valor formatado:', formatValue(valor, campo));
+                      console.log('Tipo do valor:', typeof valor);
+                      console.log('É null/undefined?', valor === null || valor === undefined);
+                      console.log('É string vazia?', valor === '');
+                      
                       return (
                         <div key={campo} className="flex flex-col border-b border-gray-100 pb-2">
                           <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
                             {fieldLabels[campo] || campo}
                           </span>
                           <span className="text-sm text-gray-800 mt-1">
-                            {formatValue(imovel[campo], campo)}
+                            {formatValue(valor, campo)}
                           </span>
                         </div>
                       );
@@ -209,7 +259,14 @@ const RelatorioPreview: React.FC = () => {
                       {reportData.campos_incluidos
                         ?.filter((campo: string) => campo.startsWith('imagem_'))
                         ?.map((campo: string) => {
-                          console.log(`Imagem ${campo}: ${imovel[campo]}`);
+                          const valorImagem = imovel[campo];
+                          console.log(`=== IMAGEM ${campo.toUpperCase()} ===`);
+                          console.log('Valor da imagem:', valorImagem);
+                          console.log('Tipo:', typeof valorImagem);
+                          console.log('É string vazia?', valorImagem === '');
+                          console.log('URL tentativa 1:', `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${valorImagem}`);
+                          console.log('URL tentativa 2:', valorImagem);
+                          
                           return (
                             <div key={campo} className="text-center">
                               <p className="text-xs text-gray-600 mb-1 font-medium">

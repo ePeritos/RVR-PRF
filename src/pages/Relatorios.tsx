@@ -286,11 +286,31 @@ const Relatorios = () => {
     try {
       const selectedData = filteredData.filter(item => selectedItems.includes(item.id));
       
-      console.log('=== DEBUG GERAÇÃO RELATÓRIO ===');
-      console.log('Dados filtrados:', filteredData.length);
+      console.log('=== DEBUG GERAÇÃO RELATÓRIO DETALHADO ===');
+      console.log('Todos os dados disponíveis:', supabaseData.length, 'registros');
+      console.log('Dados filtrados:', filteredData.length, 'registros');
       console.log('IDs selecionados:', selectedItems);
-      console.log('Dados selecionados:', selectedData);
+      console.log('Dados selecionados encontrados:', selectedData.length, 'registros');
       console.log('Campos incluídos:', selectedFields);
+      
+      if (selectedData.length > 0) {
+        console.log('=== PRIMEIRO ITEM SELECIONADO ===');
+        const primeiro = selectedData[0];
+        console.log('Objeto completo:', primeiro);
+        console.log('ID:', primeiro.id);
+        console.log('Nome:', primeiro.nome_da_unidade);
+        console.log('Tipo:', primeiro.tipo_de_unidade);
+        console.log('Endereço:', primeiro.endereco);
+        console.log('Área construída:', primeiro.area_construida_m2);
+        console.log('Estado conservação:', primeiro.estado_de_conservacao);
+        console.log('Alojamento feminino:', primeiro.alojamento_feminino);
+        console.log('Alojamento masculino:', primeiro.alojamento_masculino);
+        console.log('Todas as propriedades:', Object.keys(primeiro));
+      } else {
+        console.error('❌ ERRO: Nenhum dado selecionado encontrado!');
+        console.log('filteredData sample:', filteredData.slice(0, 3));
+        console.log('selectedItems:', selectedItems);
+      }
       
       // Preparar dados do relatório
       const reportData = {

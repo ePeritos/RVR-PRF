@@ -24,28 +24,26 @@ export interface DataRow {
 }
 
 export const useSupabaseData = (unidadeGestoraFilter?: string) => {
-  const [data, setData] = useState<DataRow[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const transformData = (supabaseData: DadosCAIP[]): DataRow[] => {
+  const transformData = (supabaseData: DadosCAIP[]): any[] => {
+    // Retornar TODOS os campos sem transformação para não perder dados
     return supabaseData.map(item => ({
-      id: item.id,
-      'ano_caip': item.ano_caip || '',
-      'tipo_de_unidade': item.tipo_de_unidade || '',
-      'unidade_gestora': item.unidade_gestora || '',
-      'estado_de_conservacao': item.estado_de_conservacao || '',
-      'vida_util_estimada_anos': item.vida_util_estimada_anos ? Number(item.vida_util_estimada_anos) : 0,
-      'area_do_terreno_m2': item.area_do_terreno_m2 ? Number(item.area_do_terreno_m2) : 0,
-      'area_construida_m2': item.area_construida_m2 ? Number(item.area_construida_m2) : 0,
-      'nome_da_unidade': item.nome_da_unidade || '',
-      'situacao_do_imovel': item.situacao_do_imovel || '',
-      'endereco': item.endereco || '',
-      'rip': item.rip || '',
-      'matricula_do_imovel': item.matricula_do_imovel || '',
-      'processo_sei': item.processo_sei || '',
-      'idade_aparente_do_imovel': item.idade_aparente_do_imovel ? Number(item.idade_aparente_do_imovel) : 15,
-      'rvr': item.rvr ? Number(item.rvr) : 0,
+      ...item, // Manter todos os campos originais
+      // Garantir que campos numéricos sejam números quando possível
+      vida_util_estimada_anos: item.vida_util_estimada_anos ? Number(item.vida_util_estimada_anos) : null,
+      area_do_terreno_m2: item.area_do_terreno_m2 ? Number(item.area_do_terreno_m2) : null,
+      area_construida_m2: item.area_construida_m2 ? Number(item.area_construida_m2) : null,
+      idade_aparente_do_imovel: item.idade_aparente_do_imovel ? Number(item.idade_aparente_do_imovel) : null,
+      rvr: item.rvr ? Number(item.rvr) : null,
+      // Garantir que strings vazias sejam null para melhor tratamento
+      nome_da_unidade: item.nome_da_unidade || null,
+      tipo_de_unidade: item.tipo_de_unidade || null,
+      endereco: item.endereco || null,
+      estado_de_conservacao: item.estado_de_conservacao || null,
+      ano_caip: item.ano_caip || null,
     }));
   };
 
@@ -57,9 +55,9 @@ export const useSupabaseData = (unidadeGestoraFilter?: string) => {
       const batchSize = 1000;
       let hasMore = true;
 
-      console.log('Iniciando busca de dados da tabela dados_caip...');
+      console.log('🔍 Iniciando busca de TODOS os dados da tabela dados_caip...');
       if (unidadeGestoraFilter) {
-        console.log(`Aplicando filtro por unidade gestora: ${unidadeGestoraFilter}`);
+        console.log(`🎯 Aplicando filtro por unidade gestora: ${unidadeGestoraFilter}`);
       }
 
       while (hasMore) {
@@ -98,9 +96,22 @@ export const useSupabaseData = (unidadeGestoraFilter?: string) => {
         }
       }
 
-      console.log(`Busca finalizada. Total de registros carregados: ${allData.length}`);
+      console.log(`✅ Busca finalizada. Total de registros carregados: ${allData.length}`);
+      
+      if (allData.length > 0) {
+        console.log('📋 Campos disponíveis no primeiro registro:', Object.keys(allData[0]));
+        console.log('🎯 Exemplo de dados do primeiro registro:');
+        const primeiro = allData[0];
+        console.log(' - Nome:', primeiro.nome_da_unidade);
+        console.log(' - Tipo:', primeiro.tipo_de_unidade);
+        console.log(' - Alojamento feminino:', primeiro.alojamento_feminino);
+        console.log(' - Alojamento masculino:', primeiro.alojamento_masculino);
+        console.log(' - Imagem geral:', primeiro.imagem_geral);
+        console.log(' - Imagem fachada:', primeiro.imagem_fachada);
+      }
       
       const transformedData = transformData(allData);
+      console.log('🔄 Dados transformados. Total:', transformedData.length);
       setData(transformedData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
