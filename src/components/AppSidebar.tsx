@@ -1,4 +1,4 @@
-import { Home, Calculator, Database, LogOut, User, Menu, Building } from "lucide-react";
+import { Home, Calculator, Database, LogOut, User, Menu, Building, FileText } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -28,6 +28,7 @@ const menuItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "CAIP", url: "/caip", icon: Database },
   { title: "RVR", url: "/rvr", icon: Calculator },
+  { title: "Relatórios", url: "/relatorios", icon: FileText },
 ];
 
 const unidadesGestoras = [

@@ -16,6 +16,7 @@ import { Building } from "lucide-react";
 import Dashboard from "./pages/Dashboard";
 import RVR from "./pages/RVR";
 import CAIP from "./pages/CAIP";
+import Relatorios from "./pages/Relatorios";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -80,6 +81,7 @@ const AppRoutes = () => {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/rvr" element={<RVR />} />
                 <Route path="/caip" element={<CAIP />} />
+                <Route path="/relatorios" element={<Relatorios />} />
                 <Route path="/auth" element={<Navigate to="/" replace />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
