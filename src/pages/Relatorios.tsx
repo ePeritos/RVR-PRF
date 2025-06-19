@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MultiSelect } from '@/components/ui/multi-select';
-import { FileText, Download, Search, Filter, Image, Building, MapPin } from 'lucide-react';
+import { FileText, Download, Search, Filter, Image, Building, MapPin, Eye } from 'lucide-react';
 import { DataFilter } from '@/components/DataFilter';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCAIPReport } from '@/hooks/useCAIPReport';
 
 const Relatorios = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, isAdmin } = useUserProfile();
   const { data: supabaseData, loading } = useSupabaseData(
@@ -272,12 +274,12 @@ const Relatorios = () => {
         gerado_por: profile?.nome_completo || user?.email
       };
 
-      // Gerar relatório customizado
-      await generateReport(reportData);
+      // Navegar para preview em vez de gerar PDF diretamente
+      navigate('/relatorio-preview', { state: { reportData } });
 
       toast({
-        title: "Sucesso",
-        description: `Relatório "${reportTitle}" gerado com sucesso!`,
+        title: "Redirecionando",
+        description: `Abrindo preview do relatório "${reportTitle}"...`,
       });
     } catch (error) {
       console.error('Erro ao gerar relatório:', error);
@@ -530,8 +532,8 @@ const Relatorios = () => {
                     </>
                   ) : (
                     <>
-                      <Download className="mr-2 h-4 w-4" />
-                      Gerar Relatório
+                      <Eye className="mr-2 h-4 w-4" />
+                      Preview do Relatório
                     </>
                   )}
                 </Button>
