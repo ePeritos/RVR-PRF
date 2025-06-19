@@ -173,7 +173,7 @@ export const CustomReportPDFTemplate: React.FC<CustomReportPDFTemplateProps> = (
               <h3 className="text-sm font-semibold text-gray-700 mb-3">Imagens</h3>
               <div className="grid grid-cols-2 gap-3">
                 {imageFields
-                  .filter(campo => data.campos_incluidos.includes(campo) && imovel[campo])
+                  .filter(campo => imovel[campo] && imovel[campo].trim() !== '') // Incluir todas as imagens disponíveis, não apenas as selecionadas
                   .map(campo => (
                     <div key={campo} className="text-center">
                       <p className="text-xs text-gray-600 mb-1">
@@ -191,6 +191,9 @@ export const CustomReportPDFTemplate: React.FC<CustomReportPDFTemplateProps> = (
                     </div>
                   ))}
               </div>
+              {imageFields.filter(campo => imovel[campo] && imovel[campo].trim() !== '').length === 0 && (
+                <p className="text-sm text-gray-500 italic">Nenhuma imagem disponível para este imóvel.</p>
+              )}
             </div>
           )}
         </div>
