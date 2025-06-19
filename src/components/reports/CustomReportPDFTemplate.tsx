@@ -20,6 +20,21 @@ export const CustomReportPDFTemplate: React.FC<CustomReportPDFTemplateProps> = (
   data,
   className = ""
 }) => {
+  // Debug logs para identificar problemas
+  console.log('=== DEBUG CustomReportPDFTemplate ===');
+  console.log('Data recebida:', data);
+  console.log('Campos incluídos:', data.campos_incluidos);
+  console.log('Incluir imagens:', data.incluir_imagens);
+  console.log('Dados dos imóveis:', data.dados);
+  
+  if (data.dados && data.dados.length > 0) {
+    const primeiroImovel = data.dados[0];
+    console.log('Primeiro imóvel completo:', primeiroImovel);
+    console.log('Alojamento feminino:', primeiroImovel.alojamento_feminino);
+    console.log('Alojamento masculino:', primeiroImovel.alojamento_masculino);
+    console.log('Imagem geral:', primeiroImovel.imagem_geral);
+    console.log('Imagem fachada:', primeiroImovel.imagem_fachada);
+  }
   const fieldLabels: Record<string, string> = {
     // Básico
     'nome_da_unidade': 'Nome da Unidade',
@@ -105,6 +120,11 @@ export const CustomReportPDFTemplate: React.FC<CustomReportPDFTemplateProps> = (
      'imagem_interna_alojamento_feminino': 'Imagem Alojamento Feminino',
      'imagem_interna_plantao_uop': 'Imagem Plantão UOP',
      
+     // Ambientes/Alojamentos
+     'alojamento_feminino': 'Alojamento Feminino',
+     'alojamento_masculino': 'Alojamento Masculino',
+     'alojamento_misto': 'Alojamento Misto',
+     
      // Outras
      'o_trecho_e_concessionado': 'Trecho Concessionado',
      'adere_ao_pgprf_teletrabalho': 'PGPRF Teletrabalho',
@@ -167,16 +187,19 @@ export const CustomReportPDFTemplate: React.FC<CustomReportPDFTemplateProps> = (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
             {data.campos_incluidos
               .filter(campo => !imageFields.includes(campo))
-              .map(campo => (
-                <div key={campo} className="flex flex-col">
-                  <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
-                    {fieldLabels[campo] || campo}
-                  </span>
-                  <span className="text-sm text-gray-800">
-                    {formatValue(imovel[campo], campo)}
-                  </span>
-                </div>
-              ))}
+              .map(campo => {
+                console.log(`Processando campo: ${campo} = ${imovel[campo]}`);
+                return (
+                  <div key={campo} className="flex flex-col">
+                    <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                      {fieldLabels[campo] || campo}
+                    </span>
+                    <span className="text-sm text-gray-800">
+                      {formatValue(imovel[campo], campo)}
+                    </span>
+                  </div>
+                );
+              })}
           </div>
 
           {/* Imagens */}
