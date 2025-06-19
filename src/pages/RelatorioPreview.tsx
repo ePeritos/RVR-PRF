@@ -120,9 +120,9 @@ const RelatorioPreview: React.FC = () => {
 
       {/* Debug Info */}
       {showDebug && (
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <h3 className="font-semibold mb-2 text-yellow-800">Debug - Informações do Relatório:</h3>
-          <div className="text-sm text-yellow-700 space-y-1">
+        <div className="mb-6 p-4 bg-muted border border-border rounded-lg">
+          <h3 className="font-semibold mb-2 text-foreground">Debug - Informações do Relatório:</h3>
+          <div className="text-sm text-muted-foreground space-y-1">
             <p><strong>Título:</strong> {reportData.titulo}</p>
             <p><strong>Total de imóveis:</strong> {reportData.total_imoveis}</p>
             <p><strong>Incluir imagens:</strong> {reportData.incluir_imagens ? 'Sim' : 'Não'}</p>
@@ -131,16 +131,16 @@ const RelatorioPreview: React.FC = () => {
           </div>
           
           <details className="mt-3">
-            <summary className="cursor-pointer font-medium text-yellow-800">Ver campos selecionados</summary>
-            <div className="mt-2 text-xs bg-yellow-100 p-2 rounded border">
+            <summary className="cursor-pointer font-medium text-foreground">Ver campos selecionados</summary>
+            <div className="mt-2 text-xs bg-card p-2 rounded border border-border">
               {reportData.campos_incluidos?.join(', ') || 'Nenhum campo selecionado'}
             </div>
           </details>
 
           <details className="mt-2">
-            <summary className="cursor-pointer font-medium text-yellow-800">Ver primeiro registro (dados brutos)</summary>
-            <div className="mt-2 text-xs bg-yellow-100 p-2 rounded border max-h-40 overflow-auto">
-              <pre>{JSON.stringify(reportData.dados?.[0] || {}, null, 2)}</pre>
+            <summary className="cursor-pointer font-medium text-foreground">Ver primeiro registro (dados brutos)</summary>
+            <div className="mt-2 text-xs bg-card p-2 rounded border border-border max-h-40 overflow-auto">
+              <pre className="text-foreground">{JSON.stringify(reportData.dados?.[0] || {}, null, 2)}</pre>
             </div>
           </details>
         </div>
