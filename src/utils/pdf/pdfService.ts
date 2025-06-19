@@ -55,6 +55,8 @@ export class PDFService {
         try {
           if (isCustomReport) {
             console.log('Renderizando CustomReportPDFTemplate...');
+            console.log('Dados incluídos:', data.campos_incluidos);
+            console.log('Incluir imagens:', data.incluir_imagens);
             root.render(React.createElement(CustomReportPDFTemplate, { 
               data
             }));
@@ -72,11 +74,39 @@ export class PDFService {
           }
           
           console.log('4. Aguardando renderização...');
-          // Aguarda a renderização
-          setTimeout(() => {
-            console.log('5. Renderização concluída');
+          // Aguarda a renderização e o carregamento das imagens
+          setTimeout(async () => {
+            console.log('5. Verificando imagens carregadas...');
+            
+            // Aguarda todas as imagens carregarem
+            const images = container.querySelectorAll('img');
+            const imagePromises = Array.from(images).map(img => {
+              return new Promise((resolve) => {
+                if (img.complete) {
+                  console.log('Imagem já carregada:', img.src);
+                  resolve(true);
+                } else {
+                  img.onload = () => {
+                    console.log('Imagem carregada:', img.src);
+                    resolve(true);
+                  };
+                  img.onerror = () => {
+                    console.log('Erro ao carregar imagem:', img.src);
+                    resolve(false);
+                  };
+                  // Timeout para imagens que não carregam
+                  setTimeout(() => {
+                    console.log('Timeout para imagem:', img.src);
+                    resolve(false);
+                  }, 5000);
+                }
+              });
+            });
+            
+            await Promise.all(imagePromises);
+            console.log('6. Todas as imagens processadas');
             resolve();
-          }, 3000);
+          }, 2000);
         } catch (renderError) {
           console.error('Erro na renderização:', renderError);
           reject(renderError);

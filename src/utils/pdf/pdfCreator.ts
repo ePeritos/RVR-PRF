@@ -87,17 +87,19 @@ export class PDFCreator {
     // Aguarda renderização completa
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Configuração otimizada para html2canvas
+    // Configuração otimizada para html2canvas com suporte a imagens
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,
-      allowTaint: false,
+      allowTaint: true, // Permite imagens de diferentes domínios
       backgroundColor: '#ffffff',
       logging: true,
       width: element.offsetWidth,
       height: element.offsetHeight,
       windowWidth: element.offsetWidth,
       windowHeight: element.offsetHeight,
+      foreignObjectRendering: false, // Desabilita para melhor compatibilidade com imagens
+      imageTimeout: 15000, // Timeout maior para carregamento de imagens
       onclone: (clonedDoc) => {
         console.log('Clonando documento...');
         const clonedContainer = clonedDoc.querySelector('div');
@@ -105,6 +107,19 @@ export class PDFCreator {
           (clonedContainer as HTMLElement).style.display = 'block';
           (clonedContainer as HTMLElement).style.visibility = 'visible';
         }
+        
+        // Força o carregamento de imagens no documento clonado
+        const images = clonedDoc.querySelectorAll('img');
+        images.forEach((img: HTMLImageElement) => {
+          if (img.src) {
+            console.log('Processando imagem no clone:', img.src);
+            // Força reload da imagem
+            img.crossOrigin = 'anonymous';
+            const originalSrc = img.src;
+            img.src = '';
+            img.src = originalSrc;
+          }
+        });
       }
     });
 

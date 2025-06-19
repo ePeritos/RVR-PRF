@@ -189,6 +189,13 @@ export const CustomReportPDFTemplate: React.FC<CustomReportPDFTemplateProps> = (
                     // Se campos de imagem foram especificamente selecionados, mostrar apenas esses
                     const hasSelectedImageFields = data.campos_incluidos.some(field => imageFields.includes(field));
                     
+                    console.log(`Verificando campo ${campo}:`, {
+                      hasSelectedImageFields,
+                      isSelected: data.campos_incluidos.includes(campo),
+                      hasValue: imovel[campo] && imovel[campo].trim() !== '',
+                      value: imovel[campo]
+                    });
+                    
                     if (hasSelectedImageFields) {
                       return data.campos_incluidos.includes(campo);
                     } else {
@@ -196,34 +203,40 @@ export const CustomReportPDFTemplate: React.FC<CustomReportPDFTemplateProps> = (
                       return imovel[campo] && imovel[campo].trim() !== '';
                     }
                   })
-                  .map(campo => (
-                    <div key={campo} className="text-center">
-                      <p className="text-xs text-gray-600 mb-1 font-medium">
-                        {fieldLabels[campo] || campo.replace('imagem_', '').replace('_', ' ')}
-                      </p>
-                      {imovel[campo] && imovel[campo].trim() !== '' ? (
-                        <img 
-                          src={imovel[campo]} 
-                          alt={fieldLabels[campo] || campo}
-                          className="w-full h-32 object-cover border border-gray-200 rounded"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                            target.nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-32 flex items-center justify-center border border-gray-300 rounded bg-gray-50">
-                          <p className="text-xs text-gray-500 text-center px-2">
-                            Imagem não disponível no banco de dados
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  .map(campo => {
+                    console.log(`Renderizando campo de imagem: ${campo} = ${imovel[campo]}`);
+                    return (
+                      <div key={campo} className="text-center">
+                        <p className="text-xs text-gray-600 mb-1 font-medium">
+                          {fieldLabels[campo] || campo.replace('imagem_', '').replace('_', ' ')}
+                        </p>
+                        {imovel[campo] && imovel[campo].trim() !== '' ? (
+                          <img 
+                            src={imovel[campo]} 
+                            alt={fieldLabels[campo] || campo}
+                            className="w-full h-32 object-cover border border-gray-200 rounded"
+                            crossOrigin="anonymous"
+                            onLoad={() => console.log(`Imagem carregada: ${campo} - ${imovel[campo]}`)}
+                            onError={(e) => {
+                              console.log(`Erro ao carregar imagem: ${campo} - ${imovel[campo]}`);
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              target.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-32 flex items-center justify-center border border-gray-300 rounded bg-gray-50">
+                            <p className="text-xs text-gray-500 text-center px-2">
+                              Imagem não disponível no banco de dados
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
               </div>
-              {imageFields.filter(campo => imovel[campo] && imovel[campo].trim() !== '').length === 0 && (
-                <p className="text-sm text-gray-500 italic">Nenhuma imagem disponível para este imóvel.</p>
+              {imageFields.filter(campo => data.campos_incluidos.includes(campo)).length === 0 && (
+                <p className="text-sm text-gray-500 italic">Nenhum campo de imagem selecionado.</p>
               )}
             </div>
           )}
