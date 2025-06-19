@@ -49,7 +49,7 @@ const RelatorioPreview: React.FC = () => {
     }
   };
 
-  // Labels para os campos
+  // Labels para os campos (versão expandida)
   const fieldLabels: Record<string, string> = {
     'nome_da_unidade': 'Nome da Unidade',
     'tipo_de_unidade': 'Tipo de Unidade', 
@@ -57,12 +57,30 @@ const RelatorioPreview: React.FC = () => {
     'endereco': 'Endereço',
     'ano_caip': 'Ano CAIP',
     'area_construida_m2': 'Área Construída (m²)',
+    'area_do_terreno_m2': 'Área do Terreno (m²)',
     'estado_de_conservacao': 'Estado de Conservação',
     'alojamento_feminino': 'Alojamento Feminino',
     'alojamento_masculino': 'Alojamento Masculino',
+    'alojamento_misto': 'Alojamento Misto',
     'rvr': 'RVR',
+    'nota_global': 'Nota Global',
+    'vida_util_estimada_anos': 'Vida Útil Estimada (anos)',
+    'processo_sei': 'Processo SEI',
+    'servo2_pdi': 'Servo2/PDI',
+    'coordenadas': 'Coordenadas',
+    'zona': 'Zona',
+    'rip': 'RIP',
+    'matricula_do_imovel': 'Matrícula do Imóvel',
     'imagem_geral': 'Imagem Geral',
-    'imagem_fachada': 'Imagem da Fachada'
+    'imagem_fachada': 'Imagem da Fachada',
+    'imagem_lateral_1': 'Imagem Lateral 1',
+    'imagem_lateral_2': 'Imagem Lateral 2',
+    'imagem_fundos': 'Imagem dos Fundos',
+    'imagem_sala_cofre': 'Imagem Sala Cofre',
+    'imagem_cofre': 'Imagem do Cofre',
+    'imagem_interna_alojamento_masculino': 'Imagem Alojamento Masculino',
+    'imagem_interna_alojamento_feminino': 'Imagem Alojamento Feminino',
+    'imagem_interna_plantao_uop': 'Imagem Plantão UOP'
   };
 
   const formatValue = (value: any, field: string): string => {
@@ -199,14 +217,20 @@ const RelatorioPreview: React.FC = () => {
                               </p>
                               {imovel[campo] && imovel[campo].trim() !== '' ? (
                                 <img 
-                                  src={imovel[campo]} 
+                                  src={`https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[campo]}`}
                                   alt={fieldLabels[campo] || campo}
                                   className="w-full h-32 object-cover border border-gray-200 rounded"
                                   onLoad={() => console.log(`✅ Imagem carregada: ${campo}`)}
                                   onError={(e) => {
                                     console.log(`❌ Erro ao carregar: ${campo} - ${imovel[campo]}`);
+                                    // Tentar URL direta se a primeira falhar
                                     const target = e.target as HTMLImageElement;
-                                    target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDIwMCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5Q0EzQUYiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiI+SW1hZ2VtIG7Do28gZGlzcG9uw612ZWw8L3RleHQ+Cjwvc3ZnPgo=';
+                                    if (!target.src.startsWith('http') && !target.dataset.tried) {
+                                      target.dataset.tried = 'true';
+                                      target.src = imovel[campo]; // Tentar URL direta
+                                    } else {
+                                      target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDIwMCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5Q0EzQUYiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiI+SW1hZ2VtIG7Do28gZGlzcG9uw612ZWw8L3RleHQ+Cjwvc3ZnPgo=';
+                                    }
                                   }}
                                 />
                               ) : (

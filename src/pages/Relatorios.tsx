@@ -27,12 +27,24 @@ const Relatorios = () => {
   const { generateReport, isGenerating } = useCAIPReport();
   const { toast } = useToast();
 
+  // Carregar dados salvos do localStorage
+  const loadSavedData = () => {
+    try {
+      const saved = localStorage.getItem('relatorio_customizacao');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const savedData = loadSavedData();
+
   const [filteredData, setFilteredData] = useState<any[]>([]);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [reportTitle, setReportTitle] = useState('');
-  const [reportDescription, setReportDescription] = useState('');
-  const [includeImages, setIncludeImages] = useState(true);
-  const [reportFormat, setReportFormat] = useState('pdf');
+  const [selectedItems, setSelectedItems] = useState<string[]>(savedData?.selectedItems || []);
+  const [reportTitle, setReportTitle] = useState(savedData?.reportTitle || '');
+  const [reportDescription, setReportDescription] = useState(savedData?.reportDescription || '');
+  const [includeImages, setIncludeImages] = useState(savedData?.includeImages ?? true);
+  const [reportFormat, setReportFormat] = useState(savedData?.reportFormat || 'pdf');
 
   // Todos os campos disponíveis do CAIP organizados por categoria
   const availableFields = [
@@ -101,9 +113,22 @@ const Relatorios = () => {
     'climatizacao_de_ambientes', 'coleta_de_lixo', 'observacoes'
   ];
 
-  const [selectedFields, setSelectedFields] = useState<string[]>([
-    'nome_da_unidade', 'tipo_de_unidade', 'endereco', 'area_construida_m2', 'estado_de_conservacao'
-  ]);
+  const [selectedFields, setSelectedFields] = useState<string[]>(
+    savedData?.selectedFields || ['nome_da_unidade', 'tipo_de_unidade', 'endereco', 'area_construida_m2', 'estado_de_conservacao']
+  );
+
+  // Salvar dados no localStorage sempre que houver mudança
+  useEffect(() => {
+    const dataToSave = {
+      selectedItems,
+      reportTitle,
+      reportDescription,
+      includeImages,
+      reportFormat,
+      selectedFields
+    };
+    localStorage.setItem('relatorio_customizacao', JSON.stringify(dataToSave));
+  }, [selectedItems, reportTitle, reportDescription, includeImages, reportFormat, selectedFields]);
 
   useEffect(() => {
     setFilteredData(supabaseData);
@@ -261,6 +286,12 @@ const Relatorios = () => {
     try {
       const selectedData = filteredData.filter(item => selectedItems.includes(item.id));
       
+      console.log('=== DEBUG GERAÇÃO RELATÓRIO ===');
+      console.log('Dados filtrados:', filteredData.length);
+      console.log('IDs selecionados:', selectedItems);
+      console.log('Dados selecionados:', selectedData);
+      console.log('Campos incluídos:', selectedFields);
+      
       // Preparar dados do relatório
       const reportData = {
         titulo: reportTitle,
@@ -273,6 +304,8 @@ const Relatorios = () => {
         data_geracao: new Date().toLocaleString('pt-BR'),
         gerado_por: profile?.nome_completo || user?.email
       };
+
+      console.log('Dados do relatório preparados:', reportData);
 
       // Navegar para preview em vez de gerar PDF diretamente
       navigate('/relatorio-preview', { state: { reportData } });
@@ -315,11 +348,34 @@ const Relatorios = () => {
     setSelectedFields(selectedFieldIds);
   };
 
+  const clearCustomization = () => {
+    setSelectedItems([]);
+    setReportTitle('');
+    setReportDescription('');
+    setIncludeImages(true);
+    setReportFormat('pdf');
+    setSelectedFields(['nome_da_unidade', 'tipo_de_unidade', 'endereco', 'area_construida_m2', 'estado_de_conservacao']);
+    localStorage.removeItem('relatorio_customizacao');
+    toast({
+      title: "Customização limpa",
+      description: "Todos os dados de customização foram removidos.",
+    });
+  };
+
   return (
     <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
-      <div className="flex items-center gap-2 mb-4 sm:mb-6">
-        <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Relatórios Customizados</h1>
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <div className="flex items-center gap-2">
+          <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Relatórios Customizados</h1>
+        </div>
+        <Button
+          variant="outline"
+          onClick={clearCustomization}
+          className="text-sm"
+        >
+          Limpar Customização
+        </Button>
       </div>
 
       <div className="text-center mb-6">
