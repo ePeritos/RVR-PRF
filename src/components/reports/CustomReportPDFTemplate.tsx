@@ -93,13 +93,25 @@ export const CustomReportPDFTemplate: React.FC<CustomReportPDFTemplateProps> = (
     'ha_plano_de_manutencao_do_imovel': 'Plano de Manutenção',
     'precisaria_de_qual_intervencao': 'Intervenção Necessária',
     
-    // Outras
-    'o_trecho_e_concessionado': 'Trecho Concessionado',
-    'adere_ao_pgprf_teletrabalho': 'PGPRF Teletrabalho',
-    'identidade_visual': 'Identidade Visual',
-    'climatizacao_de_ambientes': 'Climatização',
-    'coleta_de_lixo': 'Coleta de Lixo',
-    'observacoes': 'Observações'
+     // Imagens
+     'imagem_geral': 'Imagem Geral',
+     'imagem_fachada': 'Imagem da Fachada',
+     'imagem_lateral_1': 'Imagem Lateral 1',
+     'imagem_lateral_2': 'Imagem Lateral 2',
+     'imagem_fundos': 'Imagem dos Fundos',
+     'imagem_sala_cofre': 'Imagem Sala Cofre',
+     'imagem_cofre': 'Imagem do Cofre',
+     'imagem_interna_alojamento_masculino': 'Imagem Alojamento Masculino',
+     'imagem_interna_alojamento_feminino': 'Imagem Alojamento Feminino',
+     'imagem_interna_plantao_uop': 'Imagem Plantão UOP',
+     
+     // Outras
+     'o_trecho_e_concessionado': 'Trecho Concessionado',
+     'adere_ao_pgprf_teletrabalho': 'PGPRF Teletrabalho',
+     'identidade_visual': 'Identidade Visual',
+     'climatizacao_de_ambientes': 'Climatização',
+     'coleta_de_lixo': 'Coleta de Lixo',
+     'observacoes': 'Observações'
   };
 
   const imageFields = [
@@ -173,7 +185,16 @@ export const CustomReportPDFTemplate: React.FC<CustomReportPDFTemplateProps> = (
               <h3 className="text-sm font-semibold text-gray-700 mb-3">Imagens</h3>
               <div className="grid grid-cols-2 gap-3">
                 {imageFields
-                  .filter(campo => imovel[campo] && imovel[campo].trim() !== '') // Incluir todas as imagens disponíveis, não apenas as selecionadas
+                  .filter(campo => {
+                    // Se o campo de imagem está selecionado E tem valor
+                    const isSelected = data.campos_incluidos.includes(campo);
+                    const hasValue = imovel[campo] && imovel[campo].trim() !== '';
+                    
+                    // Se nenhum campo de imagem foi selecionado, mostrar todas as imagens disponíveis
+                    const hasSelectedImageFields = data.campos_incluidos.some(field => imageFields.includes(field));
+                    
+                    return hasValue && (isSelected || !hasSelectedImageFields);
+                  })
                   .map(campo => (
                     <div key={campo} className="text-center">
                       <p className="text-xs text-gray-600 mb-1">

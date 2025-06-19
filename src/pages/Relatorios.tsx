@@ -214,14 +214,17 @@ const Relatorios = () => {
     'sala_administrativa_escritorio': 'Sala Administrativa',
     'garagem_para_viaturas': 'Garagem para Viaturas',
     
-    // Imagens
-    'imagem_geral': 'Imagem Geral',
-    'imagem_fachada': 'Imagem da Fachada',
-    'imagem_lateral_1': 'Imagem Lateral 1',
-    'imagem_lateral_2': 'Imagem Lateral 2',
-    'imagem_fundos': 'Imagem dos Fundos',
-    'imagem_sala_cofre': 'Imagem Sala Cofre',
-    'imagem_cofre': 'Imagem do Cofre',
+     // Imagens
+     'imagem_geral': 'Imagem Geral',
+     'imagem_fachada': 'Imagem da Fachada',
+     'imagem_lateral_1': 'Imagem Lateral 1',
+     'imagem_lateral_2': 'Imagem Lateral 2',
+     'imagem_fundos': 'Imagem dos Fundos',
+     'imagem_sala_cofre': 'Imagem Sala Cofre',
+     'imagem_cofre': 'Imagem do Cofre',
+     'imagem_interna_alojamento_masculino': 'Imagem Alojamento Masculino',
+     'imagem_interna_alojamento_feminino': 'Imagem Alojamento Feminino',
+     'imagem_interna_plantao_uop': 'Imagem Plantão UOP',
     
     // Outras
     'o_trecho_e_concessionado': 'Trecho Concessionado',
@@ -232,7 +235,7 @@ const Relatorios = () => {
     'observacoes': 'Observações'
   };
 
-  const fieldOptions = availableFields.map(field => fieldLabels[field] || field);
+  const fieldOptions = availableFields.map(field => fieldLabels[field] || field).sort((a, b) => a.localeCompare(b));
 
   const handleGenerateReport = async () => {
     if (selectedItems.length === 0) {
