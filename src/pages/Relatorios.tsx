@@ -16,6 +16,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useToast } from '@/hooks/use-toast';
 import { useCAIPReport } from '@/hooks/useCAIPReport';
+import { exportToExcel, exportToCSV } from '@/utils/exportData';
 
 const Relatorios = () => {
   const navigate = useNavigate();
@@ -327,7 +328,50 @@ const Relatorios = () => {
 
       console.log('Dados do relatório preparados:', reportData);
 
-      // Navegar para preview em vez de gerar PDF diretamente
+      // Verificar formato de exportação selecionado
+      if (reportFormat === 'excel') {
+        try {
+          exportToExcel({
+            title: reportTitle,
+            data: selectedData,
+            selectedFields: selectedFields
+          });
+          toast({
+            title: "Sucesso",
+            description: "Arquivo Excel gerado com sucesso!",
+          });
+        } catch (error) {
+          toast({
+            title: "Erro",
+            description: "Erro ao gerar arquivo Excel.",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
+      if (reportFormat === 'csv') {
+        try {
+          exportToCSV({
+            title: reportTitle,
+            data: selectedData,
+            selectedFields: selectedFields
+          });
+          toast({
+            title: "Sucesso",
+            description: "Arquivo CSV gerado com sucesso!",
+          });
+        } catch (error) {
+          toast({
+            title: "Erro",
+            description: "Erro ao gerar arquivo CSV.",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
+      // Navegar para preview para PDF
       navigate('/relatorio-preview', { state: { reportData } });
 
       toast({

@@ -150,12 +150,67 @@ export const CustomReportPDFTemplate: React.FC<CustomReportPDFTemplateProps> = (
   const formatValue = (value: any, field: string): string => {
     if (value === null || value === undefined || value === '') return 'Não informado';
     
+    // Campos que representam presença/ausência de características (Sim/Não)
+    const booleanFields = [
+      'alojamento_feminino', 'alojamento_masculino', 'alojamento_misto',
+      'almoxarifado', 'area_de_servico', 'arquivo', 'auditorio',
+      'banheiro_para_zeladoria', 'banheiro_feminino_para_servidoras', 
+      'banheiro_masculino_para_servidores', 'banheiro_misto_para_servidores',
+      'box_com_chuveiro_externo', 'box_para_lavagem_de_veiculos',
+      'canil', 'casa_de_maquinas', 'central_de_gas',
+      'cobertura_para_aglomeracao_de_usuarios', 'cobertura_para_fiscalizacao_de_veiculos',
+      'copa_e_cozinha', 'deposito_de_lixo', 'deposito_de_materiais_de_descarte_e_baixa',
+      'deposito_de_material_de_limpeza', 'deposito_de_material_operacional',
+      'estacionamento_para_usuarios', 'garagem_para_servidores', 'garagem_para_viaturas',
+      'lavabo_para_servidores_sem_box_para_chuveiro', 'local_para_custodia_temporaria_de_detidos',
+      'local_para_guarda_provisoria_de_animais', 'patio_de_retencao_de_veiculos',
+      'plataforma_para_fiscalizacao_da_parte_superior_dos_veiculos',
+      'ponto_de_pouso_para_aeronaves', 'rampa_de_fiscalizacao_de_veiculos',
+      'recepcao', 'sala_administrativa_escritorio', 'sala_de_assepsia',
+      'sala_de_aula', 'sala_de_reuniao', 'sala_de_revista_pessoal',
+      'sala_operacional_observatorio', 'sala_tecnica', 'sanitario_publico',
+      'telefone_publico', 'torre_de_telecomunicacoes', 'vestiario_para_nao_policiais',
+      'vestiario_para_policiais', 'fornecimento_de_agua', 'fornecimento_de_energia_eletrica',
+      'esgotamento_sanitario', 'conexao_de_internet', 'possui_wireless_wifi',
+      'identidade_visual', 'blindagem', 'abastecimento_de_agua',
+      'energia_eletrica_de_emergencia', 'iluminacao_externa', 'protecao_contra_incendios',
+      'protecao_contra_intrusao', 'radiocomunicacao', 'cabeamento_estruturado',
+      'claviculario', 'sala_cofre', 'concertina', 'muro_ou_alambrado',
+      'acessibilidade', 'sustentabilidade', 'aproveitamento_da_agua_da_chuva',
+      'energia_solar', 'climatizacao_de_ambientes', 'coleta_de_lixo',
+      'ha_contrato_de_manutencao_predial', 'ha_plano_de_manutencao_do_imovel',
+      'o_trecho_e_concessionado', 'adere_ao_pgprf_teletrabalho'
+    ];
+    
+    if (booleanFields.includes(field)) {
+      const strValue = String(value).toLowerCase().trim();
+      // Valores que representam "Sim"
+      if (strValue === 'sim' || strValue === 'on' || strValue === 'true' || strValue === '1') {
+        return 'Sim';
+      }
+      // Valores que representam "Não"
+      if (strValue === 'não' || strValue === 'nao' || strValue === 'off' || strValue === 'false' || strValue === '0') {
+        return 'Não';
+      }
+      return 'Não informado';
+    }
+    
     if (field.includes('area_') || field.includes('m2')) {
-      return `${Number(value).toLocaleString('pt-BR')} m²`;
+      const numValue = Number(value);
+      if (isNaN(numValue) || numValue === 0) return 'Não informado';
+      return `${numValue.toLocaleString('pt-BR')} m²`;
     }
     
     if (field === 'rvr') {
-      return `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+      const numValue = Number(value);
+      if (isNaN(numValue) || numValue === 0) return 'Não informado';
+      return `R$ ${numValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    }
+    
+    if (field.includes('ano') || field.includes('idade')) {
+      const numValue = Number(value);
+      if (isNaN(numValue) || numValue === 0) return 'Não informado';
+      return `${numValue} anos`;
     }
     
     return String(value);
@@ -233,9 +288,9 @@ export const CustomReportPDFTemplate: React.FC<CustomReportPDFTemplateProps> = (
                         <p className="text-xs text-gray-600 mb-1 font-medium">
                           {fieldLabels[campo] || campo.replace('imagem_', '').replace('_', ' ')}
                         </p>
-                        {imovel[campo] && imovel[campo].trim() !== '' ? (
+                        {imovel[campo] && imovel[campo].trim() !== '' && imovel[campo] !== '{}' ? (
                           <img 
-                            src={imovel[campo]} 
+                            src={imovel[campo].startsWith('http') ? imovel[campo] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[campo]}`} 
                             alt={fieldLabels[campo] || campo}
                             className="w-full h-32 object-cover border border-gray-200 rounded"
                             crossOrigin="anonymous"
@@ -243,8 +298,7 @@ export const CustomReportPDFTemplate: React.FC<CustomReportPDFTemplateProps> = (
                             onError={(e) => {
                               console.log(`Erro ao carregar imagem: ${campo} - ${imovel[campo]}`);
                               const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              target.nextElementSibling?.classList.remove('hidden');
+                              target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDIwMCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5Q0EzQUYiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiI+SW1hZ2VtIG7Do28gZGlzcG9uw612ZWw8L3RleHQ+Cjwvc3ZnPgo=';
                             }}
                           />
                         ) : (
