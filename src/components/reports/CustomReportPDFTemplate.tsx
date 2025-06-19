@@ -186,29 +186,39 @@ export const CustomReportPDFTemplate: React.FC<CustomReportPDFTemplateProps> = (
               <div className="grid grid-cols-2 gap-3">
                 {imageFields
                   .filter(campo => {
-                    // Se o campo de imagem está selecionado E tem valor
-                    const isSelected = data.campos_incluidos.includes(campo);
-                    const hasValue = imovel[campo] && imovel[campo].trim() !== '';
-                    
-                    // Se nenhum campo de imagem foi selecionado, mostrar todas as imagens disponíveis
+                    // Se campos de imagem foram especificamente selecionados, mostrar apenas esses
                     const hasSelectedImageFields = data.campos_incluidos.some(field => imageFields.includes(field));
                     
-                    return hasValue && (isSelected || !hasSelectedImageFields);
+                    if (hasSelectedImageFields) {
+                      return data.campos_incluidos.includes(campo);
+                    } else {
+                      // Se nenhum campo de imagem foi selecionado, mostrar todas as imagens que têm valor
+                      return imovel[campo] && imovel[campo].trim() !== '';
+                    }
                   })
                   .map(campo => (
                     <div key={campo} className="text-center">
-                      <p className="text-xs text-gray-600 mb-1">
+                      <p className="text-xs text-gray-600 mb-1 font-medium">
                         {fieldLabels[campo] || campo.replace('imagem_', '').replace('_', ' ')}
                       </p>
-                      <img 
-                        src={imovel[campo]} 
-                        alt={fieldLabels[campo] || campo}
-                        className="w-full h-32 object-cover border border-gray-200 rounded"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                        }}
-                      />
+                      {imovel[campo] && imovel[campo].trim() !== '' ? (
+                        <img 
+                          src={imovel[campo]} 
+                          alt={fieldLabels[campo] || campo}
+                          className="w-full h-32 object-cover border border-gray-200 rounded"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-32 flex items-center justify-center border border-gray-300 rounded bg-gray-50">
+                          <p className="text-xs text-gray-500 text-center px-2">
+                            Imagem não disponível no banco de dados
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ))}
               </div>
