@@ -196,7 +196,7 @@ export const ReportContent: React.FC<ReportContentProps> = ({
                   <tbody>
                     {fieldPairs.map((pair, pairIndex) => (
                       <tr key={pairIndex}>
-                        {/* Primeira coluna */}
+                      {/* Primeira coluna */}
                         <td style={{ 
                           width: '25%', 
                           padding: '6px', 
@@ -214,7 +214,7 @@ export const ReportContent: React.FC<ReportContentProps> = ({
                           borderBottom: '1px solid #eee',
                           borderRight: '1px solid #eee'
                         }}>
-                          {pair[0] ? formatValue(imovel[pair[0]], pair[0]) : ''}
+                          {pair[0] ? formatValue(imovel[pair[0]] || '', pair[0]) : ''}
                         </td>
                         
                         {/* Segunda coluna */}
@@ -234,7 +234,7 @@ export const ReportContent: React.FC<ReportContentProps> = ({
                           verticalAlign: 'top',
                           borderBottom: '1px solid #eee'
                         }}>
-                          {pair[1] ? formatValue(imovel[pair[1]], pair[1]) : ''}
+                          {pair[1] ? formatValue(imovel[pair[1]] || '', pair[1]) : ''}
                         </td>
                       </tr>
                     ))}
@@ -244,7 +244,11 @@ export const ReportContent: React.FC<ReportContentProps> = ({
 
               {/* Imagens em colunas duplas */}
               {data.incluir_imagens && imageFields.length > 0 && (
-                <div style={{ marginTop: '16px', pageBreakBefore: 'auto' }}>
+                <div style={{ 
+                  marginTop: '16px', 
+                  pageBreakBefore: 'auto',
+                  pageBreakInside: 'avoid'
+                }}>
                   <h3 style={{ 
                     fontSize: '14px', 
                     fontWeight: 'bold', 
@@ -254,154 +258,159 @@ export const ReportContent: React.FC<ReportContentProps> = ({
                     Imagens
                   </h3>
                   
-                  <table style={{ 
-                    width: '100%', 
-                    borderCollapse: 'collapse',
-                    marginBottom: '16px'
-                  }}>
-                    <tbody>
-                      {imagePairs.map((imagePair, pairIndex) => (
-                        <tr key={pairIndex}>
-                          {/* Primeira imagem */}
-                          <td style={{ 
-                            width: '50%', 
-                            padding: '8px', 
-                            verticalAlign: 'top',
-                            borderBottom: '1px solid #eee'
-                          }}>
-                            {imagePair[0] && (
-                              <div style={{ pageBreakInside: 'avoid' }}>
-                                <h4 style={{ 
-                                  fontSize: '12px', 
-                                  fontWeight: 'bold',
-                                  marginBottom: '8px',
-                                  textAlign: 'center',
-                                  color: '#555'
-                                }}>
-                                  {fieldLabels[imagePair[0]] || imagePair[0].replace('imagem_', '').replace('_', ' ')}
-                                </h4>
-                                {imovel[imagePair[0]] && imovel[imagePair[0]].trim() !== '' && imovel[imagePair[0]] !== '{}' ? (
-                                  <div style={{ 
-                                    width: '100%',
-                                    height: '180px',
-                                    border: '1px solid #ddd',
-                                    borderRadius: '4px',
-                                    overflow: 'hidden',
-                                    backgroundColor: '#f9f9f9',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    pageBreakInside: 'avoid'
+                  {imagePairs.map((imagePair, pairIndex) => (
+                    <div key={pairIndex} style={{ 
+                      pageBreakInside: 'avoid',
+                      marginBottom: '16px'
+                    }}>
+                      <table style={{ 
+                        width: '100%', 
+                        borderCollapse: 'collapse',
+                        pageBreakInside: 'avoid'
+                      }}>
+                        <tbody>
+                          <tr>
+                            {/* Primeira imagem */}
+                            <td style={{ 
+                              width: '50%', 
+                              padding: '8px', 
+                              verticalAlign: 'top',
+                              pageBreakInside: 'avoid'
+                            }}>
+                              {imagePair[0] && (
+                                <div style={{ pageBreakInside: 'avoid' }}>
+                                  <h4 style={{ 
+                                    fontSize: '12px', 
+                                    fontWeight: 'bold',
+                                    marginBottom: '8px',
+                                    textAlign: 'center',
+                                    color: '#555'
                                   }}>
-                                    <img 
-                                      src={imovel[imagePair[0]].startsWith('http') ? imovel[imagePair[0]] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imagePair[0]]}`}
-                                      alt={fieldLabels[imagePair[0]] || imagePair[0]}
-                                      style={{ 
-                                        maxWidth: '100%',
-                                        maxHeight: '100%',
-                                        objectFit: 'contain',
-                                        display: 'block'
-                                      }}
-                                      crossOrigin="anonymous"
-                                    />
-                                  </div>
-                                ) : (
-                                  <div style={{ 
-                                    width: '100%',
-                                    height: '180px',
-                                    border: '1px solid #ddd',
-                                    borderRadius: '4px',
-                                    backgroundColor: '#f9f9f9',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                  }}>
-                                    <p style={{ 
-                                      fontSize: '11px', 
-                                      color: '#888',
-                                      textAlign: 'center',
-                                      padding: '8px'
+                                    {fieldLabels[imagePair[0]] || imagePair[0].replace('imagem_', '').replace('_', ' ')}
+                                  </h4>
+                                  {imovel[imagePair[0]] && imovel[imagePair[0]].trim() !== '' && imovel[imagePair[0]] !== '{}' ? (
+                                    <div style={{ 
+                                      width: '100%',
+                                      height: '180px',
+                                      border: '1px solid #ddd',
+                                      borderRadius: '4px',
+                                      overflow: 'hidden',
+                                      backgroundColor: '#f9f9f9',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      pageBreakInside: 'avoid'
                                     }}>
-                                      Imagem não disponível
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </td>
-                          
-                          {/* Segunda imagem */}
-                          <td style={{ 
-                            width: '50%', 
-                            padding: '8px', 
-                            verticalAlign: 'top',
-                            borderBottom: '1px solid #eee',
-                            borderLeft: '1px solid #eee'
-                          }}>
-                            {imagePair[1] && (
-                              <div style={{ pageBreakInside: 'avoid' }}>
-                                <h4 style={{ 
-                                  fontSize: '12px', 
-                                  fontWeight: 'bold',
-                                  marginBottom: '8px',
-                                  textAlign: 'center',
-                                  color: '#555'
-                                }}>
-                                  {fieldLabels[imagePair[1]] || imagePair[1].replace('imagem_', '').replace('_', ' ')}
-                                </h4>
-                                {imovel[imagePair[1]] && imovel[imagePair[1]].trim() !== '' && imovel[imagePair[1]] !== '{}' ? (
-                                  <div style={{ 
-                                    width: '100%',
-                                    height: '180px',
-                                    border: '1px solid #ddd',
-                                    borderRadius: '4px',
-                                    overflow: 'hidden',
-                                    backgroundColor: '#f9f9f9',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    pageBreakInside: 'avoid'
-                                  }}>
-                                    <img 
-                                      src={imovel[imagePair[1]].startsWith('http') ? imovel[imagePair[1]] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imagePair[1]]}`}
-                                      alt={fieldLabels[imagePair[1]] || imagePair[1]}
-                                      style={{ 
-                                        maxWidth: '100%',
-                                        maxHeight: '100%',
-                                        objectFit: 'contain',
-                                        display: 'block'
-                                      }}
-                                      crossOrigin="anonymous"
-                                    />
-                                  </div>
-                                ) : (
-                                  <div style={{ 
-                                    width: '100%',
-                                    height: '180px',
-                                    border: '1px solid #ddd',
-                                    borderRadius: '4px',
-                                    backgroundColor: '#f9f9f9',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                  }}>
-                                    <p style={{ 
-                                      fontSize: '11px', 
-                                      color: '#888',
-                                      textAlign: 'center',
-                                      padding: '8px'
+                                      <img 
+                                        src={imovel[imagePair[0]].startsWith('http') ? imovel[imagePair[0]] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imagePair[0]]}`}
+                                        alt={fieldLabels[imagePair[0]] || imagePair[0]}
+                                        style={{ 
+                                          maxWidth: '100%',
+                                          maxHeight: '100%',
+                                          objectFit: 'contain',
+                                          display: 'block'
+                                        }}
+                                        crossOrigin="anonymous"
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div style={{ 
+                                      width: '100%',
+                                      height: '180px',
+                                      border: '1px solid #ddd',
+                                      borderRadius: '4px',
+                                      backgroundColor: '#f9f9f9',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center'
                                     }}>
-                                      Imagem não disponível
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                                      <p style={{ 
+                                        fontSize: '11px', 
+                                        color: '#888',
+                                        textAlign: 'center',
+                                        padding: '8px'
+                                      }}>
+                                        Imagem não disponível
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </td>
+                            
+                            {/* Segunda imagem */}
+                            <td style={{ 
+                              width: '50%', 
+                              padding: '8px', 
+                              verticalAlign: 'top',
+                              borderLeft: '1px solid #eee',
+                              pageBreakInside: 'avoid'
+                            }}>
+                              {imagePair[1] && (
+                                <div style={{ pageBreakInside: 'avoid' }}>
+                                  <h4 style={{ 
+                                    fontSize: '12px', 
+                                    fontWeight: 'bold',
+                                    marginBottom: '8px',
+                                    textAlign: 'center',
+                                    color: '#555'
+                                  }}>
+                                    {fieldLabels[imagePair[1]] || imagePair[1].replace('imagem_', '').replace('_', ' ')}
+                                  </h4>
+                                  {imovel[imagePair[1]] && imovel[imagePair[1]].trim() !== '' && imovel[imagePair[1]] !== '{}' ? (
+                                    <div style={{ 
+                                      width: '100%',
+                                      height: '180px',
+                                      border: '1px solid #ddd',
+                                      borderRadius: '4px',
+                                      overflow: 'hidden',
+                                      backgroundColor: '#f9f9f9',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      pageBreakInside: 'avoid'
+                                    }}>
+                                      <img 
+                                        src={imovel[imagePair[1]].startsWith('http') ? imovel[imagePair[1]] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imagePair[1]]}`}
+                                        alt={fieldLabels[imagePair[1]] || imagePair[1]}
+                                        style={{ 
+                                          maxWidth: '100%',
+                                          maxHeight: '100%',
+                                          objectFit: 'contain',
+                                          display: 'block'
+                                        }}
+                                        crossOrigin="anonymous"
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div style={{ 
+                                      width: '100%',
+                                      height: '180px',
+                                      border: '1px solid #ddd',
+                                      borderRadius: '4px',
+                                      backgroundColor: '#f9f9f9',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center'
+                                    }}>
+                                      <p style={{ 
+                                        fontSize: '11px', 
+                                        color: '#888',
+                                        textAlign: 'center',
+                                        padding: '8px'
+                                      }}>
+                                        Imagem não disponível
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

@@ -125,6 +125,7 @@ export class PDFService {
             font-family: Arial, sans-serif !important;
           }
           
+          /* Controle rigoroso de quebra de página para tabelas */
           table {
             border-collapse: collapse !important;
             width: 100% !important;
@@ -143,6 +144,14 @@ export class PDFService {
             vertical-align: top !important;
           }
           
+          /* Controle específico para seções de imagem */
+          div[style*="pageBreakInside"] {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            margin-bottom: 20px !important;
+          }
+          
+          /* Controle específico para imagens e seus containers */
           img {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
@@ -152,9 +161,30 @@ export class PDFService {
             display: block !important;
           }
           
-          div[style*="pageBreakInside"] {
+          /* Container de cada imagem individual */
+          div[style*="height: 180px"] {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
+            margin-bottom: 10px !important;
+          }
+          
+          /* Seção de imagens completa */
+          div h3 + table {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          
+          /* Cada linha de imagens */
+          tr:has(img) {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            page-break-before: auto !important;
+          }
+          
+          /* Força quebra antes de seções de imagem se necessário */
+          h3:contains("Imagens") {
+            page-break-before: auto !important;
+            margin-top: 20px !important;
           }
         }
       `;
