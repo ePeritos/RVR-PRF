@@ -122,23 +122,37 @@ export class PDFService {
           * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            font-family: Arial, sans-serif !important;
+          }
+          
+          table {
+            border-collapse: collapse !important;
+            width: 100% !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          
+          tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          
+          td {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            vertical-align: top !important;
           }
           
           img {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
-            max-width: 95% !important;
-            max-height: 95% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
             object-fit: contain !important;
             display: block !important;
           }
           
-          .grid {
-            display: block !important;
-          }
-          
-          .grid > div {
-            margin-bottom: 40px !important;
+          div[style*="pageBreakInside"] {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }

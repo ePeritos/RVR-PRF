@@ -129,14 +129,19 @@ export const ReportContent: React.FC<ReportContentProps> = ({
   };
 
   return (
-    <div className={`border rounded-lg p-6 bg-white shadow-sm ${className}`} style={{ pageBreakInside: 'avoid' }}>
+    <div className={`border rounded-lg p-6 bg-white shadow-sm ${className}`} style={{ 
+      pageBreakInside: 'avoid',
+      fontFamily: 'Arial, sans-serif',
+      fontSize: '12px',
+      lineHeight: '1.4'
+    }}>
       {/* Cabeçalho do Relatório */}
       <div className="text-center mb-8 border-b-2 border-gray-800 pb-4">
-        <h1 className="text-xl font-bold text-gray-800 mb-2">{data.titulo}</h1>
+        <h1 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>{data.titulo}</h1>
         {data.descricao && (
-          <p className="text-sm text-gray-600 mb-2">{data.descricao}</p>
+          <p style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>{data.descricao}</p>
         )}
-        <div className="text-xs text-gray-500">
+        <div style={{ fontSize: '11px', color: '#888' }}>
           <p>Gerado em: {data.data_geracao}</p>
           <p>Por: {data.gerado_por}</p>
           <p>Total de imóveis: {data.total_imoveis}</p>
@@ -145,99 +150,279 @@ export const ReportContent: React.FC<ReportContentProps> = ({
 
       {/* Dados dos Imóveis */}
       {data.dados && data.dados.length > 0 ? (
-        data.dados.map((imovel: any, index: number) => (
-          <div key={imovel.id || index} className="mb-8 border border-gray-300 rounded p-4" style={{ pageBreakInside: 'avoid', marginBottom: '20px' }}>
-            <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2" style={{ pageBreakAfter: 'avoid' }}>
-              {imovel.nome_da_unidade || `Imóvel ${index + 1}`}
-            </h2>
-            
-            {/* Campos de dados */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-              {data.campos_incluidos
-                ?.filter((campo: string) => !campo.startsWith('imagem_'))
-                ?.map((campo: string) => (
-                  <div key={campo} className="flex flex-col border-b border-gray-100 pb-2">
-                    <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
-                      {fieldLabels[campo] || campo}
-                    </span>
-                    <span className="text-sm text-gray-800 mt-1">
-                      {formatValue(imovel[campo], campo)}
-                    </span>
-                  </div>
-                ))}
-            </div>
+        data.dados.map((imovel: any, index: number) => {
+          const dataFields = data.campos_incluidos?.filter((campo: string) => !campo.startsWith('imagem_')) || [];
+          const imageFields = data.campos_incluidos?.filter((campo: string) => campo.startsWith('imagem_')) || [];
+          
+          // Organizar campos em pares para a tabela de duas colunas
+          const fieldPairs: Array<[string, string?]> = [];
+          for (let i = 0; i < dataFields.length; i += 2) {
+            fieldPairs.push([dataFields[i], dataFields[i + 1]]);
+          }
+          
+          // Organizar imagens em pares para layout duplo
+          const imagePairs: Array<[string, string?]> = [];
+          for (let i = 0; i < imageFields.length; i += 2) {
+            imagePairs.push([imageFields[i], imageFields[i + 1]]);
+          }
 
-            {/* Imagens */}
-            {data.incluir_imagens && (
-              <div className="mt-8" style={{ pageBreakBefore: 'auto' }}>
-                <h3 className="text-sm font-semibold text-gray-700 mb-4" style={{ pageBreakAfter: 'avoid' }}>Imagens</h3>
-                {data.campos_incluidos
-                  ?.filter((campo: string) => campo.startsWith('imagem_'))
-                  ?.map((campo: string, index: number) => (
-                    <div 
-                      key={campo} 
-                      className="mb-8" 
-                      style={{ 
-                        pageBreakInside: 'avoid',
-                        marginBottom: '40px',
-                        minHeight: '220px',
-                        breakInside: 'avoid'
-                      }}
-                    >
-                      <h4 className="text-sm text-gray-700 mb-3 font-medium text-center">
-                        {fieldLabels[campo] || campo.replace('imagem_', '').replace('_', ' ')}
-                      </h4>
-                      {imovel[campo] && imovel[campo].trim() !== '' && imovel[campo] !== '{}' ? (
-                        <div 
-                          className="w-full border border-gray-200 rounded overflow-hidden bg-gray-50"
-                          style={{ 
-                            height: '200px',
-                            pageBreakInside: 'avoid',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            breakInside: 'avoid'
-                          }}
-                        >
-                          <img 
-                            src={imovel[campo].startsWith('http') ? imovel[campo] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[campo]}`}
-                            alt={fieldLabels[campo] || campo}
-                            style={{ 
-                              maxWidth: '95%',
-                              maxHeight: '95%',
-                              objectFit: 'contain',
-                              pageBreakInside: 'avoid',
-                              breakInside: 'avoid',
-                              display: 'block'
-                            }}
-                            crossOrigin="anonymous"
-                          />
-                        </div>
-                      ) : (
-                        <div 
-                          className="w-full flex items-center justify-center border border-gray-300 rounded bg-gray-50"
-                          style={{ height: '200px' }}
-                        >
-                          <p className="text-xs text-gray-500 text-center px-2">
-                            Imagem não disponível
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-              </div>
-            )}
-          </div>
-        ))
+          return (
+            <div key={imovel.id || index} style={{ 
+              pageBreakInside: 'avoid', 
+              marginBottom: '20px',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              padding: '16px'
+            }}>
+              <h2 style={{ 
+                fontSize: '16px', 
+                fontWeight: 'bold', 
+                marginBottom: '16px',
+                borderBottom: '1px solid #ddd',
+                paddingBottom: '8px',
+                pageBreakAfter: 'avoid'
+              }}>
+                {imovel.nome_da_unidade || `Imóvel ${index + 1}`}
+              </h2>
+              
+              {/* Tabela de dados em colunas duplas */}
+              {dataFields.length > 0 && (
+                <table style={{ 
+                  width: '100%', 
+                  borderCollapse: 'collapse',
+                  marginBottom: '16px',
+                  fontSize: '12px'
+                }}>
+                  <tbody>
+                    {fieldPairs.map((pair, pairIndex) => (
+                      <tr key={pairIndex}>
+                        {/* Primeira coluna */}
+                        <td style={{ 
+                          width: '25%', 
+                          padding: '6px', 
+                          verticalAlign: 'top',
+                          borderBottom: '1px solid #eee',
+                          fontWeight: 'bold',
+                          color: '#555'
+                        }}>
+                          {pair[0] ? (fieldLabels[pair[0]] || pair[0]) : ''}
+                        </td>
+                        <td style={{ 
+                          width: '25%', 
+                          padding: '6px', 
+                          verticalAlign: 'top',
+                          borderBottom: '1px solid #eee',
+                          borderRight: '1px solid #eee'
+                        }}>
+                          {pair[0] ? formatValue(imovel[pair[0]], pair[0]) : ''}
+                        </td>
+                        
+                        {/* Segunda coluna */}
+                        <td style={{ 
+                          width: '25%', 
+                          padding: '6px', 
+                          verticalAlign: 'top',
+                          borderBottom: '1px solid #eee',
+                          fontWeight: 'bold',
+                          color: '#555'
+                        }}>
+                          {pair[1] ? (fieldLabels[pair[1]] || pair[1]) : ''}
+                        </td>
+                        <td style={{ 
+                          width: '25%', 
+                          padding: '6px', 
+                          verticalAlign: 'top',
+                          borderBottom: '1px solid #eee'
+                        }}>
+                          {pair[1] ? formatValue(imovel[pair[1]], pair[1]) : ''}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {/* Imagens em colunas duplas */}
+              {data.incluir_imagens && imageFields.length > 0 && (
+                <div style={{ marginTop: '16px', pageBreakBefore: 'auto' }}>
+                  <h3 style={{ 
+                    fontSize: '14px', 
+                    fontWeight: 'bold', 
+                    marginBottom: '16px',
+                    pageBreakAfter: 'avoid'
+                  }}>
+                    Imagens
+                  </h3>
+                  
+                  <table style={{ 
+                    width: '100%', 
+                    borderCollapse: 'collapse',
+                    marginBottom: '16px'
+                  }}>
+                    <tbody>
+                      {imagePairs.map((imagePair, pairIndex) => (
+                        <tr key={pairIndex}>
+                          {/* Primeira imagem */}
+                          <td style={{ 
+                            width: '50%', 
+                            padding: '8px', 
+                            verticalAlign: 'top',
+                            borderBottom: '1px solid #eee'
+                          }}>
+                            {imagePair[0] && (
+                              <div style={{ pageBreakInside: 'avoid' }}>
+                                <h4 style={{ 
+                                  fontSize: '12px', 
+                                  fontWeight: 'bold',
+                                  marginBottom: '8px',
+                                  textAlign: 'center',
+                                  color: '#555'
+                                }}>
+                                  {fieldLabels[imagePair[0]] || imagePair[0].replace('imagem_', '').replace('_', ' ')}
+                                </h4>
+                                {imovel[imagePair[0]] && imovel[imagePair[0]].trim() !== '' && imovel[imagePair[0]] !== '{}' ? (
+                                  <div style={{ 
+                                    width: '100%',
+                                    height: '180px',
+                                    border: '1px solid #ddd',
+                                    borderRadius: '4px',
+                                    overflow: 'hidden',
+                                    backgroundColor: '#f9f9f9',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    pageBreakInside: 'avoid'
+                                  }}>
+                                    <img 
+                                      src={imovel[imagePair[0]].startsWith('http') ? imovel[imagePair[0]] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imagePair[0]]}`}
+                                      alt={fieldLabels[imagePair[0]] || imagePair[0]}
+                                      style={{ 
+                                        maxWidth: '100%',
+                                        maxHeight: '100%',
+                                        objectFit: 'contain',
+                                        display: 'block'
+                                      }}
+                                      crossOrigin="anonymous"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div style={{ 
+                                    width: '100%',
+                                    height: '180px',
+                                    border: '1px solid #ddd',
+                                    borderRadius: '4px',
+                                    backgroundColor: '#f9f9f9',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}>
+                                    <p style={{ 
+                                      fontSize: '11px', 
+                                      color: '#888',
+                                      textAlign: 'center',
+                                      padding: '8px'
+                                    }}>
+                                      Imagem não disponível
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                          
+                          {/* Segunda imagem */}
+                          <td style={{ 
+                            width: '50%', 
+                            padding: '8px', 
+                            verticalAlign: 'top',
+                            borderBottom: '1px solid #eee',
+                            borderLeft: '1px solid #eee'
+                          }}>
+                            {imagePair[1] && (
+                              <div style={{ pageBreakInside: 'avoid' }}>
+                                <h4 style={{ 
+                                  fontSize: '12px', 
+                                  fontWeight: 'bold',
+                                  marginBottom: '8px',
+                                  textAlign: 'center',
+                                  color: '#555'
+                                }}>
+                                  {fieldLabels[imagePair[1]] || imagePair[1].replace('imagem_', '').replace('_', ' ')}
+                                </h4>
+                                {imovel[imagePair[1]] && imovel[imagePair[1]].trim() !== '' && imovel[imagePair[1]] !== '{}' ? (
+                                  <div style={{ 
+                                    width: '100%',
+                                    height: '180px',
+                                    border: '1px solid #ddd',
+                                    borderRadius: '4px',
+                                    overflow: 'hidden',
+                                    backgroundColor: '#f9f9f9',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    pageBreakInside: 'avoid'
+                                  }}>
+                                    <img 
+                                      src={imovel[imagePair[1]].startsWith('http') ? imovel[imagePair[1]] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imagePair[1]]}`}
+                                      alt={fieldLabels[imagePair[1]] || imagePair[1]}
+                                      style={{ 
+                                        maxWidth: '100%',
+                                        maxHeight: '100%',
+                                        objectFit: 'contain',
+                                        display: 'block'
+                                      }}
+                                      crossOrigin="anonymous"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div style={{ 
+                                    width: '100%',
+                                    height: '180px',
+                                    border: '1px solid #ddd',
+                                    borderRadius: '4px',
+                                    backgroundColor: '#f9f9f9',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}>
+                                    <p style={{ 
+                                      fontSize: '11px', 
+                                      color: '#888',
+                                      textAlign: 'center',
+                                      padding: '8px'
+                                    }}>
+                                      Imagem não disponível
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          );
+        })
       ) : (
-        <div className="text-center text-red-600 p-8">
-          <p className="font-semibold">❌ Nenhum dado encontrado para exibir</p>
-          <p className="text-sm mt-2">Verifique se os imóveis foram selecionados corretamente</p>
+        <div style={{ textAlign: 'center', color: '#dc2626', padding: '32px' }}>
+          <p style={{ fontWeight: 'bold' }}>❌ Nenhum dado encontrado para exibir</p>
+          <p style={{ fontSize: '11px', marginTop: '8px' }}>Verifique se os imóveis foram selecionados corretamente</p>
         </div>
       )}
 
       {/* Rodapé */}
-      <div className="text-center text-xs text-gray-500 mt-8 pt-4 border-t border-gray-300">
+      <div style={{ 
+        textAlign: 'center', 
+        fontSize: '11px', 
+        color: '#888', 
+        marginTop: '32px', 
+        paddingTop: '16px', 
+        borderTop: '1px solid #ccc' 
+      }}>
         <p>Sistema Integrado de Gestão de Imóveis - SIGI-PRF</p>
         <p>Relatório gerado automaticamente em {data.data_geracao}</p>
       </div>
