@@ -129,7 +129,7 @@ export const ReportContent: React.FC<ReportContentProps> = ({
   };
 
   return (
-    <div className={`border rounded-lg p-6 bg-white shadow-sm ${className}`}>
+    <div className={`border rounded-lg p-6 bg-white shadow-sm ${className}`} style={{ pageBreakInside: 'avoid' }}>
       {/* Cabeçalho do Relatório */}
       <div className="text-center mb-8 border-b-2 border-gray-800 pb-4">
         <h1 className="text-xl font-bold text-gray-800 mb-2">{data.titulo}</h1>
@@ -169,28 +169,53 @@ export const ReportContent: React.FC<ReportContentProps> = ({
 
             {/* Imagens */}
             {data.incluir_imagens && (
-              <div className="mt-6" style={{ pageBreakInside: 'avoid' }}>
+              <div className="mt-6" style={{ pageBreakInside: 'avoid', marginTop: '30px' }}>
                 <h3 className="text-sm font-semibold text-gray-700 mb-3" style={{ pageBreakAfter: 'avoid' }}>Imagens</h3>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-4">
                   {data.campos_incluidos
                     ?.filter((campo: string) => campo.startsWith('imagem_'))
-                    ?.map((campo: string) => (
-                      <div key={campo} className="text-center">
-                        <p className="text-xs text-gray-600 mb-1 font-medium">
+                    ?.map((campo: string, index: number) => (
+                      <div 
+                        key={campo} 
+                        className="text-center mb-6" 
+                        style={{ 
+                          pageBreakInside: 'avoid',
+                          marginBottom: '30px',
+                          minHeight: '200px'
+                        }}
+                      >
+                        <p className="text-sm text-gray-700 mb-2 font-medium">
                           {fieldLabels[campo] || campo.replace('imagem_', '').replace('_', ' ')}
                         </p>
                         {imovel[campo] && imovel[campo].trim() !== '' && imovel[campo] !== '{}' ? (
-                          <div className="w-full h-40 border border-gray-200 rounded overflow-hidden mb-2">
+                          <div 
+                            className="w-full border border-gray-200 rounded overflow-hidden"
+                            style={{ 
+                              height: '180px',
+                              pageBreakInside: 'avoid',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              backgroundColor: '#f9fafb'
+                            }}
+                          >
                             <img 
                               src={imovel[campo].startsWith('http') ? imovel[campo] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[campo]}`}
                               alt={fieldLabels[campo] || campo}
-                              className="w-full h-full object-contain bg-gray-50"
+                              style={{ 
+                                maxWidth: '100%',
+                                maxHeight: '100%',
+                                objectFit: 'contain',
+                                pageBreakInside: 'avoid'
+                              }}
                               crossOrigin="anonymous"
-                              style={{ pageBreakInside: 'avoid' }}
                             />
                           </div>
                         ) : (
-                          <div className="w-full h-40 flex items-center justify-center border border-gray-300 rounded bg-gray-50 mb-2">
+                          <div 
+                            className="w-full flex items-center justify-center border border-gray-300 rounded bg-gray-50"
+                            style={{ height: '180px' }}
+                          >
                             <p className="text-xs text-gray-500 text-center px-2">
                               Imagem não disponível
                             </p>

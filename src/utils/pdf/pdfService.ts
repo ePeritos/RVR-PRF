@@ -115,6 +115,34 @@ export class PDFService {
 
       console.log('6. Iniciando captura do canvas...');
       
+      // Adiciona estilos CSS específicos para PDF antes da captura
+      const style = document.createElement('style');
+      style.textContent = `
+        @media print {
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          img {
+            page-break-inside: avoid !important;
+            max-width: 100% !important;
+            height: auto !important;
+            object-fit: contain !important;
+          }
+          
+          .grid {
+            display: block !important;
+          }
+          
+          .grid > div {
+            margin-bottom: 30px !important;
+            page-break-inside: avoid !important;
+          }
+        }
+      `;
+      container.appendChild(style);
+      
       // Gera o canvas a partir do elemento
       const canvas = await PDFCreator.generateCanvasFromElement(container);
       
