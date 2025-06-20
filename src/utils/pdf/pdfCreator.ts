@@ -14,7 +14,7 @@ export class PDFCreator {
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = 210;
     const pageHeight = 297;
-    const margin = 10;
+    const margin = 15;
     
     // Converter canvas para imagem
     const imgData = canvas.toDataURL('image/png', 1.0);

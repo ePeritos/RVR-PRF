@@ -146,8 +146,8 @@ export const ReportContent: React.FC<ReportContentProps> = ({
       {/* Dados dos Imóveis */}
       {data.dados && data.dados.length > 0 ? (
         data.dados.map((imovel: any, index: number) => (
-          <div key={imovel.id || index} className="mb-8 border border-gray-300 rounded p-4">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+          <div key={imovel.id || index} className="mb-8 border border-gray-300 rounded p-4" style={{ pageBreakInside: 'avoid', marginBottom: '20px' }}>
+            <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2" style={{ pageBreakAfter: 'avoid' }}>
               {imovel.nome_da_unidade || `Imóvel ${index + 1}`}
             </h2>
             
@@ -169,8 +169,8 @@ export const ReportContent: React.FC<ReportContentProps> = ({
 
             {/* Imagens */}
             {data.incluir_imagens && (
-              <div className="mt-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Imagens</h3>
+              <div className="mt-6" style={{ pageBreakInside: 'avoid' }}>
+                <h3 className="text-sm font-semibold text-gray-700 mb-3" style={{ pageBreakAfter: 'avoid' }}>Imagens</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {data.campos_incluidos
                     ?.filter((campo: string) => campo.startsWith('imagem_'))
@@ -180,14 +180,17 @@ export const ReportContent: React.FC<ReportContentProps> = ({
                           {fieldLabels[campo] || campo.replace('imagem_', '').replace('_', ' ')}
                         </p>
                         {imovel[campo] && imovel[campo].trim() !== '' && imovel[campo] !== '{}' ? (
-                          <img 
-                            src={imovel[campo].startsWith('http') ? imovel[campo] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[campo]}`}
-                            alt={fieldLabels[campo] || campo}
-                            className="w-full h-32 object-cover border border-gray-200 rounded"
-                            crossOrigin="anonymous"
-                          />
+                          <div className="w-full h-40 border border-gray-200 rounded overflow-hidden mb-2">
+                            <img 
+                              src={imovel[campo].startsWith('http') ? imovel[campo] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[campo]}`}
+                              alt={fieldLabels[campo] || campo}
+                              className="w-full h-full object-contain bg-gray-50"
+                              crossOrigin="anonymous"
+                              style={{ pageBreakInside: 'avoid' }}
+                            />
+                          </div>
                         ) : (
-                          <div className="w-full h-32 flex items-center justify-center border border-gray-300 rounded bg-gray-50">
+                          <div className="w-full h-40 flex items-center justify-center border border-gray-300 rounded bg-gray-50 mb-2">
                             <p className="text-xs text-gray-500 text-center px-2">
                               Imagem não disponível
                             </p>
