@@ -85,39 +85,64 @@ export class PDFCreator {
     console.log('Capturando elemento para PDF...');
     
     // Aguarda renderização completa
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     // Configuração otimizada para html2canvas com suporte a imagens
     const canvas = await html2canvas(element, {
-      scale: 2,
+      scale: 1.5, // Reduzir scale para evitar problemas de memória
       useCORS: true,
-      allowTaint: true, // Permite imagens de diferentes domínios
+      allowTaint: true,
       backgroundColor: '#ffffff',
-      logging: true,
+      logging: false,
       width: element.offsetWidth,
       height: element.offsetHeight,
       windowWidth: element.offsetWidth,
       windowHeight: element.offsetHeight,
-      foreignObjectRendering: false, // Desabilita para melhor compatibilidade com imagens
-      imageTimeout: 15000, // Timeout maior para carregamento de imagens
-      onclone: (clonedDoc) => {
+      foreignObjectRendering: false,
+      imageTimeout: 10000,
+      ignoreElements: (element) => {
+        // Ignora elementos que podem causar problemas
+        return element.tagName === 'SCRIPT' || element.tagName === 'STYLE';
+      },
+      onclone: (clonedDoc, element) => {
         console.log('Clonando documento...');
-        const clonedContainer = clonedDoc.querySelector('div');
-        if (clonedContainer) {
-          (clonedContainer as HTMLElement).style.display = 'block';
-          (clonedContainer as HTMLElement).style.visibility = 'visible';
-        }
+        
+        // Adiciona estilos específicos para o clone
+        const style = clonedDoc.createElement('style');
+        style.textContent = `
+          * {
+            box-sizing: border-box !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          img {
+            max-width: 95% !important;
+            max-height: 95% !important;
+            object-fit: contain !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            display: block !important;
+          }
+          
+          div[style*="pageBreakInside"] {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+        `;
+        clonedDoc.head.appendChild(style);
         
         // Força o carregamento de imagens no documento clonado
         const images = clonedDoc.querySelectorAll('img');
         images.forEach((img: HTMLImageElement) => {
           if (img.src) {
             console.log('Processando imagem no clone:', img.src);
-            // Força reload da imagem
             img.crossOrigin = 'anonymous';
-            const originalSrc = img.src;
-            img.src = '';
-            img.src = originalSrc;
+            // Força estilo inline para garantir renderização correta
+            img.style.maxWidth = '95%';
+            img.style.maxHeight = '95%';
+            img.style.objectFit = 'contain';
+            img.style.display = 'block';
           }
         });
       }

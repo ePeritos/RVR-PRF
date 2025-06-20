@@ -126,9 +126,11 @@ export class PDFService {
           
           img {
             page-break-inside: avoid !important;
-            max-width: 100% !important;
-            height: auto !important;
+            break-inside: avoid !important;
+            max-width: 95% !important;
+            max-height: 95% !important;
             object-fit: contain !important;
+            display: block !important;
           }
           
           .grid {
@@ -136,12 +138,30 @@ export class PDFService {
           }
           
           .grid > div {
-            margin-bottom: 30px !important;
+            margin-bottom: 40px !important;
             page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
         }
       `;
       container.appendChild(style);
+      
+      // Aguarda um tempo adicional para garantir que as imagens sejam processadas
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Força a renderização completa antes da captura
+      const images = container.querySelectorAll('img');
+      await Promise.all(Array.from(images).map(img => {
+        return new Promise((resolve) => {
+          if (img.complete && img.naturalHeight !== 0) {
+            resolve(true);
+          } else {
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            setTimeout(() => resolve(false), 3000);
+          }
+        });
+      }));
       
       // Gera o canvas a partir do elemento
       const canvas = await PDFCreator.generateCanvasFromElement(container);

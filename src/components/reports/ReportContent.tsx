@@ -169,61 +169,62 @@ export const ReportContent: React.FC<ReportContentProps> = ({
 
             {/* Imagens */}
             {data.incluir_imagens && (
-              <div className="mt-6" style={{ pageBreakInside: 'avoid', marginTop: '30px' }}>
-                <h3 className="text-sm font-semibold text-gray-700 mb-3" style={{ pageBreakAfter: 'avoid' }}>Imagens</h3>
-                <div className="grid grid-cols-1 gap-4">
-                  {data.campos_incluidos
-                    ?.filter((campo: string) => campo.startsWith('imagem_'))
-                    ?.map((campo: string, index: number) => (
-                      <div 
-                        key={campo} 
-                        className="text-center mb-6" 
-                        style={{ 
-                          pageBreakInside: 'avoid',
-                          marginBottom: '30px',
-                          minHeight: '200px'
-                        }}
-                      >
-                        <p className="text-sm text-gray-700 mb-2 font-medium">
-                          {fieldLabels[campo] || campo.replace('imagem_', '').replace('_', ' ')}
-                        </p>
-                        {imovel[campo] && imovel[campo].trim() !== '' && imovel[campo] !== '{}' ? (
-                          <div 
-                            className="w-full border border-gray-200 rounded overflow-hidden"
+              <div className="mt-8" style={{ pageBreakBefore: 'auto' }}>
+                <h3 className="text-sm font-semibold text-gray-700 mb-4" style={{ pageBreakAfter: 'avoid' }}>Imagens</h3>
+                {data.campos_incluidos
+                  ?.filter((campo: string) => campo.startsWith('imagem_'))
+                  ?.map((campo: string, index: number) => (
+                    <div 
+                      key={campo} 
+                      className="mb-8" 
+                      style={{ 
+                        pageBreakInside: 'avoid',
+                        marginBottom: '40px',
+                        minHeight: '220px',
+                        breakInside: 'avoid'
+                      }}
+                    >
+                      <h4 className="text-sm text-gray-700 mb-3 font-medium text-center">
+                        {fieldLabels[campo] || campo.replace('imagem_', '').replace('_', ' ')}
+                      </h4>
+                      {imovel[campo] && imovel[campo].trim() !== '' && imovel[campo] !== '{}' ? (
+                        <div 
+                          className="w-full border border-gray-200 rounded overflow-hidden bg-gray-50"
+                          style={{ 
+                            height: '200px',
+                            pageBreakInside: 'avoid',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            breakInside: 'avoid'
+                          }}
+                        >
+                          <img 
+                            src={imovel[campo].startsWith('http') ? imovel[campo] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[campo]}`}
+                            alt={fieldLabels[campo] || campo}
                             style={{ 
-                              height: '180px',
+                              maxWidth: '95%',
+                              maxHeight: '95%',
+                              objectFit: 'contain',
                               pageBreakInside: 'avoid',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              backgroundColor: '#f9fafb'
+                              breakInside: 'avoid',
+                              display: 'block'
                             }}
-                          >
-                            <img 
-                              src={imovel[campo].startsWith('http') ? imovel[campo] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[campo]}`}
-                              alt={fieldLabels[campo] || campo}
-                              style={{ 
-                                maxWidth: '100%',
-                                maxHeight: '100%',
-                                objectFit: 'contain',
-                                pageBreakInside: 'avoid'
-                              }}
-                              crossOrigin="anonymous"
-                            />
-                          </div>
-                        ) : (
-                          <div 
-                            className="w-full flex items-center justify-center border border-gray-300 rounded bg-gray-50"
-                            style={{ height: '180px' }}
-                          >
-                            <p className="text-xs text-gray-500 text-center px-2">
-                              Imagem não disponível
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                </div>
+                            crossOrigin="anonymous"
+                          />
+                        </div>
+                      ) : (
+                        <div 
+                          className="w-full flex items-center justify-center border border-gray-300 rounded bg-gray-50"
+                          style={{ height: '200px' }}
+                        >
+                          <p className="text-xs text-gray-500 text-center px-2">
+                            Imagem não disponível
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
               </div>
             )}
           </div>

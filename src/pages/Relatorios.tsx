@@ -510,10 +510,32 @@ const Relatorios = () => {
           {/* Campos a Incluir */}
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-lg">Campos a Incluir</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Selecione os campos que deseja incluir no relatório
-              </p>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle className="text-lg">Campos a Incluir</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Selecione os campos que deseja incluir no relatório
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedFields([...availableFields])}
+                    className="text-xs"
+                  >
+                    Todos
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedFields([])}
+                    className="text-xs"
+                  >
+                    Limpar
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <MultiSelect
