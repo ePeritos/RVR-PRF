@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 interface ReportContentData {
@@ -20,6 +21,11 @@ export const ReportContent: React.FC<ReportContentProps> = ({
   data,
   className = ""
 }) => {
+  console.log('=== DEBUG ReportContent ===');
+  console.log('Data recebida:', data);
+  console.log('Dados:', data.dados);
+  console.log('Campos incluídos:', data.campos_incluidos);
+  
   // Labels para os campos (versão expandida)
   const fieldLabels: Record<string, string> = {
     'nome_da_unidade': 'Nome da Unidade',
@@ -55,9 +61,17 @@ export const ReportContent: React.FC<ReportContentProps> = ({
   };
 
   const formatValue = (value: any, field: string): string => {
+    console.log(`Formatando campo ${field} com valor:`, value, typeof value);
+    
     // Verificações mais robustas para valores vazios
-    if (value === null || value === undefined) return 'Não informado';
-    if (typeof value === 'string' && value.trim() === '') return 'Não informado';
+    if (value === null || value === undefined) {
+      console.log(`Campo ${field} é null/undefined`);
+      return 'Não informado';
+    }
+    if (typeof value === 'string' && value.trim() === '') {
+      console.log(`Campo ${field} é string vazia`);
+      return 'Não informado';
+    }
     
     // Campos que representam presença/ausência de características (Sim/Não)
     const booleanFields = [
@@ -93,6 +107,7 @@ export const ReportContent: React.FC<ReportContentProps> = ({
     
     if (booleanFields.includes(field)) {
       const strValue = String(value).toLowerCase().trim();
+      console.log(`Campo boolean ${field} - valor processado:`, strValue);
       // Valores que representam "Sim"
       if (strValue === 'sim' || strValue === 'on' || strValue === 'true' || strValue === '1') {
         return 'Sim';
@@ -125,7 +140,9 @@ export const ReportContent: React.FC<ReportContentProps> = ({
       return `${numValue} anos`;
     }
     
-    return String(value);
+    const result = String(value);
+    console.log(`Campo ${field} - valor final:`, result);
+    return result;
   };
 
   return (
@@ -151,8 +168,15 @@ export const ReportContent: React.FC<ReportContentProps> = ({
       {/* Dados dos Imóveis */}
       {data.dados && data.dados.length > 0 ? (
         data.dados.map((imovel: any, index: number) => {
+          console.log(`=== PROCESSANDO IMÓVEL ${index + 1} ===`);
+          console.log('Dados do imóvel:', imovel);
+          console.log('Chaves disponíveis:', Object.keys(imovel));
+          
           const dataFields = data.campos_incluidos?.filter((campo: string) => !campo.startsWith('imagem_')) || [];
           const imageFields = data.campos_incluidos?.filter((campo: string) => campo.startsWith('imagem_')) || [];
+          
+          console.log('Campos de dados:', dataFields);
+          console.log('Campos de imagem:', imageFields);
           
           // Organizar campos em pares para a tabela de duas colunas
           const fieldPairs: Array<[string, string?]> = [];
@@ -194,50 +218,64 @@ export const ReportContent: React.FC<ReportContentProps> = ({
                   fontSize: '12px'
                 }}>
                   <tbody>
-                    {fieldPairs.map((pair, pairIndex) => (
-                      <tr key={pairIndex}>
-                      {/* Primeira coluna */}
-                        <td style={{ 
-                          width: '25%', 
-                          padding: '6px', 
-                          verticalAlign: 'top',
-                          borderBottom: '1px solid #eee',
-                          fontWeight: 'bold',
-                          color: '#555'
-                        }}>
-                          {pair[0] ? (fieldLabels[pair[0]] || pair[0]) : ''}
-                        </td>
-                        <td style={{ 
-                          width: '25%', 
-                          padding: '6px', 
-                          verticalAlign: 'top',
-                          borderBottom: '1px solid #eee',
-                          borderRight: '1px solid #eee'
-                        }}>
-                          {pair[0] ? formatValue(imovel[pair[0]] || '', pair[0]) : ''}
-                        </td>
-                        
-                        {/* Segunda coluna */}
-                        <td style={{ 
-                          width: '25%', 
-                          padding: '6px', 
-                          verticalAlign: 'top',
-                          borderBottom: '1px solid #eee',
-                          fontWeight: 'bold',
-                          color: '#555'
-                        }}>
-                          {pair[1] ? (fieldLabels[pair[1]] || pair[1]) : ''}
-                        </td>
-                        <td style={{ 
-                          width: '25%', 
-                          padding: '6px', 
-                          verticalAlign: 'top',
-                          borderBottom: '1px solid #eee'
-                        }}>
-                          {pair[1] ? formatValue(imovel[pair[1]] || '', pair[1]) : ''}
-                        </td>
-                      </tr>
-                    ))}
+                    {fieldPairs.map((pair, pairIndex) => {
+                      const field1 = pair[0];
+                      const field2 = pair[1];
+                      const value1 = field1 ? imovel[field1] : '';
+                      const value2 = field2 ? imovel[field2] : '';
+                      
+                      console.log(`Par ${pairIndex}:`, {
+                        field1,
+                        value1,
+                        field2,
+                        value2
+                      });
+                      
+                      return (
+                        <tr key={pairIndex}>
+                          {/* Primeira coluna */}
+                          <td style={{ 
+                            width: '25%', 
+                            padding: '6px', 
+                            verticalAlign: 'top',
+                            borderBottom: '1px solid #eee',
+                            fontWeight: 'bold',
+                            color: '#555'
+                          }}>
+                            {field1 ? (fieldLabels[field1] || field1) : ''}
+                          </td>
+                          <td style={{ 
+                            width: '25%', 
+                            padding: '6px', 
+                            verticalAlign: 'top',
+                            borderBottom: '1px solid #eee',
+                            borderRight: '1px solid #eee'
+                          }}>
+                            {field1 ? formatValue(value1, field1) : ''}
+                          </td>
+                          
+                          {/* Segunda coluna */}
+                          <td style={{ 
+                            width: '25%', 
+                            padding: '6px', 
+                            verticalAlign: 'top',
+                            borderBottom: '1px solid #eee',
+                            fontWeight: 'bold',
+                            color: '#555'
+                          }}>
+                            {field2 ? (fieldLabels[field2] || field2) : ''}
+                          </td>
+                          <td style={{ 
+                            width: '25%', 
+                            padding: '6px', 
+                            verticalAlign: 'top',
+                            borderBottom: '1px solid #eee'
+                          }}>
+                            {field2 ? formatValue(value2, field2) : ''}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               )}
