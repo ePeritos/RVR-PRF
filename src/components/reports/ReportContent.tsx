@@ -61,15 +61,15 @@ export const ReportContent: React.FC<ReportContentProps> = ({
   };
 
   const formatValue = (value: any, field: string): string => {
-    console.log(`Formatando campo ${field} com valor:`, value, typeof value);
+    console.log(`🔍 Formatando campo ${field}:`, { value, type: typeof value });
     
     // Verificações mais robustas para valores vazios
     if (value === null || value === undefined) {
-      console.log(`Campo ${field} é null/undefined`);
+      console.log(`❌ Campo ${field} é null/undefined`);
       return 'Não informado';
     }
     if (typeof value === 'string' && value.trim() === '') {
-      console.log(`Campo ${field} é string vazia`);
+      console.log(`❌ Campo ${field} é string vazia`);
       return 'Não informado';
     }
     
@@ -107,7 +107,7 @@ export const ReportContent: React.FC<ReportContentProps> = ({
     
     if (booleanFields.includes(field)) {
       const strValue = String(value).toLowerCase().trim();
-      console.log(`Campo boolean ${field} - valor processado:`, strValue);
+      console.log(`✅ Campo boolean ${field} - valor processado:`, strValue);
       // Valores que representam "Sim"
       if (strValue === 'sim' || strValue === 'on' || strValue === 'true' || strValue === '1') {
         return 'Sim';
@@ -141,7 +141,7 @@ export const ReportContent: React.FC<ReportContentProps> = ({
     }
     
     const result = String(value);
-    console.log(`Campo ${field} - valor final:`, result);
+    console.log(`✅ Campo ${field} - valor final:`, result);
     return result;
   };
 
@@ -169,14 +169,14 @@ export const ReportContent: React.FC<ReportContentProps> = ({
       {data.dados && data.dados.length > 0 ? (
         data.dados.map((imovel: any, index: number) => {
           console.log(`=== PROCESSANDO IMÓVEL ${index + 1} ===`);
-          console.log('Dados do imóvel:', imovel);
-          console.log('Chaves disponíveis:', Object.keys(imovel));
+          console.log('📋 Dados do imóvel:', imovel);
+          console.log('🔑 Chaves disponíveis:', Object.keys(imovel));
           
           const dataFields = data.campos_incluidos?.filter((campo: string) => !campo.startsWith('imagem_')) || [];
           const imageFields = data.campos_incluidos?.filter((campo: string) => campo.startsWith('imagem_')) || [];
           
-          console.log('Campos de dados:', dataFields);
-          console.log('Campos de imagem:', imageFields);
+          console.log('📊 Campos de dados:', dataFields);
+          console.log('🖼️ Campos de imagem:', imageFields);
           
           // Organizar campos em pares para a tabela de duas colunas
           const fieldPairs: Array<[string, string?]> = [];
@@ -211,73 +211,77 @@ export const ReportContent: React.FC<ReportContentProps> = ({
               
               {/* Tabela de dados em colunas duplas */}
               {dataFields.length > 0 && (
-                <table style={{ 
-                  width: '100%', 
-                  borderCollapse: 'collapse',
-                  marginBottom: '16px',
-                  fontSize: '12px'
-                }}>
-                  <tbody>
-                    {fieldPairs.map((pair, pairIndex) => {
-                      const field1 = pair[0];
-                      const field2 = pair[1];
-                      const value1 = field1 ? imovel[field1] : '';
-                      const value2 = field2 ? imovel[field2] : '';
-                      
-                      console.log(`Par ${pairIndex}:`, {
-                        field1,
-                        value1,
-                        field2,
-                        value2
-                      });
-                      
-                      return (
-                        <tr key={pairIndex}>
-                          {/* Primeira coluna */}
-                          <td style={{ 
-                            width: '25%', 
-                            padding: '6px', 
-                            verticalAlign: 'top',
-                            borderBottom: '1px solid #eee',
-                            fontWeight: 'bold',
-                            color: '#555'
-                          }}>
-                            {field1 ? (fieldLabels[field1] || field1) : ''}
-                          </td>
-                          <td style={{ 
-                            width: '25%', 
-                            padding: '6px', 
-                            verticalAlign: 'top',
-                            borderBottom: '1px solid #eee',
-                            borderRight: '1px solid #eee'
-                          }}>
-                            {field1 ? formatValue(value1, field1) : ''}
-                          </td>
-                          
-                          {/* Segunda coluna */}
-                          <td style={{ 
-                            width: '25%', 
-                            padding: '6px', 
-                            verticalAlign: 'top',
-                            borderBottom: '1px solid #eee',
-                            fontWeight: 'bold',
-                            color: '#555'
-                          }}>
-                            {field2 ? (fieldLabels[field2] || field2) : ''}
-                          </td>
-                          <td style={{ 
-                            width: '25%', 
-                            padding: '6px', 
-                            verticalAlign: 'top',
-                            borderBottom: '1px solid #eee'
-                          }}>
-                            {field2 ? formatValue(value2, field2) : ''}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                <div className="mb-4">
+                  <table style={{ 
+                    width: '100%', 
+                    borderCollapse: 'collapse',
+                    marginBottom: '16px',
+                    fontSize: '12px'
+                  }}>
+                    <tbody>
+                      {fieldPairs.map((pair, pairIndex) => {
+                        const field1 = pair[0];
+                        const field2 = pair[1];
+                        const value1 = field1 ? imovel[field1] : '';
+                        const value2 = field2 ? imovel[field2] : '';
+                        
+                        console.log(`🔍 Par ${pairIndex}:`, {
+                          field1,
+                          value1: value1,
+                          field2,
+                          value2: value2
+                        });
+                        
+                        return (
+                          <tr key={pairIndex}>
+                            {/* Primeira coluna */}
+                            <td style={{ 
+                              width: '25%', 
+                              padding: '8px', 
+                              verticalAlign: 'top',
+                              borderBottom: '1px solid #eee',
+                              fontWeight: 'bold',
+                              color: '#555',
+                              backgroundColor: '#f8f9fa'
+                            }}>
+                              {field1 ? (fieldLabels[field1] || field1) : ''}
+                            </td>
+                            <td style={{ 
+                              width: '25%', 
+                              padding: '8px', 
+                              verticalAlign: 'top',
+                              borderBottom: '1px solid #eee',
+                              borderRight: '1px solid #eee'
+                            }}>
+                              {field1 ? formatValue(value1, field1) : ''}
+                            </td>
+                            
+                            {/* Segunda coluna */}
+                            <td style={{ 
+                              width: '25%', 
+                              padding: '8px', 
+                              verticalAlign: 'top',
+                              borderBottom: '1px solid #eee',
+                              fontWeight: 'bold',
+                              color: '#555',
+                              backgroundColor: '#f8f9fa'
+                            }}>
+                              {field2 ? (fieldLabels[field2] || field2) : ''}
+                            </td>
+                            <td style={{ 
+                              width: '25%', 
+                              padding: '8px', 
+                              verticalAlign: 'top',
+                              borderBottom: '1px solid #eee'
+                            }}>
+                              {field2 ? formatValue(value2, field2) : ''}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               )}
 
               {/* Imagens em colunas duplas */}
@@ -296,159 +300,71 @@ export const ReportContent: React.FC<ReportContentProps> = ({
                     Imagens
                   </h3>
                   
-                  {imagePairs.map((imagePair, pairIndex) => (
-                    <div key={pairIndex} style={{ 
-                      pageBreakInside: 'avoid',
-                      marginBottom: '16px'
-                    }}>
-                      <table style={{ 
-                        width: '100%', 
-                        borderCollapse: 'collapse',
-                        pageBreakInside: 'avoid'
-                      }}>
-                        <tbody>
-                          <tr>
-                            {/* Primeira imagem */}
-                            <td style={{ 
-                              width: '50%', 
-                              padding: '8px', 
-                              verticalAlign: 'top',
-                              pageBreakInside: 'avoid'
+                  <div className="grid grid-cols-2 gap-4">
+                    {imagePairs.map((imagePair, pairIndex) => (
+                      <React.Fragment key={pairIndex}>
+                        {/* Primeira imagem */}
+                        {imagePair[0] && (
+                          <div className="space-y-2" style={{ pageBreakInside: 'avoid' }}>
+                            <h4 style={{ 
+                              fontSize: '12px', 
+                              fontWeight: 'bold',
+                              textAlign: 'center',
+                              color: '#555'
                             }}>
-                              {imagePair[0] && (
-                                <div style={{ pageBreakInside: 'avoid' }}>
-                                  <h4 style={{ 
-                                    fontSize: '12px', 
-                                    fontWeight: 'bold',
-                                    marginBottom: '8px',
-                                    textAlign: 'center',
-                                    color: '#555'
-                                  }}>
-                                    {fieldLabels[imagePair[0]] || imagePair[0].replace('imagem_', '').replace('_', ' ')}
-                                  </h4>
-                                  {imovel[imagePair[0]] && imovel[imagePair[0]].trim() !== '' && imovel[imagePair[0]] !== '{}' ? (
-                                    <div style={{ 
-                                      width: '100%',
-                                      height: '180px',
-                                      border: '1px solid #ddd',
-                                      borderRadius: '4px',
-                                      overflow: 'hidden',
-                                      backgroundColor: '#f9f9f9',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      pageBreakInside: 'avoid'
-                                    }}>
-                                      <img 
-                                        src={imovel[imagePair[0]].startsWith('http') ? imovel[imagePair[0]] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imagePair[0]]}`}
-                                        alt={fieldLabels[imagePair[0]] || imagePair[0]}
-                                        style={{ 
-                                          maxWidth: '100%',
-                                          maxHeight: '100%',
-                                          objectFit: 'contain',
-                                          display: 'block'
-                                        }}
-                                        crossOrigin="anonymous"
-                                      />
-                                    </div>
-                                  ) : (
-                                    <div style={{ 
-                                      width: '100%',
-                                      height: '180px',
-                                      border: '1px solid #ddd',
-                                      borderRadius: '4px',
-                                      backgroundColor: '#f9f9f9',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center'
-                                    }}>
-                                      <p style={{ 
-                                        fontSize: '11px', 
-                                        color: '#888',
-                                        textAlign: 'center',
-                                        padding: '8px'
-                                      }}>
-                                        Imagem não disponível
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </td>
-                            
-                            {/* Segunda imagem */}
-                            <td style={{ 
-                              width: '50%', 
-                              padding: '8px', 
-                              verticalAlign: 'top',
-                              borderLeft: '1px solid #eee',
-                              pageBreakInside: 'avoid'
+                              {fieldLabels[imagePair[0]] || imagePair[0].replace('imagem_', '').replace('_', ' ')}
+                            </h4>
+                            {imovel[imagePair[0]] && imovel[imagePair[0]].trim() !== '' && imovel[imagePair[0]] !== '{}' ? (
+                              <div className="w-full h-48 border border-gray-300 rounded overflow-hidden bg-gray-50 flex items-center justify-center">
+                                <img 
+                                  src={imovel[imagePair[0]].startsWith('http') ? imovel[imagePair[0]] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imagePair[0]]}`}
+                                  alt={fieldLabels[imagePair[0]] || imagePair[0]}
+                                  className="max-w-full max-h-full object-contain"
+                                  crossOrigin="anonymous"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-full h-48 border border-gray-300 rounded bg-gray-50 flex items-center justify-center">
+                                <p className="text-xs text-gray-500 text-center p-2">
+                                  Imagem não disponível
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Segunda imagem */}
+                        {imagePair[1] && (
+                          <div className="space-y-2" style={{ pageBreakInside: 'avoid' }}>
+                            <h4 style={{ 
+                              fontSize: '12px', 
+                              fontWeight: 'bold',
+                              textAlign: 'center',
+                              color: '#555'
                             }}>
-                              {imagePair[1] && (
-                                <div style={{ pageBreakInside: 'avoid' }}>
-                                  <h4 style={{ 
-                                    fontSize: '12px', 
-                                    fontWeight: 'bold',
-                                    marginBottom: '8px',
-                                    textAlign: 'center',
-                                    color: '#555'
-                                  }}>
-                                    {fieldLabels[imagePair[1]] || imagePair[1].replace('imagem_', '').replace('_', ' ')}
-                                  </h4>
-                                  {imovel[imagePair[1]] && imovel[imagePair[1]].trim() !== '' && imovel[imagePair[1]] !== '{}' ? (
-                                    <div style={{ 
-                                      width: '100%',
-                                      height: '180px',
-                                      border: '1px solid #ddd',
-                                      borderRadius: '4px',
-                                      overflow: 'hidden',
-                                      backgroundColor: '#f9f9f9',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      pageBreakInside: 'avoid'
-                                    }}>
-                                      <img 
-                                        src={imovel[imagePair[1]].startsWith('http') ? imovel[imagePair[1]] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imagePair[1]]}`}
-                                        alt={fieldLabels[imagePair[1]] || imagePair[1]}
-                                        style={{ 
-                                          maxWidth: '100%',
-                                          maxHeight: '100%',
-                                          objectFit: 'contain',
-                                          display: 'block'
-                                        }}
-                                        crossOrigin="anonymous"
-                                      />
-                                    </div>
-                                  ) : (
-                                    <div style={{ 
-                                      width: '100%',
-                                      height: '180px',
-                                      border: '1px solid #ddd',
-                                      borderRadius: '4px',
-                                      backgroundColor: '#f9f9f9',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center'
-                                    }}>
-                                      <p style={{ 
-                                        fontSize: '11px', 
-                                        color: '#888',
-                                        textAlign: 'center',
-                                        padding: '8px'
-                                      }}>
-                                        Imagem não disponível
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  ))}
+                              {fieldLabels[imagePair[1]] || imagePair[1].replace('imagem_', '').replace('_', ' ')}
+                            </h4>
+                            {imovel[imagePair[1]] && imovel[imagePair[1]].trim() !== '' && imovel[imagePair[1]] !== '{}' ? (
+                              <div className="w-full h-48 border border-gray-300 rounded overflow-hidden bg-gray-50 flex items-center justify-center">
+                                <img 
+                                  src={imovel[imagePair[1]].startsWith('http') ? imovel[imagePair[1]] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imagePair[1]]}`}
+                                  alt={fieldLabels[imagePair[1]] || imagePair[1]}
+                                  className="max-w-full max-h-full object-contain"
+                                  crossOrigin="anonymous"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-full h-48 border border-gray-300 rounded bg-gray-50 flex items-center justify-center">
+                                <p className="text-xs text-gray-500 text-center p-2">
+                                  Imagem não disponível
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
