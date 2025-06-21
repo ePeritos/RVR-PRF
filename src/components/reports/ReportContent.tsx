@@ -154,11 +154,11 @@ export const ReportContent: React.FC<ReportContentProps> = ({
     }}>
       {/* Cabeçalho do Relatório */}
       <div className="text-center mb-8 border-b-2 border-gray-800 pb-4">
-        <h1 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>{data.titulo}</h1>
+        <h1 className="text-lg font-bold mb-2">{data.titulo}</h1>
         {data.descricao && (
-          <p style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>{data.descricao}</p>
+          <p className="text-sm text-gray-600 mb-2">{data.descricao}</p>
         )}
-        <div style={{ fontSize: '11px', color: '#888' }}>
+        <div className="text-xs text-gray-500">
           <p>Gerado em: {data.data_geracao}</p>
           <p>Por: {data.gerado_por}</p>
           <p>Total de imóveis: {data.total_imoveis}</p>
@@ -177,192 +177,80 @@ export const ReportContent: React.FC<ReportContentProps> = ({
           
           console.log('📊 Campos de dados:', dataFields);
           console.log('🖼️ Campos de imagem:', imageFields);
-          
-          // Organizar campos em pares para a tabela de duas colunas
-          const fieldPairs: Array<[string, string?]> = [];
-          for (let i = 0; i < dataFields.length; i += 2) {
-            fieldPairs.push([dataFields[i], dataFields[i + 1]]);
-          }
-          
-          // Organizar imagens em pares para layout duplo
-          const imagePairs: Array<[string, string?]> = [];
-          for (let i = 0; i < imageFields.length; i += 2) {
-            imagePairs.push([imageFields[i], imageFields[i + 1]]);
-          }
 
           return (
-            <div key={imovel.id || index} style={{ 
-              pageBreakInside: 'avoid', 
-              marginBottom: '20px',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              padding: '16px'
+            <div key={imovel.id || index} className="mb-8 border border-gray-300 rounded p-4" style={{ 
+              pageBreakInside: 'avoid'
             }}>
-              <h2 style={{ 
-                fontSize: '16px', 
-                fontWeight: 'bold', 
-                marginBottom: '16px',
-                borderBottom: '1px solid #ddd',
-                paddingBottom: '8px',
+              <h2 className="text-base font-bold mb-4 pb-2 border-b border-gray-300" style={{ 
                 pageBreakAfter: 'avoid'
               }}>
                 {imovel.nome_da_unidade || `Imóvel ${index + 1}`}
               </h2>
               
-              {/* Tabela de dados em colunas duplas */}
+              {/* Grid de dados em duas colunas */}
               {dataFields.length > 0 && (
-                <div className="mb-4">
-                  <table style={{ 
-                    width: '100%', 
-                    borderCollapse: 'collapse',
-                    marginBottom: '16px',
-                    fontSize: '12px'
-                  }}>
-                    <tbody>
-                      {fieldPairs.map((pair, pairIndex) => {
-                        const field1 = pair[0];
-                        const field2 = pair[1];
-                        const value1 = field1 ? imovel[field1] : '';
-                        const value2 = field2 ? imovel[field2] : '';
-                        
-                        console.log(`🔍 Par ${pairIndex}:`, {
-                          field1,
-                          value1: value1,
-                          field2,
-                          value2: value2
-                        });
-                        
-                        return (
-                          <tr key={pairIndex}>
-                            {/* Primeira coluna */}
-                            <td style={{ 
-                              width: '25%', 
-                              padding: '8px', 
-                              verticalAlign: 'top',
-                              borderBottom: '1px solid #eee',
-                              fontWeight: 'bold',
-                              color: '#555',
-                              backgroundColor: '#f8f9fa'
-                            }}>
-                              {field1 ? (fieldLabels[field1] || field1) : ''}
-                            </td>
-                            <td style={{ 
-                              width: '25%', 
-                              padding: '8px', 
-                              verticalAlign: 'top',
-                              borderBottom: '1px solid #eee',
-                              borderRight: '1px solid #eee'
-                            }}>
-                              {field1 ? formatValue(value1, field1) : ''}
-                            </td>
-                            
-                            {/* Segunda coluna */}
-                            <td style={{ 
-                              width: '25%', 
-                              padding: '8px', 
-                              verticalAlign: 'top',
-                              borderBottom: '1px solid #eee',
-                              fontWeight: 'bold',
-                              color: '#555',
-                              backgroundColor: '#f8f9fa'
-                            }}>
-                              {field2 ? (fieldLabels[field2] || field2) : ''}
-                            </td>
-                            <td style={{ 
-                              width: '25%', 
-                              padding: '8px', 
-                              verticalAlign: 'top',
-                              borderBottom: '1px solid #eee'
-                            }}>
-                              {field2 ? formatValue(value2, field2) : ''}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                <div className="mb-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    {dataFields.map((field: string, fieldIndex: number) => {
+                      const value = imovel[field];
+                      const formattedValue = formatValue(value, field);
+                      
+                      console.log(`🔍 Campo ${field}:`, {
+                        rawValue: value,
+                        formattedValue: formattedValue
+                      });
+                      
+                      return (
+                        <div key={fieldIndex} className="border-b border-gray-100 pb-2 mb-2">
+                          <div className="text-xs font-semibold text-gray-600 mb-1">
+                            {fieldLabels[field] || field}
+                          </div>
+                          <div className="text-sm text-gray-800">
+                            {formattedValue}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
-              {/* Imagens em colunas duplas */}
+              {/* Imagens em grid */}
               {data.incluir_imagens && imageFields.length > 0 && (
-                <div style={{ 
-                  marginTop: '16px', 
+                <div className="mt-6" style={{ 
                   pageBreakBefore: 'auto',
                   pageBreakInside: 'avoid'
                 }}>
-                  <h3 style={{ 
-                    fontSize: '14px', 
-                    fontWeight: 'bold', 
-                    marginBottom: '16px',
+                  <h3 className="text-sm font-bold mb-4" style={{ 
                     pageBreakAfter: 'avoid'
                   }}>
                     Imagens
                   </h3>
                   
                   <div className="grid grid-cols-2 gap-4">
-                    {imagePairs.map((imagePair, pairIndex) => (
-                      <React.Fragment key={pairIndex}>
-                        {/* Primeira imagem */}
-                        {imagePair[0] && (
-                          <div className="space-y-2" style={{ pageBreakInside: 'avoid' }}>
-                            <h4 style={{ 
-                              fontSize: '12px', 
-                              fontWeight: 'bold',
-                              textAlign: 'center',
-                              color: '#555'
-                            }}>
-                              {fieldLabels[imagePair[0]] || imagePair[0].replace('imagem_', '').replace('_', ' ')}
-                            </h4>
-                            {imovel[imagePair[0]] && imovel[imagePair[0]].trim() !== '' && imovel[imagePair[0]] !== '{}' ? (
-                              <div className="w-full h-48 border border-gray-300 rounded overflow-hidden bg-gray-50 flex items-center justify-center">
-                                <img 
-                                  src={imovel[imagePair[0]].startsWith('http') ? imovel[imagePair[0]] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imagePair[0]]}`}
-                                  alt={fieldLabels[imagePair[0]] || imagePair[0]}
-                                  className="max-w-full max-h-full object-contain"
-                                  crossOrigin="anonymous"
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-full h-48 border border-gray-300 rounded bg-gray-50 flex items-center justify-center">
-                                <p className="text-xs text-gray-500 text-center p-2">
-                                  Imagem não disponível
-                                </p>
-                              </div>
-                            )}
+                    {imageFields.map((imageField: string, imgIndex: number) => (
+                      <div key={imgIndex} className="space-y-2" style={{ pageBreakInside: 'avoid' }}>
+                        <h4 className="text-xs font-semibold text-center text-gray-600">
+                          {fieldLabels[imageField] || imageField.replace('imagem_', '').replace('_', ' ')}
+                        </h4>
+                        {imovel[imageField] && imovel[imageField].trim() !== '' && imovel[imageField] !== '{}' ? (
+                          <div className="w-full h-48 border border-gray-300 rounded overflow-hidden bg-gray-50 flex items-center justify-center">
+                            <img 
+                              src={imovel[imageField].startsWith('http') ? imovel[imageField] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imageField]}`}
+                              alt={fieldLabels[imageField] || imageField}
+                              className="max-w-full max-h-full object-contain"
+                              crossOrigin="anonymous"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-full h-48 border border-gray-300 rounded bg-gray-50 flex items-center justify-center">
+                            <p className="text-xs text-gray-500 text-center p-2">
+                              Imagem não disponível
+                            </p>
                           </div>
                         )}
-                        
-                        {/* Segunda imagem */}
-                        {imagePair[1] && (
-                          <div className="space-y-2" style={{ pageBreakInside: 'avoid' }}>
-                            <h4 style={{ 
-                              fontSize: '12px', 
-                              fontWeight: 'bold',
-                              textAlign: 'center',
-                              color: '#555'
-                            }}>
-                              {fieldLabels[imagePair[1]] || imagePair[1].replace('imagem_', '').replace('_', ' ')}
-                            </h4>
-                            {imovel[imagePair[1]] && imovel[imagePair[1]].trim() !== '' && imovel[imagePair[1]] !== '{}' ? (
-                              <div className="w-full h-48 border border-gray-300 rounded overflow-hidden bg-gray-50 flex items-center justify-center">
-                                <img 
-                                  src={imovel[imagePair[1]].startsWith('http') ? imovel[imagePair[1]] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imagePair[1]]}`}
-                                  alt={fieldLabels[imagePair[1]] || imagePair[1]}
-                                  className="max-w-full max-h-full object-contain"
-                                  crossOrigin="anonymous"
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-full h-48 border border-gray-300 rounded bg-gray-50 flex items-center justify-center">
-                                <p className="text-xs text-gray-500 text-center p-2">
-                                  Imagem não disponível
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </React.Fragment>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -371,21 +259,14 @@ export const ReportContent: React.FC<ReportContentProps> = ({
           );
         })
       ) : (
-        <div style={{ textAlign: 'center', color: '#dc2626', padding: '32px' }}>
-          <p style={{ fontWeight: 'bold' }}>❌ Nenhum dado encontrado para exibir</p>
-          <p style={{ fontSize: '11px', marginTop: '8px' }}>Verifique se os imóveis foram selecionados corretamente</p>
+        <div className="text-center text-red-600 py-8">
+          <p className="font-bold">❌ Nenhum dado encontrado para exibir</p>
+          <p className="text-xs mt-2">Verifique se os imóveis foram selecionados corretamente</p>
         </div>
       )}
 
       {/* Rodapé */}
-      <div style={{ 
-        textAlign: 'center', 
-        fontSize: '11px', 
-        color: '#888', 
-        marginTop: '32px', 
-        paddingTop: '16px', 
-        borderTop: '1px solid #ccc' 
-      }}>
+      <div className="text-center text-xs text-gray-500 mt-8 pt-4 border-t border-gray-300">
         <p>Sistema Integrado de Gestão de Imóveis - SIGI-PRF</p>
         <p>Relatório gerado automaticamente em {data.data_geracao}</p>
       </div>
