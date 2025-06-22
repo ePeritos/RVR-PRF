@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -33,7 +33,8 @@ interface AmbienteExistente {
 export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvaliacoesChange, editingItem }: EnvironmentsSectionProps) => {
   const [avaliacoesLocais, setAvaliacoesLocais] = useState<{[key: string]: number}>({});
   const [isLoadingAvaliacoes, setIsLoadingAvaliacoes] = useState(false);
-  const [lastLoadedId, setLastLoadedId] = useState<string | null>(null);
+  const [avaliacoesInicializadas, setAvaliacoesInicializadas] = useState(false);
+  const [currentEditingId, setCurrentEditingId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const environmentFields = [
@@ -137,39 +138,9 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
     { campo: 'vestiario_para_policiais', nomeAmbiente: 'Vestiário para policiais' }
   ];
 
-  // Carregar avaliações quando há um item para editar (usando os dados do próprio editingItem)
-  useEffect(() => {
-    if (editingItem?.id && editingItem?.tipo_de_unidade && editingItem.id !== lastLoadedId) {
-      console.log('🔄 Carregando avaliações para edição:', editingItem.id, 'tipo:', editingItem.tipo_de_unidade);
-      carregarAvaliacoesExistentes();
-      setLastLoadedId(editingItem.id);
-    } else if (!editingItem?.id) {
-      // Limpar avaliações para novo registro
-      console.log('🧹 Limpando avaliações para novo registro');
-      setAvaliacoesLocais({});
-      setLastLoadedId(null);
-    }
-  }, [editingItem?.id, editingItem?.tipo_de_unidade]);
-
-  // Notificar mudanças nas avaliações para o componente pai
-  useEffect(() => {
-    if (onAvaliacoesChange) {
-      onAvaliacoesChange(avaliacoesLocais);
-    }
-  }, [avaliacoesLocais, onAvaliacoesChange]);
-
-  const carregarAvaliacoesExistentes = async () => {
-    const imovelId = editingItem?.id;
-    const tipoUnidade = editingItem?.tipo_de_unidade;
-    
-    if (!imovelId || !tipoUnidade) {
-      console.log('❌ ID do imóvel ou tipo de unidade não disponível');
-      return;
-    }
-
-    console.log('=== CARREGANDO AVALIAÇÕES EXISTENTES ===');
-    console.log('ID do imóvel:', imovelId);
-    console.log('Tipo de unidade:', tipoUnidade);
+  // Função para carregar avaliações (memorizada para evitar re-criações)
+  const carregarAvaliacoesExistentes = useCallback(async (imovelId: string, tipoUnidade: string) => {
+    console.log('🔄 INICIANDO carregarAvaliacoesExistentes para:', imovelId, 'tipo:', tipoUnidade);
     setIsLoadingAvaliacoes(true);
 
     try {
@@ -186,7 +157,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
 
       if (error) throw error;
 
-      console.log('Avaliações encontradas:', avaliacoes);
+      console.log('✅ Avaliações do banco carregadas:', avaliacoes);
 
       // Construir mapa de avaliações
       const avaliacoesMap: {[key: string]: number} = {};
@@ -202,30 +173,66 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
           
           if (campoCorrespondente) {
             avaliacoesMap[campoCorrespondente.campo] = avaliacao.score_conservacao;
-            console.log(`✅ Carregada avaliação para ${campoCorrespondente.campo}: ${avaliacao.score_conservacao}`);
+            console.log(`✅ Mapeada avaliação ${campoCorrespondente.campo}: ${avaliacao.score_conservacao}`);
           }
         });
       }
 
-      console.log('Mapa de avaliações carregado:', avaliacoesMap);
+      console.log('🎯 Mapa final de avaliações:', avaliacoesMap);
       
-      // Definir as avaliações carregadas
+      // Definir as avaliações no estado
       setAvaliacoesLocais(avaliacoesMap);
-      console.log('🔄 Estado de avaliacoesLocais atualizado com sucesso');
+      setAvaliacoesInicializadas(true);
+      console.log('✅ Estado atualizado com sucesso');
       
     } catch (error) {
-      console.error('Erro ao carregar avaliações:', error);
+      console.error('❌ Erro ao carregar avaliações:', error);
       setAvaliacoesLocais({});
+      setAvaliacoesInicializadas(true);
     } finally {
       setIsLoadingAvaliacoes(false);
     }
-  };
+  }, [camposAmbientes]);
+
+  // Effect principal para controlar o carregamento das avaliações
+  useEffect(() => {
+    const novoEditingId = editingItem?.id || null;
+    
+    console.log('🔥 useEffect principal executado');
+    console.log('editingItem?.id:', novoEditingId);
+    console.log('currentEditingId:', currentEditingId);
+    console.log('avaliacoesInicializadas:', avaliacoesInicializadas);
+
+    // Se mudou o ID do item sendo editado
+    if (novoEditingId !== currentEditingId) {
+      console.log('🔄 ID do item mudou - resetando estado');
+      
+      setCurrentEditingId(novoEditingId);
+      setAvaliacoesInicializadas(false);
+      setAvaliacoesLocais({});
+
+      // Se há um item para editar, carregar suas avaliações
+      if (novoEditingId && editingItem?.tipo_de_unidade) {
+        console.log('📦 Carregando avaliações para novo item:', novoEditingId);
+        carregarAvaliacoesExistentes(novoEditingId, editingItem.tipo_de_unidade);
+      } else {
+        // Novo registro - apenas marcar como inicializado
+        console.log('🆕 Novo registro - sem avaliações para carregar');
+        setAvaliacoesInicializadas(true);
+      }
+    }
+  }, [editingItem?.id, editingItem?.tipo_de_unidade, currentEditingId, carregarAvaliacoesExistentes]);
+
+  // Notificar mudanças nas avaliações para o componente pai
+  useEffect(() => {
+    if (onAvaliacoesChange && avaliacoesInicializadas) {
+      console.log('📢 Notificando mudanças nas avaliações:', avaliacoesLocais);
+      onAvaliacoesChange(avaliacoesLocais);
+    }
+  }, [avaliacoesLocais, onAvaliacoesChange, avaliacoesInicializadas]);
 
   const handleAvaliacaoChange = (campo: string, rating: number) => {
-    console.log(`🌟 === AVALIAÇÃO CHANGED === 🌟`);
-    console.log(`Campo: ${campo}, Rating: ${rating}`);
-    console.log('ID do registro:', watchedValues?.id);
-    console.log('Tipo de unidade:', watchedValues?.tipo_de_unidade);
+    console.log(`⭐ Mudança de avaliação - Campo: ${campo}, Rating: ${rating}`);
     
     // Atualizar estado local
     const novasAvaliacoes = {
@@ -238,7 +245,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
 
     // Se o registro já existe (editando), salvar no banco imediatamente
     if (watchedValues?.id) {
-      console.log('🏢 Registro existente - salvando no banco...');
+      console.log('💾 Salvando no banco para registro existente:', watchedValues.id);
       salvarAvaliacaoNoBanco(campo, rating);
     }
   };
@@ -249,7 +256,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
       return;
     }
 
-    console.log('🔥 === SALVANDO AVALIAÇÃO NO BANCO === 🔥');
+    console.log('💾 === SALVANDO AVALIAÇÃO NO BANCO === 💾');
     console.log('Campo:', campo);
     console.log('Score:', scoreConservacao);
     console.log('ID do imóvel:', watchedValues.id);
@@ -365,9 +372,23 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
 
   const getAvaliacaoLocal = (campo: string) => {
     const avaliacao = avaliacoesLocais[campo] || 0;
-    console.log(`🔍 getAvaliacaoLocal para ${campo}:`, avaliacao, 'loadedId:', lastLoadedId);
+    console.log(`🔍 getAvaliacaoLocal para ${campo}:`, avaliacao, 'inicializadas:', avaliacoesInicializadas);
     return avaliacao;
   };
+
+  // Não renderizar até que as avaliações estejam inicializadas
+  if (!avaliacoesInicializadas) {
+    return (
+      <Card className="p-6">
+        <div className="flex items-center justify-center py-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p className="text-sm text-muted-foreground">Carregando avaliações dos ambientes...</p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-6">
