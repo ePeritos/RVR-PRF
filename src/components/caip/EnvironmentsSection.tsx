@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
@@ -31,6 +32,7 @@ interface AmbienteExistente {
 
 export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvaliacoesChange, editingItem }: EnvironmentsSectionProps) => {
   const [avaliacoesLocais, setAvaliacoesLocais] = useState<{[key: string]: number}>({});
+  const [isLoadingAvaliacoes, setIsLoadingAvaliacoes] = useState(false);
   const { toast } = useToast();
 
   const environmentFields = [
@@ -134,19 +136,23 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
     { campo: 'vestiario_para_policiais', nomeAmbiente: 'Vestiário para policiais' }
   ];
 
-  // Carregar avaliações existentes quando há editingItem
+  // Carregar avaliações existentes quando há editingItem - melhorado para garantir carregamento
   useEffect(() => {
     if (editingItem?.id) {
       console.log('🔄 Carregando avaliações para ID:', editingItem.id);
-      // Aguardar um pouco para garantir que o formulário seja populado primeiro
+      setIsLoadingAvaliacoes(true);
+      
+      // Aguardar para garantir que o formulário seja populado primeiro
       const timer = setTimeout(() => {
         carregarAvaliacoesExistentes();
-      }, 500);
+      }, 300);
+      
       return () => clearTimeout(timer);
     } else {
       // Limpar avaliações quando não há ID (novo registro)
       console.log('🧹 Limpando avaliações para novo registro');
       setAvaliacoesLocais({});
+      setIsLoadingAvaliacoes(false);
     }
   }, [editingItem?.id]);
 
@@ -157,11 +163,12 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
     }
   }, [avaliacoesLocais, onAvaliacoesChange]);
 
-  // O cálculo da nota agora é feito pelo hook useCAIPCalculations
-
   const carregarAvaliacoesExistentes = async () => {
-    const imovelId = editingItem?.id || watchedValues?.id;
-    if (!imovelId) return;
+    const imovelId = editingItem?.id;
+    if (!imovelId) {
+      setIsLoadingAvaliacoes(false);
+      return;
+    }
 
     console.log('=== CARREGANDO AVALIAÇÕES EXISTENTES ===');
     console.log('ID do imóvel:', imovelId);
@@ -202,18 +209,16 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
       }
 
       console.log('Mapa de avaliações carregado:', avaliacoesMap);
-      console.log('Estado atual avaliacoesLocais antes da atualização:', avaliacoesLocais);
       
-      // Forçar atualização do estado
-      setAvaliacoesLocais(prevState => {
-        console.log('🔄 Atualizando estado de avaliacoesLocais');
-        console.log('Estado anterior:', prevState);
-        console.log('Novo estado:', avaliacoesMap);
-        return { ...avaliacoesMap };
-      });
+      // Forçar atualização do estado com garantia de que será aplicado
+      setAvaliacoesLocais(avaliacoesMap);
+      console.log('🔄 Estado de avaliacoesLocais atualizado:', avaliacoesMap);
+      
     } catch (error) {
       console.error('Erro ao carregar avaliações:', error);
       setAvaliacoesLocais({});
+    } finally {
+      setIsLoadingAvaliacoes(false);
     }
   };
 
@@ -222,12 +227,6 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
     console.log(`Campo: ${campo}, Rating: ${rating}`);
     console.log('ID do registro:', watchedValues?.id);
     console.log('Tipo de unidade:', watchedValues?.tipo_de_unidade);
-    console.log('Estado atual watchedValues:', {
-      id: watchedValues?.id,
-      tipo_de_unidade: watchedValues?.tipo_de_unidade,
-      nota_para_adequacao: watchedValues?.nota_para_adequacao,
-      nota_para_manutencao: watchedValues?.nota_para_manutencao
-    });
     
     // Atualizar estado local
     const novasAvaliacoes = {
@@ -243,16 +242,11 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
       console.log('🏢 Registro existente - salvando no banco...');
       salvarAvaliacaoNoBanco(campo, rating);
     }
-    // O cálculo da nota agora é feito automaticamente pelo hook useCAIPCalculations
   };
-
-  // Função removida - o cálculo agora é feito pelo hook useCAIPCalculations
 
   const salvarAvaliacaoNoBanco = async (campo: string, scoreConservacao: number) => {
     if (!watchedValues?.id || !watchedValues?.tipo_de_unidade) {
       console.log('❌ ERRO: ID do imóvel ou tipo de unidade não disponível');
-      console.log('watchedValues?.id:', watchedValues?.id);
-      console.log('watchedValues?.tipo_de_unidade:', watchedValues?.tipo_de_unidade);
       return;
     }
 
@@ -278,23 +272,17 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
         throw errorCaderno;
       }
 
-      console.log('Caderno de ambientes encontrado:', cadernoAmbientes);
-
       const campoCorrespondente = camposAmbientes.find(c => c.campo === campo);
       if (!campoCorrespondente) {
         console.log('❌ Campo correspondente não encontrado para:', campo);
         return;
       }
 
-      console.log('Campo correspondente:', campoCorrespondente);
-
       const ambiente = cadernoAmbientes?.find(a => a.nome_ambiente === campoCorrespondente.nomeAmbiente);
       if (!ambiente) {
         console.log('❌ Ambiente não encontrado para:', campoCorrespondente.nomeAmbiente);
         return;
       }
-
-      console.log('Ambiente encontrado:', ambiente);
 
       // Se score for 0, deletar a avaliação
       if (scoreConservacao === 0) {
@@ -344,8 +332,6 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
         throw errorBusca;
       }
 
-      console.log('Dados atualizados do banco:', dadosAtualizados);
-
       // Atualizar os campos no formulário com conversão correta de tipos
       if (dadosAtualizados.nota_para_manutencao !== null) {
         const notaManutencao = Number(dadosAtualizados.nota_para_manutencao).toFixed(2);
@@ -379,7 +365,9 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
   };
 
   const getAvaliacaoLocal = (campo: string) => {
-    return avaliacoesLocais[campo] || 0;
+    const avaliacao = avaliacoesLocais[campo] || 0;
+    console.log(`🔍 getAvaliacaoLocal para ${campo}:`, avaliacao);
+    return avaliacao;
   };
 
   return (
@@ -398,6 +386,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
       </div>
       <p className="text-sm text-muted-foreground mb-4">
         Marque quais ambientes existem no imóvel e avalie o estado de conservação (1 = Péssimo, 5 = Ótimo).
+        {isLoadingAvaliacoes && " Carregando avaliações..."}
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {environmentFields.map(({ key, label }) => {
@@ -422,8 +411,9 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
                     value={avaliacaoAtual}
                     onChange={(rating) => handleAvaliacaoChange(key, rating)}
                     size={18}
+                    disabled={isLoadingAvaliacoes}
                   />
-                   {avaliacaoAtual === 0 && (
+                   {avaliacaoAtual === 0 && !isLoadingAvaliacoes && (
                      <p className="text-xs text-destructive font-medium">⚠️ Obrigatório: Avalie o estado de conservação</p>
                    )}
                 </div>
