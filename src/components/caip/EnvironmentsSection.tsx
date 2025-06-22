@@ -33,7 +33,7 @@ interface AmbienteExistente {
 export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvaliacoesChange, editingItem }: EnvironmentsSectionProps) => {
   const [avaliacoesLocais, setAvaliacoesLocais] = useState<{[key: string]: number}>({});
   const [isLoadingAvaliacoes, setIsLoadingAvaliacoes] = useState(false);
-  const [avaliacoesCarregadas, setAvaliacoesCarregadas] = useState(false);
+  const [lastLoadedId, setLastLoadedId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const environmentFields = [
@@ -137,20 +137,19 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
     { campo: 'vestiario_para_policiais', nomeAmbiente: 'Vestiário para policiais' }
   ];
 
-  // Reset quando editar um item diferente ou limpar
+  // Carregar avaliações quando há um item para editar (usando os dados do próprio editingItem)
   useEffect(() => {
-    console.log('🔄 editingItem mudou:', editingItem?.id);
-    setAvaliacoesCarregadas(false);
-    setAvaliacoesLocais({});
-  }, [editingItem?.id]);
-
-  // Carregar avaliações quando há um item para editar e ainda não foram carregadas
-  useEffect(() => {
-    if (editingItem?.id && !avaliacoesCarregadas && watchedValues?.tipo_de_unidade) {
-      console.log('🔄 Carregando avaliações para edição:', editingItem.id);
+    if (editingItem?.id && editingItem?.tipo_de_unidade && editingItem.id !== lastLoadedId) {
+      console.log('🔄 Carregando avaliações para edição:', editingItem.id, 'tipo:', editingItem.tipo_de_unidade);
       carregarAvaliacoesExistentes();
+      setLastLoadedId(editingItem.id);
+    } else if (!editingItem?.id) {
+      // Limpar avaliações para novo registro
+      console.log('🧹 Limpando avaliações para novo registro');
+      setAvaliacoesLocais({});
+      setLastLoadedId(null);
     }
-  }, [editingItem?.id, avaliacoesCarregadas, watchedValues?.tipo_de_unidade]);
+  }, [editingItem?.id, editingItem?.tipo_de_unidade]);
 
   // Notificar mudanças nas avaliações para o componente pai
   useEffect(() => {
@@ -161,10 +160,16 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
 
   const carregarAvaliacoesExistentes = async () => {
     const imovelId = editingItem?.id;
-    if (!imovelId) return;
+    const tipoUnidade = editingItem?.tipo_de_unidade;
+    
+    if (!imovelId || !tipoUnidade) {
+      console.log('❌ ID do imóvel ou tipo de unidade não disponível');
+      return;
+    }
 
     console.log('=== CARREGANDO AVALIAÇÕES EXISTENTES ===');
     console.log('ID do imóvel:', imovelId);
+    console.log('Tipo de unidade:', tipoUnidade);
     setIsLoadingAvaliacoes(true);
 
     try {
@@ -206,13 +211,11 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
       
       // Definir as avaliações carregadas
       setAvaliacoesLocais(avaliacoesMap);
-      setAvaliacoesCarregadas(true);
-      console.log('🔄 Estado de avaliacoesLocais atualizado e marcado como carregado');
+      console.log('🔄 Estado de avaliacoesLocais atualizado com sucesso');
       
     } catch (error) {
       console.error('Erro ao carregar avaliações:', error);
       setAvaliacoesLocais({});
-      setAvaliacoesCarregadas(true); // Marcar como carregado mesmo com erro para evitar loops
     } finally {
       setIsLoadingAvaliacoes(false);
     }
@@ -362,7 +365,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
 
   const getAvaliacaoLocal = (campo: string) => {
     const avaliacao = avaliacoesLocais[campo] || 0;
-    console.log(`🔍 getAvaliacaoLocal para ${campo}:`, avaliacao, 'carregadas:', avaliacoesCarregadas);
+    console.log(`🔍 getAvaliacaoLocal para ${campo}:`, avaliacao, 'loadedId:', lastLoadedId);
     return avaliacao;
   };
 
