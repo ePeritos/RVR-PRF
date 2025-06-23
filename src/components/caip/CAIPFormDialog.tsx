@@ -136,10 +136,8 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
           <BasicInformationSection 
             register={register}
             setValue={setValue}
+            watch={watchedValues}
             errors={errors}
-            unidadesGestoras={UNIDADES_GESTORAS}
-            estadosConservacao={ESTADOS_CONSERVACAO}
-            watchedValues={watchedValues}
           />
 
           <ImagesSection 

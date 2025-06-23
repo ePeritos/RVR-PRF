@@ -6,6 +6,11 @@ export const UNIDADES_GESTORAS = [
   'SPRF/SP', 'SPRF/SE', 'SPRF/TO', 'SEDE NACIONAL', 'UNIPRF'
 ];
 
+export const TIPOS_UNIDADE = [
+  'UOP', 'Delegacia', 'Sede Administrativa', 'Posto de Fiscalização',
+  'Centro de Treinamento', 'Núcleo de Capacitação', 'Unidade Operacional'
+];
+
 export const ESTADOS_CONSERVACAO = [
   { value: 'A', label: 'A - Novo' },
   { value: 'B', label: 'B - Entre novo e regular' },

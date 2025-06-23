@@ -18,6 +18,14 @@ interface BasicInformationSectionProps {
 }
 
 export const BasicInformationSection = ({ register, setValue, watch, errors }: BasicInformationSectionProps) => {
+  console.log('🏢 === BASIC INFORMATION SECTION ===');
+  console.log('Valores atuais do formulário:', {
+    unidade_gestora: watch('unidade_gestora'),
+    tipo_de_unidade: watch('tipo_de_unidade'),
+    nome_da_unidade: watch('nome_da_unidade'),
+    ano_caip: watch('ano_caip')
+  });
+
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
 
