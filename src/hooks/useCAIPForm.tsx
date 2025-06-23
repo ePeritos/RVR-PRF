@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useToast } from '@/hooks/use-toast';
@@ -386,6 +387,7 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
     handleSubmit,
     reset,
     setValue,
+    watch,
     watchedValues,
     errors,
     isLoading,
