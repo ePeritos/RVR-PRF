@@ -39,27 +39,53 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
 
   // Preencher formulário com dados existentes quando editar
   useEffect(() => {
+    console.log('🔄 === useCAIPForm: Effect de carregamento ===');
+    console.log('editingItem:', editingItem);
+    console.log('open:', open);
+    console.log('editingItem?.id:', editingItem?.id);
+    console.log('editingItem?.nome_da_unidade:', editingItem?.nome_da_unidade);
+    console.log('editingItem?.ano_caip:', editingItem?.ano_caip);
+    
     if (editingItem && open) {
-      console.log('Preenchendo formulário com dados existentes:', editingItem.id);
+      console.log('✅ Preenchendo formulário com dados existentes:', editingItem.id);
+      console.log('📋 Dados completos do editingItem:', editingItem);
       
       // Reset primeiro para limpar todos os campos
       reset();
       
       // Aguardar um pouco antes de preencher para garantir que o reset foi processado
       setTimeout(() => {
+        console.log('🔄 Iniciando preenchimento dos campos...');
+        
         // Load each field from the editing item
         Object.keys(editingItem).forEach(key => {
           const value = editingItem[key as keyof DadosCAIP];
           if (value !== null && value !== undefined) {
+            console.log(`📝 Definindo campo ${key}:`, value);
             setValue(key as keyof DadosCAIP, value);
           }
         });
+        
+        console.log('✅ Preenchimento concluído');
+        
+        // Debug: verificar valores após definir
+        setTimeout(() => {
+          const currentValues = watch();
+          console.log('🔍 Valores atuais no formulário após preenchimento:', currentValues);
+          console.log('🔍 Nome da unidade atual:', currentValues.nome_da_unidade);
+          console.log('🔍 Ano CAIP atual:', currentValues.ano_caip);
+          console.log('🔍 Endereço atual:', currentValues.endereco);
+        }, 100);
       }, 100);
     } else if (!editingItem && open) {
-      console.log('Novo registro - resetando formulário...');
+      console.log('🆕 Novo registro - resetando formulário...');
       reset();
+    } else {
+      console.log('❌ Condições não atendidas para carregamento');
+      console.log('editingItem existe:', !!editingItem);
+      console.log('dialog está aberto:', open);
     }
-  }, [editingItem, open, setValue, reset]);
+  }, [editingItem, open, setValue, reset, watch]);
 
   // Calcular percentual de preenchimento
   useEffect(() => {
@@ -76,6 +102,9 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
   }, [watchedValues]);
 
   const onSubmit = async (data: any) => {
+    console.log('🚀 === INICIANDO SUBMIT ===');
+    console.log('Dados do formulário:', data);
+    
     setIsLoading(true);
     try {
       // Validações obrigatórias
@@ -147,6 +176,8 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
       console.log('Dados processados para salvamento:', processedData);
 
       if (editingItem) {
+        console.log('📝 Atualizando registro existente:', editingItem.id);
+        
         // Atualizar registro existente
         const { error } = await supabase
           .from('dados_caip')
@@ -156,13 +187,20 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
           })
           .eq('id', editingItem.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Erro ao atualizar:', error);
+          throw error;
+        }
 
+        console.log('✅ Registro atualizado com sucesso');
+        
         toast({
           title: "Sucesso",
           description: "Registro atualizado com sucesso.",
         });
       } else {
+        console.log('🆕 Criando novo registro');
+        
         // Criar novo registro
         const { data: newRecord, error } = await supabase
           .from('dados_caip')
@@ -174,7 +212,12 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Erro ao criar:', error);
+          throw error;
+        }
+
+        console.log('✅ Novo registro criado:', newRecord);
 
         // Salvar as avaliações de ambientes se existirem
         if (newRecord && avaliacoesLocais && Object.keys(avaliacoesLocais).length > 0) {
@@ -203,7 +246,7 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
       onOpenChange(false);
       onSuccess();
     } catch (error) {
-      console.error('Erro ao salvar:', error);
+      console.error('❌ Erro ao salvar:', error);
       toast({
         title: "Erro",
         description: "Erro ao salvar os dados.",

@@ -25,6 +25,10 @@ const CAIP = () => {
   }, [profile, isAdmin]);
 
   const fetchExistingData = async () => {
+    console.log('🔍 === FETCHEXISTINGDATA: Iniciando busca ===');
+    console.log('profile:', profile);
+    console.log('isAdmin:', isAdmin);
+    
     try {
       let query = supabase
         .from('dados_caip')
@@ -34,15 +38,49 @@ const CAIP = () => {
 
       // Apply unit filter for non-admin users
       if (!isAdmin && profile?.unidade_gestora) {
+        console.log('🔒 Aplicando filtro por unidade gestora:', profile.unidade_gestora);
         query = query.eq('unidade_gestora', profile.unidade_gestora);
+      } else {
+        console.log('👑 Usuário admin - sem filtro por unidade');
       }
 
+      console.log('📡 Executando query...');
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro na query:', error);
+        throw error;
+      }
+      
+      console.log('✅ Dados retornados:', data);
+      console.log('📊 Total de registros:', data?.length || 0);
+      
+      // Debug específico para Biguaçu
+      if (data) {
+        const biguacuRecords = data.filter(item => 
+          item.endereco?.toLowerCase().includes('biguaçu') || 
+          item.endereco?.toLowerCase().includes('biguacu') ||
+          item.nome_da_unidade?.toLowerCase().includes('biguaçu') ||
+          item.nome_da_unidade?.toLowerCase().includes('biguacu')
+        );
+        console.log('🏢 Registros de Biguaçu encontrados:', biguacuRecords);
+        
+        const caip2025Records = data.filter(item => item.ano_caip === '2025');
+        console.log('📅 Registros CAIP 2025:', caip2025Records);
+        
+        const biguacuCAIP2025 = data.filter(item => 
+          (item.endereco?.toLowerCase().includes('biguaçu') || 
+           item.endereco?.toLowerCase().includes('biguacu') ||
+           item.nome_da_unidade?.toLowerCase().includes('biguaçu') ||
+           item.nome_da_unidade?.toLowerCase().includes('biguacu')) &&
+          item.ano_caip === '2025'
+        );
+        console.log('🎯 Registros Biguaçu + CAIP 2025:', biguacuCAIP2025);
+      }
+      
       setExistingData(data || []);
     } catch (error) {
-      console.error('Erro ao buscar dados:', error);
+      console.error('❌ Erro ao buscar dados:', error);
       toast({
         title: "Erro",
         description: "Erro ao carregar dados existentes.",
@@ -52,6 +90,13 @@ const CAIP = () => {
   };
 
   const handleEdit = (item: DadosCAIP) => {
+    console.log('✏️ === HANDLE EDIT ===');
+    console.log('Item selecionado para edição:', item);
+    console.log('ID:', item.id);
+    console.log('Nome:', item.nome_da_unidade);
+    console.log('Endereço:', item.endereco);
+    console.log('Ano CAIP:', item.ano_caip);
+    
     setEditingItem(item);
     setDialogOpen(true);
   };
