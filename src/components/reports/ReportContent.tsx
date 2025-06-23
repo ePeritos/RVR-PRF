@@ -48,6 +48,7 @@ export const ReportContent: React.FC<ReportContentProps> = ({
     'zona': 'Zona',
     'rip': 'RIP',
     'matricula_do_imovel': 'Matrícula do Imóvel',
+    'idade_aparente_do_imovel': 'Idade Aparente do Imóvel',
     'imagem_geral': 'Imagem Geral',
     'imagem_fachada': 'Imagem da Fachada',
     'imagem_lateral_1': 'Imagem Lateral 1',
@@ -71,6 +72,13 @@ export const ReportContent: React.FC<ReportContentProps> = ({
     if (typeof value === 'string' && value.trim() === '') {
       console.log(`❌ Campo ${field} é string vazia`);
       return 'Não informado';
+    }
+    
+    // Campos especiais - Ano CAIP e Idade (SEM "anos")
+    if (field === 'ano_caip' || field === 'idade_aparente_do_imovel') {
+      const numValue = Number(value);
+      if (isNaN(numValue) || numValue === 0) return 'Não informado';
+      return String(numValue); // Apenas o número, sem "anos"
     }
     
     // Campos que representam presença/ausência de características (Sim/Não)
@@ -133,8 +141,8 @@ export const ReportContent: React.FC<ReportContentProps> = ({
       return `R$ ${numValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
     }
     
-    // Formatação para anos
-    if (field.includes('ano') || field.includes('idade')) {
+    // Formatação para outros campos com anos (vida útil estimada)
+    if (field === 'vida_util_estimada_anos') {
       const numValue = Number(value);
       if (isNaN(numValue) || numValue === 0) return 'Não informado';
       return `${numValue} anos`;
