@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -41,6 +42,7 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
     register,
     handleSubmit,
     setValue,
+    watch,
     watchedValues,
     errors,
     isLoading,
@@ -136,7 +138,7 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
           <BasicInformationSection 
             register={register}
             setValue={setValue}
-            watch={watchedValues}
+            watch={watch}
             errors={errors}
           />
 
