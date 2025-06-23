@@ -154,14 +154,28 @@ export const ReportContent: React.FC<ReportContentProps> = ({
   };
 
   return (
-    <div className={`border rounded-lg p-6 bg-white shadow-sm ${className}`} style={{ 
-      pageBreakInside: 'avoid',
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '12px',
-      lineHeight: '1.4'
-    }}>
+    <div 
+      className={`border rounded-lg p-6 bg-white shadow-sm ${className}`} 
+      style={{ 
+        pageBreakInside: 'avoid',
+        fontFamily: 'Arial, sans-serif',
+        fontSize: '12px',
+        lineHeight: '1.4',
+        minHeight: '100vh',
+        width: '210mm',
+        maxWidth: '210mm',
+        margin: '0 auto',
+        padding: '15mm'
+      }}
+    >
       {/* Cabeçalho do Relatório */}
-      <div className="text-center mb-8 border-b-2 border-gray-800 pb-4">
+      <div 
+        className="text-center mb-8 border-b-2 border-gray-800 pb-4"
+        style={{
+          pageBreakAfter: 'avoid',
+          pageBreakInside: 'avoid'
+        }}
+      >
         <h1 className="text-lg font-bold mb-2">{data.titulo}</h1>
         {data.descricao && (
           <p className="text-sm text-gray-600 mb-2">{data.descricao}</p>
@@ -187,19 +201,41 @@ export const ReportContent: React.FC<ReportContentProps> = ({
           console.log('🖼️ Campos de imagem:', imageFields);
 
           return (
-            <div key={imovel.id || index} className="mb-8 border border-gray-300 rounded p-4" style={{ 
-              pageBreakInside: 'avoid'
-            }}>
-              <h2 className="text-base font-bold mb-4 pb-2 border-b border-gray-300" style={{ 
-                pageBreakAfter: 'avoid'
-              }}>
+            <div 
+              key={imovel.id || index} 
+              className="mb-8 border border-gray-300 rounded p-4" 
+              style={{ 
+                pageBreakInside: 'avoid',
+                breakInside: 'avoid',
+                marginBottom: '30px'
+              }}
+            >
+              <h2 
+                className="text-base font-bold mb-4 pb-2 border-b border-gray-300" 
+                style={{ 
+                  pageBreakAfter: 'avoid',
+                  pageBreakInside: 'avoid'
+                }}
+              >
                 {imovel.nome_da_unidade || `Imóvel ${index + 1}`}
               </h2>
               
               {/* Grid de dados em duas colunas */}
               {dataFields.length > 0 && (
-                <div className="mb-6">
-                  <div className="grid grid-cols-2 gap-4">
+                <div 
+                  className="mb-6"
+                  style={{
+                    pageBreakInside: 'avoid',
+                    breakInside: 'avoid'
+                  }}
+                >
+                  <div 
+                    className="grid grid-cols-2 gap-4"
+                    style={{
+                      display: 'block',
+                      pageBreakInside: 'avoid'
+                    }}
+                  >
                     {dataFields.map((field: string, fieldIndex: number) => {
                       const value = imovel[field];
                       const formattedValue = formatValue(value, field);
@@ -210,7 +246,17 @@ export const ReportContent: React.FC<ReportContentProps> = ({
                       });
                       
                       return (
-                        <div key={fieldIndex} className="border-b border-gray-100 pb-2 mb-2">
+                        <div 
+                          key={fieldIndex} 
+                          className="border-b border-gray-100 pb-2 mb-2"
+                          style={{
+                            display: 'inline-block',
+                            width: '48%',
+                            marginRight: '2%',
+                            verticalAlign: 'top',
+                            pageBreakInside: 'avoid'
+                          }}
+                        >
                           <div className="text-xs font-semibold text-gray-600 mb-1">
                             {fieldLabels[field] || field}
                           </div>
@@ -226,33 +272,75 @@ export const ReportContent: React.FC<ReportContentProps> = ({
 
               {/* Imagens em grid */}
               {data.incluir_imagens && imageFields.length > 0 && (
-                <div className="mt-6" style={{ 
-                  pageBreakBefore: 'auto',
-                  pageBreakInside: 'avoid'
-                }}>
-                  <h3 className="text-sm font-bold mb-4" style={{ 
-                    pageBreakAfter: 'avoid'
-                  }}>
+                <div 
+                  className="mt-6" 
+                  style={{ 
+                    pageBreakBefore: 'auto',
+                    pageBreakInside: 'avoid',
+                    breakInside: 'avoid'
+                  }}
+                >
+                  <h3 
+                    className="text-sm font-bold mb-4" 
+                    style={{ 
+                      pageBreakAfter: 'avoid'
+                    }}
+                  >
                     Imagens
                   </h3>
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div 
+                    className="grid grid-cols-2 gap-4"
+                    style={{
+                      display: 'block',
+                      pageBreakInside: 'avoid'
+                    }}
+                  >
                     {imageFields.map((imageField: string, imgIndex: number) => (
-                      <div key={imgIndex} className="space-y-2" style={{ pageBreakInside: 'avoid' }}>
+                      <div 
+                        key={imgIndex} 
+                        className="space-y-2" 
+                        style={{ 
+                          pageBreakInside: 'avoid',
+                          display: 'inline-block',
+                          width: '48%',
+                          marginRight: '2%',
+                          marginBottom: '10px',
+                          verticalAlign: 'top'
+                        }}
+                      >
                         <h4 className="text-xs font-semibold text-center text-gray-600">
                           {fieldLabels[imageField] || imageField.replace('imagem_', '').replace('_', ' ')}
                         </h4>
                         {imovel[imageField] && imovel[imageField].trim() !== '' && imovel[imageField] !== '{}' ? (
-                          <div className="w-full h-48 border border-gray-300 rounded overflow-hidden bg-gray-50 flex items-center justify-center">
+                          <div 
+                            className="w-full border border-gray-300 rounded overflow-hidden bg-gray-50 flex items-center justify-center"
+                            style={{
+                              height: '180px',
+                              pageBreakInside: 'avoid'
+                            }}
+                          >
                             <img 
                               src={imovel[imageField].startsWith('http') ? imovel[imageField] : `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imovel[imageField]}`}
                               alt={fieldLabels[imageField] || imageField}
-                              className="max-w-full max-h-full object-contain"
+                              style={{
+                                maxWidth: '100%',
+                                maxHeight: '100%',
+                                objectFit: 'contain',
+                                display: 'block',
+                                pageBreakInside: 'avoid'
+                              }}
                               crossOrigin="anonymous"
                             />
                           </div>
                         ) : (
-                          <div className="w-full h-48 border border-gray-300 rounded bg-gray-50 flex items-center justify-center">
+                          <div 
+                            className="w-full border border-gray-300 rounded bg-gray-50 flex items-center justify-center"
+                            style={{
+                              height: '180px',
+                              pageBreakInside: 'avoid'
+                            }}
+                          >
                             <p className="text-xs text-gray-500 text-center p-2">
                               Imagem não disponível
                             </p>
@@ -273,8 +361,17 @@ export const ReportContent: React.FC<ReportContentProps> = ({
         </div>
       )}
 
-      {/* Rodapé */}
-      <div className="text-center text-xs text-gray-500 mt-8 pt-4 border-t border-gray-300">
+      {/* Rodapé - Sempre na última página */}
+      <div 
+        className="text-center text-xs text-gray-500 mt-8 pt-4 border-t border-gray-300"
+        style={{
+          pageBreakBefore: 'avoid',
+          pageBreakInside: 'avoid',
+          breakInside: 'avoid',
+          marginTop: '40px',
+          position: 'relative'
+        }}
+      >
         <p>Sistema Integrado de Gestão de Imóveis - SIGI-PRF</p>
         <p>Relatório gerado automaticamente em {data.data_geracao}</p>
       </div>
