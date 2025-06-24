@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Filter, Search } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -255,7 +254,7 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
             options={unidadesGestoras}
             selected={filters.unidadeGestora}
             onChange={(selected) => handleFilterChange('unidadeGestora', selected)}
-            placeholder="Selecionar unidades gestoras"
+            placeholder="Selecione a unidade"
             disabled={!isAdmin}
             className={`border-border focus:border-primary ${!isAdmin ? 'opacity-50' : ''}`}
           />
