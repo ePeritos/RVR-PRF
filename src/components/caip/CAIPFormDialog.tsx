@@ -17,7 +17,6 @@ import { EnvironmentsSection } from './EnvironmentsSection';
 import { SystemsSection } from './SystemsSection';
 import { SecuritySection } from './SecuritySection';
 import { NotesEvaluationSection } from './NotesEvaluationSection';
-
 import { ProgressActionsSection } from './ProgressActionsSection';
 
 type DadosCAIP = Tables<'dados_caip'>;
@@ -34,8 +33,11 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
   const { toast } = useToast();
   
   // Debug log to check if editingItem is being received correctly
-  console.log('=== CAIPFormDialog ===');
+  console.log('=== CAIPFormDialog RENDER ===');
   console.log('editingItem recebido:', editingItem);
+  console.log('editingItem ID:', editingItem?.id);
+  console.log('editingItem nome_da_unidade:', editingItem?.nome_da_unidade);
+  console.log('editingItem ano_caip:', editingItem?.ano_caip);
   console.log('dialog open:', open);
   
   const {
