@@ -14,7 +14,7 @@ import NotFound from './pages/NotFound';
 import { Header } from './components/Header';
 import { AppSidebar } from './components/AppSidebar';
 import { SidebarProvider } from './components/ui/sidebar';
-import { useAuth } from './hooks/useAuth';
+import { useAuth, AuthProvider } from './hooks/useAuth';
 
 const queryClient = new QueryClient();
 
@@ -61,9 +61,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <Router>
-          <AppContent />
-        </Router>
+        <AuthProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </AuthProvider>
         <Toaster />
       </ThemeProvider>
     </QueryClientProvider>
