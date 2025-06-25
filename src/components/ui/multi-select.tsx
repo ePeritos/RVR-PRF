@@ -1,17 +1,11 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-interface Option {
-  label: string;
-  value: string;
-}
-
 interface MultiSelectProps {
-  options: Option[] | string[];
+  options: string[];
   selected: string[];
   onChange: (selected: string[]) => void;
   placeholder?: string;
@@ -30,14 +24,6 @@ export function MultiSelect({
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Normalizar options para sempre ter o formato {label, value}
-  const normalizedOptions: Option[] = options.map(option => {
-    if (typeof option === 'string') {
-      return { label: option, value: option };
-    }
-    return option;
-  });
 
   // Fechar dropdown quando clicar fora
   useEffect(() => {
@@ -69,15 +55,9 @@ export function MultiSelect({
     onChange([]);
   };
 
-  const filteredOptions = normalizedOptions.filter(option => 
-    option.label.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOptions = options.filter(option => 
+    option.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  // Encontrar o label para o valor selecionado
-  const getLabel = (value: string) => {
-    const option = normalizedOptions.find(opt => opt.value === value);
-    return option ? option.label : value;
-  };
 
   return (
     <div className={cn("relative w-full", className)} ref={containerRef}>
@@ -108,7 +88,7 @@ export function MultiSelect({
                     handleRemove(item);
                   }}
                 >
-                  {getLabel(item)}
+                  {item}
                   <X className="ml-1 h-3 w-3 cursor-pointer" />
                 </Badge>
               ))}
@@ -158,17 +138,17 @@ export function MultiSelect({
             ) : (
               filteredOptions.map((option) => (
                 <div
-                  key={option.value}
+                  key={option}
                   className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                  onClick={() => handleSelect(option.value)}
+                  onClick={() => handleSelect(option)}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      selected.includes(option.value) ? "opacity-100" : "opacity-0"
+                      selected.includes(option) ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {option.label}
+                  {option}
                 </div>
               ))
             )}
