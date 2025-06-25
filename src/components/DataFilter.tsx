@@ -105,7 +105,7 @@ export const DataFilter = ({ onFilterChange }: DataFilterProps) => {
         <div className="space-y-2">
           <Label>Ano CAIP</Label>
           <MultiSelect
-            options={availableYears.map(year => ({ label: year, value: year }))}
+            options={availableYears}
             selected={filters.anoCAIP}
             onChange={(values) => updateFilter('anoCAIP', values)}
             placeholder="Selecione os anos"
@@ -115,7 +115,7 @@ export const DataFilter = ({ onFilterChange }: DataFilterProps) => {
         <div className="space-y-2">
           <Label>Unidade Gestora</Label>
           <MultiSelect
-            options={UNIDADES_GESTORAS.map(ug => ({ label: ug, value: ug }))}
+            options={UNIDADES_GESTORAS}
             selected={filters.unidadeGestora}
             onChange={(values) => updateFilter('unidadeGestora', values)}
             placeholder="Selecione as unidades"
@@ -125,7 +125,7 @@ export const DataFilter = ({ onFilterChange }: DataFilterProps) => {
         <div className="space-y-2">
           <Label>Tipo de Unidade</Label>
           <MultiSelect
-            options={TIPOS_UNIDADE.map(tipo => ({ label: tipo, value: tipo }))}
+            options={TIPOS_UNIDADE}
             selected={filters.tipoUnidade}
             onChange={(values) => updateFilter('tipoUnidade', values)}
             placeholder="Selecione os tipos"
