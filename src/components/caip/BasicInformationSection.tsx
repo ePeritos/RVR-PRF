@@ -19,12 +19,18 @@ interface BasicInformationSectionProps {
 
 export const BasicInformationSection = ({ register, setValue, watch, errors }: BasicInformationSectionProps) => {
   console.log('🏢 === BASIC INFORMATION SECTION ===');
-  console.log('Valores atuais do formulário:', {
+  const watchedValues = {
     unidade_gestora: watch('unidade_gestora'),
     tipo_de_unidade: watch('tipo_de_unidade'),
     nome_da_unidade: watch('nome_da_unidade'),
-    ano_caip: watch('ano_caip')
-  });
+    ano_caip: watch('ano_caip'),
+    processo_sei: watch('processo_sei'),
+    servo2_pdi: watch('servo2_pdi'),
+    endereco: watch('endereco'),
+    observacoes: watch('observacoes')
+  };
+  
+  console.log('Valores atuais do formulário:', watchedValues);
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
@@ -38,8 +44,11 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
             Unidade Gestora *
           </Label>
           <Select 
-            value={watch('unidade_gestora') || ''} 
-            onValueChange={(value) => setValue('unidade_gestora', value)}
+            value={watchedValues.unidade_gestora || ''} 
+            onValueChange={(value) => {
+              console.log('🔄 Selecionando unidade gestora:', value);
+              setValue('unidade_gestora', value);
+            }}
           >
             <SelectTrigger>
               <SelectValue placeholder="Selecione a unidade gestora" />
@@ -62,8 +71,11 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
             Tipo de Unidade *
           </Label>
           <Select 
-            value={watch('tipo_de_unidade') || ''} 
-            onValueChange={(value) => setValue('tipo_de_unidade', value)}
+            value={watchedValues.tipo_de_unidade || ''} 
+            onValueChange={(value) => {
+              console.log('🔄 Selecionando tipo de unidade:', value);
+              setValue('tipo_de_unidade', value);
+            }}
           >
             <SelectTrigger>
               <SelectValue placeholder="Selecione o tipo de unidade" />
@@ -88,6 +100,11 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
           <Input
             {...register('nome_da_unidade')}
             placeholder="Nome da unidade"
+            value={watchedValues.nome_da_unidade || ''}
+            onChange={(e) => {
+              console.log('🔄 Alterando nome da unidade:', e.target.value);
+              setValue('nome_da_unidade', e.target.value);
+            }}
           />
           {errors.nome_da_unidade && (
             <p className="text-sm text-destructive mt-1">Este campo é obrigatório</p>
@@ -99,8 +116,11 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
             Ano CAIP *
           </Label>
           <Select 
-            value={watch('ano_caip') || ''} 
-            onValueChange={(value) => setValue('ano_caip', value)}
+            value={watchedValues.ano_caip || ''} 
+            onValueChange={(value) => {
+              console.log('🔄 Selecionando ano CAIP:', value);
+              setValue('ano_caip', value);
+            }}
           >
             <SelectTrigger>
               <SelectValue placeholder="Selecione o ano" />
@@ -125,6 +145,8 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
           <Input
             {...register('processo_sei')}
             placeholder="Número do processo SEI"
+            value={watchedValues.processo_sei || ''}
+            onChange={(e) => setValue('processo_sei', e.target.value)}
           />
         </div>
 
@@ -135,6 +157,8 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
           <Input
             {...register('servo2_pdi')}
             placeholder="Servo2/PDI"
+            value={watchedValues.servo2_pdi || ''}
+            onChange={(e) => setValue('servo2_pdi', e.target.value)}
           />
         </div>
       </div>
@@ -147,6 +171,8 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
           {...register('endereco')}
           placeholder="Endereço completo"
           rows={2}
+          value={watchedValues.endereco || ''}
+          onChange={(e) => setValue('endereco', e.target.value)}
         />
       </div>
 
@@ -158,6 +184,8 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
           {...register('observacoes')}
           placeholder="Observações gerais"
           rows={3}
+          value={watchedValues.observacoes || ''}
+          onChange={(e) => setValue('observacoes', e.target.value)}
         />
       </div>
     </Card>

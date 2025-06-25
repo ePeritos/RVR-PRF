@@ -26,9 +26,10 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<DadosCAIP>();
   const watchedValues = watch();
 
-  // Preencher campos automáticos
+  // Preencher campos automáticos para novos registros
   useEffect(() => {
-    if (profile && !editingItem) {
+    if (!editingItem && profile && open) {
+      console.log('🆕 Preenchendo campos automáticos para novo registro');
       setValue('cadastrador', profile.nome_completo);
       setValue('alterador', profile.nome_completo);
       setValue('ultima_alteracao', new Date().toISOString().split('T')[0]);
@@ -38,55 +39,42 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
     }
   }, [profile, editingItem, setValue, open]);
 
-  // Preencher formulário com dados existentes quando editar
+  // Carregar dados para edição
   useEffect(() => {
     console.log('🔄 === useCAIPForm: Effect de carregamento ===');
     console.log('editingItem:', editingItem);
     console.log('open:', open);
-    console.log('editingItem?.id:', editingItem?.id);
-    console.log('editingItem?.nome_da_unidade:', editingItem?.nome_da_unidade);
-    console.log('editingItem?.ano_caip:', editingItem?.ano_caip);
     
-    if (editingItem && open) {
-      console.log('✅ Preenchendo formulário com dados existentes:', editingItem.id);
-      console.log('📋 Dados completos do editingItem:', editingItem);
-      
-      // Reset primeiro para limpar todos os campos
+    if (!open) {
+      console.log('❌ Dialog não está aberto, resetando formulário');
       reset();
-      
-      // Aguardar um pouco antes de preencher para garantir que o reset foi processado
-      setTimeout(() => {
-        console.log('🔄 Iniciando preenchimento dos campos...');
-        
-        // Load each field from the editing item
-        Object.keys(editingItem).forEach(key => {
-          const value = editingItem[key as keyof DadosCAIP];
-          if (value !== null && value !== undefined) {
-            console.log(`📝 Definindo campo ${key}:`, value);
-            setValue(key as keyof DadosCAIP, value);
-          }
-        });
-        
-        console.log('✅ Preenchimento concluído');
-        
-        // Debug: verificar valores após definir
-        setTimeout(() => {
-          const currentValues = watch();
-          console.log('🔍 Valores atuais no formulário após preenchimento:', currentValues);
-          console.log('🔍 Nome da unidade atual:', currentValues.nome_da_unidade);
-          console.log('🔍 Ano CAIP atual:', currentValues.ano_caip);
-          console.log('🔍 Endereço atual:', currentValues.endereco);
-        }, 100);
-      }, 100);
-    } else if (!editingItem && open) {
-      console.log('🆕 Novo registro - resetando formulário...');
-      reset();
-    } else {
-      console.log('❌ Condições não atendidas para carregamento');
-      console.log('editingItem existe:', !!editingItem);
-      console.log('dialog está aberto:', open);
+      return;
     }
-  }, [editingItem, open, setValue, reset, watch]);
+
+    if (editingItem) {
+      console.log('✅ Carregando dados para edição:', editingItem.id);
+      console.log('📋 Dados do item:', {
+        id: editingItem.id,
+        nome_da_unidade: editingItem.nome_da_unidade,
+        ano_caip: editingItem.ano_caip,
+        endereco: editingItem.endereco,
+        unidade_gestora: editingItem.unidade_gestora,
+        tipo_de_unidade: editingItem.tipo_de_unidade
+      });
+      
+      // Carregar todos os campos do editingItem
+      Object.entries(editingItem).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          console.log(`📝 Definindo campo ${key}:`, value);
+          setValue(key as keyof DadosCAIP, value);
+        }
+      });
+      
+      console.log('✅ Carregamento de dados concluído');
+    } else {
+      console.log('🆕 Novo registro - campos serão preenchidos pelo useEffect de campos automáticos');
+    }
+  }, [editingItem, open, setValue, reset]);
 
   // Calcular percentual de preenchimento
   useEffect(() => {
@@ -105,6 +93,7 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
   const onSubmit = async (data: any) => {
     console.log('🚀 === INICIANDO SUBMIT ===');
     console.log('Dados do formulário:', data);
+    console.log('É edição?', !!editingItem);
     
     setIsLoading(true);
     try {
@@ -129,34 +118,7 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
         return;
       }
 
-      // Validar notas de manutenção para ambientes selecionados
-      const ambientesSelecionados = [];
-      const environmentFields = [
-        'almoxarifado', 'alojamento_feminino', 'alojamento_masculino', 'alojamento_misto',
-        'area_de_servico', 'area_de_uso_compartilhado_com_outros_orgaos', 'arquivo', 'auditorio',
-        'banheiro_para_zeladoria', 'banheiro_feminino_para_servidoras', 'banheiro_masculino_para_servidores',
-        'banheiro_misto_para_servidores', 'box_com_chuveiro_externo', 'box_para_lavagem_de_veiculos',
-        'canil', 'casa_de_maquinas', 'central_de_gas', 'cobertura_para_aglomeracao_de_usuarios',
-        'cobertura_para_fiscalizacao_de_veiculos', 'copa_e_cozinha', 'deposito_de_lixo',
-        'deposito_de_materiais_de_descarte_e_baixa', 'deposito_de_material_de_limpeza',
-        'deposito_de_material_operacional', 'estacionamento_para_usuarios', 'garagem_para_servidores',
-        'garagem_para_viaturas', 'lavabo_para_servidores_sem_box_para_chuveiro',
-        'local_para_custodia_temporaria_de_detidos', 'local_para_guarda_provisoria_de_animais',
-        'patio_de_retencao_de_veiculos', 'plataforma_para_fiscalizacao_da_parte_superior_dos_veiculos',
-        'ponto_de_pouso_para_aeronaves', 'rampa_de_fiscalizacao_de_veiculos', 'recepcao',
-        'sala_administrativa_escritorio', 'sala_de_assepsia', 'sala_de_aula', 'sala_de_reuniao',
-        'sala_de_revista_pessoal', 'sala_operacional_observatorio', 'sala_tecnica',
-        'sanitario_publico', 'telefone_publico', 'torre_de_telecomunicacoes',
-        'vestiario_para_nao_policiais', 'vestiario_para_policiais'
-      ];
-
-      environmentFields.forEach(campo => {
-        if (data[campo] === 'Sim') {
-          ambientesSelecionados.push(campo);
-        }
-      });
-
-      // Validação simplificada - a validação detalhada está no CAIPFormDialog
+      // Validação simplificada para ambientes (detalhada no CAIPFormDialog)
       console.log('useCAIPForm: Validação básica dos campos obrigatórios');
 
       // Validate Ano CAIP
