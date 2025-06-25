@@ -1,6 +1,7 @@
+
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface ThemeToggleProps {
   collapsed?: boolean;
@@ -8,7 +9,11 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ collapsed = false, showText = true }: ThemeToggleProps) {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
   return (
     <Button
