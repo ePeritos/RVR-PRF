@@ -35,56 +35,61 @@ export const CHART_FIELDS: ChartField[] = [
 
 export const useChartData = (data: DataRow[], config: ChartConfig) => {
   return useMemo(() => {
-    if (!data.length || !config.xField || !config.yField) {
+    if (!data || !data.length || !config.xField || !config.yField) {
       return [];
     }
 
-    // Agrupar dados por campo X
-    const groupedData = data.reduce((acc, item) => {
-      const xValue = item[config.xField] || 'Não informado';
-      const yValue = Number(item[config.yField]) || 0;
-      
-      if (!acc[xValue]) {
-        acc[xValue] = [];
-      }
-      acc[xValue].push(yValue);
-      
-      return acc;
-    }, {} as Record<string, number[]>);
+    try {
+      // Agrupar dados por campo X
+      const groupedData = data.reduce((acc, item) => {
+        const xValue = item[config.xField] || 'Não informado';
+        const yValue = Number(item[config.yField]) || 0;
+        
+        if (!acc[xValue]) {
+          acc[xValue] = [];
+        }
+        acc[xValue].push(yValue);
+        
+        return acc;
+      }, {} as Record<string, number[]>);
 
-    // Aplicar agregação
-    const processedData = Object.entries(groupedData).map(([key, values]) => {
-      let aggregatedValue: number;
-      
-      switch (config.aggregation) {
-        case 'count':
-          aggregatedValue = values.length;
-          break;
-        case 'sum':
-          aggregatedValue = values.reduce((sum, val) => sum + val, 0);
-          break;
-        case 'avg':
-          aggregatedValue = values.reduce((sum, val) => sum + val, 0) / values.length;
-          break;
-        case 'min':
-          aggregatedValue = Math.min(...values);
-          break;
-        case 'max':
-          aggregatedValue = Math.max(...values);
-          break;
-        default:
-          aggregatedValue = values.length;
-      }
+      // Aplicar agregação
+      const processedData = Object.entries(groupedData).map(([key, values]) => {
+        let aggregatedValue: number;
+        
+        switch (config.aggregation) {
+          case 'count':
+            aggregatedValue = values.length;
+            break;
+          case 'sum':
+            aggregatedValue = values.reduce((sum, val) => sum + val, 0);
+            break;
+          case 'avg':
+            aggregatedValue = values.reduce((sum, val) => sum + val, 0) / values.length;
+            break;
+          case 'min':
+            aggregatedValue = Math.min(...values);
+            break;
+          case 'max':
+            aggregatedValue = Math.max(...values);
+            break;
+          default:
+            aggregatedValue = values.length;
+        }
 
-      return {
-        name: key,
-        value: Math.round(aggregatedValue * 100) / 100, // Arredondar para 2 casas decimais
-        [config.xField]: key,
-        [config.yField]: aggregatedValue,
-      };
-    });
+        return {
+          name: key,
+          value: Math.round(aggregatedValue * 100) / 100, // Arredondar para 2 casas decimais
+          [config.xField]: key,
+          [config.yField]: aggregatedValue,
+        };
+      });
 
-    // Ordenar por valor (maior para menor)
-    return processedData.sort((a, b) => b.value - a.value);
+      // Ordenar por valor (maior para menor)
+      return processedData.sort((a, b) => b.value - a.value);
+    } catch (error) {
+      console.error('Erro ao processar dados do gráfico:', error);
+      return [];
+    }
   }, [data, config]);
 };

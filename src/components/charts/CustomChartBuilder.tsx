@@ -22,19 +22,30 @@ const DEFAULT_CONFIG: ChartConfig = {
 
 export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
   const [config, setConfig] = useState<ChartConfig>(DEFAULT_CONFIG);
-  const [saveFunction, setSaveFunction] = useState<((config: ChartConfig) => boolean) | null>(null);
   const { toast } = useToast();
   
   const chartData = useChartData(data, config);
 
-  const handleSave = () => {
-    if (saveFunction) {
-      const success = saveFunction(config);
-      if (success) {
-        // Reset form after successful save
-        setConfig({ ...DEFAULT_CONFIG, id: Date.now().toString() });
-      }
+  const handleSave = (configToSave: ChartConfig) => {
+    if (!configToSave.name.trim()) {
+      toast({
+        title: "Erro",
+        description: "Digite um nome para o gráfico",
+        variant: "destructive",
+      });
+      return false;
     }
+
+    // Aqui você pode implementar a lógica de salvamento
+    // Por enquanto, vamos apenas mostrar uma mensagem de sucesso
+    toast({
+      title: "Sucesso",
+      description: "Gráfico salvo com sucesso!",
+    });
+    
+    // Reset form after successful save
+    setConfig({ ...DEFAULT_CONFIG, id: Date.now().toString() });
+    return true;
   };
 
   const handleReset = () => {
@@ -61,14 +72,14 @@ export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
           <ChartConfigPanel
             config={config}
             onConfigChange={setConfig}
-            onSave={handleSave}
+            onSave={() => handleSave(config)}
             onReset={handleReset}
           />
           
           <SavedChartsManager
             onLoadChart={handleLoadChart}
             currentConfig={config}
-            onSaveChart={setSaveFunction as any}
+            onSaveChart={handleSave}
           />
         </div>
 

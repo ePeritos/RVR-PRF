@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 interface SavedChartsManagerProps {
   onLoadChart: (config: ChartConfig) => void;
   currentConfig: ChartConfig;
-  onSaveChart: (config: ChartConfig) => void;
+  onSaveChart: (config: ChartConfig) => boolean;
 }
 
 const STORAGE_KEY = 'sigi-saved-charts';
@@ -34,19 +34,19 @@ export function SavedChartsManager({ onLoadChart, currentConfig, onSaveChart }: 
     }
   };
 
-  const saveChart = (config: ChartConfig) => {
-    if (!config.name.trim()) {
+  const saveCurrentChart = () => {
+    if (!currentConfig || !currentConfig.name || !currentConfig.name.trim()) {
       toast({
         title: "Erro",
-        description: "Digite um nome para o gráfico",
+        description: "Configure um nome para o gráfico antes de salvar",
         variant: "destructive",
       });
-      return false;
+      return;
     }
 
     try {
       const newChart = {
-        ...config,
+        ...currentConfig,
         id: Date.now().toString(),
       };
 
@@ -58,15 +58,12 @@ export function SavedChartsManager({ onLoadChart, currentConfig, onSaveChart }: 
         title: "Sucesso",
         description: "Gráfico salvo com sucesso!",
       });
-      
-      return true;
     } catch (error) {
       toast({
         title: "Erro",
         description: "Erro ao salvar o gráfico",
         variant: "destructive",
       });
-      return false;
     }
   };
 
@@ -113,15 +110,13 @@ export function SavedChartsManager({ onLoadChart, currentConfig, onSaveChart }: 
     }
   };
 
-  // Expor a função saveChart para o componente pai
-  React.useEffect(() => {
-    onSaveChart(saveChart as any);
-  }, [savedCharts]);
-
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">Gráficos Salvos</CardTitle>
+        <Button onClick={saveCurrentChart} className="w-full" size="sm">
+          Salvar Configuração Atual
+        </Button>
       </CardHeader>
       <CardContent>
         {savedCharts.length === 0 ? (
