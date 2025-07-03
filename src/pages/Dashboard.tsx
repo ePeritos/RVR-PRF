@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CustomChartBuilder } from '@/components/charts/CustomChartBuilder';
 
 interface DashboardStats {
   totalImoveis: number;
@@ -22,6 +23,52 @@ interface UnidadeGestoraData {
   numeroImoveis: number;
   areaConstruidaMedia: number;
 }
+
+// Função para formatar valores grandes de forma compacta
+const formatCurrency = (value: number) => {
+  if (value >= 1000000000) {
+    return `R$ ${(value / 1000000000).toFixed(1)} bi`;
+  } else if (value >= 1000000) {
+    return `R$ ${(value / 1000000).toFixed(1)} mi`;
+  } else if (value >= 1000) {
+    return `R$ ${(value / 1000).toFixed(1)} mil`;
+  } else {
+    return value.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+  }
+};
+
+// Função para calcular dados por unidade gestora
+const calculateUnidadeGestoraData = (data: any[]) => {
+  const unidadeMap = new Map<string, { count: number; area: number }>();
+  
+  data.forEach(item => {
+    const unidade = item.unidade_gestora || 'Não informado';
+    const area = Number(item.area_construida_m2) || 0;
+    
+    if (unidadeMap.has(unidade)) {
+      const existing = unidadeMap.get(unidade)!;
+      unidadeMap.set(unidade, {
+        count: existing.count + 1,
+        area: existing.area + area
+      });
+    } else {
+      unidadeMap.set(unidade, { count: 1, area });
+    }
+  });
+
+  return Array.from(unidadeMap.entries())
+    .map(([unidade, data]) => ({
+      unidade: unidade.replace('SPRF/', ''), // Remove prefixo para melhor visualização
+      numeroImoveis: data.count,
+      areaConstruidaMedia: Math.round(data.area / data.count)
+    }))
+    .sort((a, b) => b.areaConstruidaMedia - a.areaConstruidaMedia); // Ordenar por área construída média (maior para menor)
+};
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -37,52 +84,7 @@ const Dashboard = () => {
   });
   const [filteredStats, setFilteredStats] = useState<DashboardStats>(stats);
   const [unidadeGestoraData, setUnidadeGestoraData] = useState<UnidadeGestoraData[]>([]);
-
-  // Função para formatar valores grandes de forma compacta
-  const formatCurrency = (value: number) => {
-    if (value >= 1000000000) {
-      return `R$ ${(value / 1000000000).toFixed(1)} bi`;
-    } else if (value >= 1000000) {
-      return `R$ ${(value / 1000000).toFixed(1)} mi`;
-    } else if (value >= 1000) {
-      return `R$ ${(value / 1000).toFixed(1)} mil`;
-    } else {
-      return value.toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-      });
-    }
-  };
-
-  // Função para calcular dados por unidade gestora
-  const calculateUnidadeGestoraData = (data: any[]) => {
-    const unidadeMap = new Map<string, { count: number; area: number }>();
-    
-    data.forEach(item => {
-      const unidade = item.unidade_gestora || 'Não informado';
-      const area = Number(item.area_construida_m2) || 0;
-      
-      if (unidadeMap.has(unidade)) {
-        const existing = unidadeMap.get(unidade)!;
-        unidadeMap.set(unidade, {
-          count: existing.count + 1,
-          area: existing.area + area
-        });
-      } else {
-        unidadeMap.set(unidade, { count: 1, area });
-      }
-    });
-
-    return Array.from(unidadeMap.entries())
-      .map(([unidade, data]) => ({
-        unidade: unidade.replace('SPRF/', ''), // Remove prefixo para melhor visualização
-        numeroImoveis: data.count,
-        areaConstruidaMedia: Math.round(data.area / data.count)
-      }))
-      .sort((a, b) => b.areaConstruidaMedia - a.areaConstruidaMedia); // Ordenar por área construída média (maior para menor)
-  };
+  const [filteredData, setFilteredData] = useState<any[]>([]);
 
   useEffect(() => {
     if (supabaseData.length > 0) {
@@ -111,6 +113,7 @@ const Dashboard = () => {
       setStats(newStats);
       setFilteredStats(newStats);
       setUnidadeGestoraData(unidadeData);
+      setFilteredData(supabaseData);
     }
   }, [supabaseData]);
 
@@ -158,6 +161,7 @@ const Dashboard = () => {
       valorTotalAvaliado,
     });
     setUnidadeGestoraData(unidadeData);
+    setFilteredData(filtered);
   };
 
   if (loading) {
@@ -270,10 +274,11 @@ const Dashboard = () => {
 
       {/* Tabs com Gráficos */}
       <Tabs defaultValue="geral" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="geral">Visão Geral</TabsTrigger>
           <TabsTrigger value="conservacao">Estado de Conservação</TabsTrigger>
           <TabsTrigger value="temporal">Análise Temporal</TabsTrigger>
+          <TabsTrigger value="customizados">Gráficos Customizados</TabsTrigger>
         </TabsList>
         
         <TabsContent value="geral" className="space-y-4">
@@ -344,6 +349,10 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="customizados" className="space-y-4">
+          <CustomChartBuilder data={filteredData} />
         </TabsContent>
       </Tabs>
     </div>
