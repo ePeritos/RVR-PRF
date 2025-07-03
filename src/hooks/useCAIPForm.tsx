@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useToast } from '@/hooks/use-toast';
@@ -22,11 +21,11 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
   const { profile } = useProfile();
   const [isLoading, setIsLoading] = useState(false);
   const [percentualPreenchimento, setPercentualPreenchimento] = useState(0);
+  const [imageErrors, setImageErrors] = useState<{[key: string]: string}>({});
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<DadosCAIP>();
   const watchedValues = watch();
 
-  // Preencher campos automáticos para novos registros
   useEffect(() => {
     if (!editingItem && profile && open) {
       console.log('🆕 Preenchendo campos automáticos para novo registro');
@@ -39,7 +38,6 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
     }
   }, [profile, editingItem, setValue, open]);
 
-  // Carregar dados para edição
   useEffect(() => {
     console.log('🔄 === useCAIPForm: Effect de carregamento ===');
     console.log('editingItem:', editingItem);
@@ -76,7 +74,6 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
     }
   }, [editingItem, open, setValue, reset]);
 
-  // Calcular percentual de preenchimento
   useEffect(() => {
     if (watchedValues) {
       const campos = Object.keys(watchedValues);
@@ -90,14 +87,68 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
     }
   }, [watchedValues]);
 
+  // Função para validar imagens antes do submit
+  const validateImages = (): boolean => {
+    const imageFields = [
+      'imagem_geral', 'imagem_fachada', 'imagem_lateral_1', 'imagem_lateral_2', 
+      'imagem_fundos', 'imagem_sala_cofre', 'imagem_cofre', 
+      'imagem_interna_alojamento_masculino', 'imagem_interna_alojamento_feminino', 
+      'imagem_interna_plantao_uop'
+    ];
+
+    const errors: {[key: string]: string} = {};
+    let hasErrors = false;
+
+    imageFields.forEach(field => {
+      const imageUrl = watchedValues[field as keyof DadosCAIP];
+      
+      // Se há uma URL de imagem, verificar se é válida
+      if (imageUrl && typeof imageUrl === 'string') {
+        // Verificar se não é uma URL temporária (blob) que indica upload em andamento
+        if (imageUrl.startsWith('blob:')) {
+          errors[field] = 'Upload em andamento. Aguarde a conclusão.';
+          hasErrors = true;
+        }
+        // Verificar se é uma URL válida de imagem
+        else if (!imageUrl.startsWith('http') && !imageUrl.startsWith('https')) {
+          errors[field] = 'URL de imagem inválida.';
+          hasErrors = true;
+        }
+      }
+    });
+
+    setImageErrors(errors);
+
+    if (hasErrors) {
+      const errorCount = Object.keys(errors).length;
+      toast({
+        title: "Erro nas Imagens",
+        description: `${errorCount === 1 
+          ? 'Uma imagem possui erro' 
+          : `${errorCount} imagens possuem erros`
+        }. Corrija antes de salvar.`,
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const onSubmit = async (data: any) => {
     console.log('🚀 === INICIANDO SUBMIT ===');
     console.log('Dados do formulário:', data);
     console.log('É edição?', !!editingItem);
     
     setIsLoading(true);
+    
     try {
-      // Validações obrigatórias
+      // Validar imagens primeiro
+      if (!validateImages()) {
+        setIsLoading(false);
+        return;
+      }
+
       if (!data.unidade_gestora) {
         toast({
           title: "Campo obrigatório",
@@ -182,12 +233,10 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
 
         console.log('✅ Novo registro criado:', newRecord);
 
-        // Salvar as avaliações de ambientes se existirem
         if (newRecord && avaliacoesLocais && Object.keys(avaliacoesLocais).length > 0) {
           console.log('Salvando avaliações para novo registro...');
           await salvarAvaliacoesAmbientes(newRecord.id, processedData.tipo_de_unidade, avaliacoesLocais);
           
-          // Aguardar para o trigger processar e buscar notas atualizadas
           await new Promise(resolve => setTimeout(resolve, 500));
           
           const { data: notasAtualizadas } = await supabase
@@ -206,15 +255,27 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
       }
 
       reset();
+      setImageErrors({}); // Limpar erros de imagem
       onOpenChange(false);
       onSuccess();
     } catch (error) {
       console.error('❌ Erro ao salvar:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar os dados.",
-        variant: "destructive",
-      });
+      
+      // Verificar se é erro relacionado a imagem
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      if (errorMessage.toLowerCase().includes('image') || errorMessage.toLowerCase().includes('storage')) {
+        toast({
+          title: "Erro nas Imagens",
+          description: "Erro ao processar imagens. Verifique se todas as imagens foram carregadas corretamente.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Erro ao salvar os dados.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -222,6 +283,7 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
 
   const handleNew = () => {
     reset();
+    setImageErrors({}); // Limpar erros de imagem
   };
 
   const salvarAvaliacoesAmbientes = async (imovelId: string, tipoUnidade: string, avaliacoes: {[key: string]: number}) => {
@@ -355,6 +417,7 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
     isLoading,
     percentualPreenchimento,
     onSubmit,
-    handleNew
+    handleNew,
+    imageErrors // Exportar erros de imagem para componente pai se necessário
   };
 };

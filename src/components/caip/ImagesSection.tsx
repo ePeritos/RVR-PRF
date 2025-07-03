@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Camera, Upload, X, Loader2 } from 'lucide-react';
+import { Camera, Upload, X, Loader2, AlertTriangle } from 'lucide-react';
 import { Tables } from '@/integrations/supabase/types';
 import { Button } from '@/components/ui/button';
 import { ImageUploadService } from '@/utils/imageUpload';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 type DadosCAIP = Tables<'dados_caip'>;
 
@@ -20,10 +21,12 @@ interface ImagePreview {
   url: string;
   isExisting?: boolean;
   isUploading?: boolean;
+  error?: string;
 }
 
 export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) => {
   const [imagePreviews, setImagePreviews] = useState<{[key: string]: ImagePreview}>({});
+  const [globalError, setGlobalError] = useState<string>('');
   const { toast } = useToast();
 
   const imageFields = [
@@ -39,7 +42,10 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
     { key: 'imagem_interna_plantao_uop', label: 'Imagem Interna Plantão UOP' }
   ];
 
-  // Load existing images when editing
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB em bytes
+  const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+  // useEffect for loading existing images
   useEffect(() => {
     if (watchedValues?.id) {
       console.log('=== LOADING EXISTING IMAGES ===');
@@ -52,7 +58,6 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
         const imageUrl = watchedValues[key];
         console.log(`Verificando campo ${key}:`, imageUrl);
         
-        // Validação mais rigorosa para URLs reais de imagem
         if (imageUrl && 
             typeof imageUrl === 'string' && 
             imageUrl.trim() !== '' && 
@@ -63,7 +68,6 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
             !imageUrl.toLowerCase().includes('example') &&
             !imageUrl.toLowerCase().includes('default')) {
           
-          // Verificar se a URL parece válida (contém extensão de imagem ou domínio supabase)
           const isValidImageUrl = imageUrl.includes('supabase') || 
                                   /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(imageUrl) ||
                                   imageUrl.startsWith('blob:');
@@ -91,51 +95,97 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
         setImagePreviews({});
       }
     } else {
-      // Clear previews when no ID (new record)
       console.log('Novo registro - limpando previews de imagem');
       setImagePreviews({});
     }
   }, [watchedValues?.id]);
+
+  const validateFile = (file: File): { isValid: boolean; error?: string } => {
+    // Validar tipo de arquivo
+    if (!ALLOWED_TYPES.includes(file.type.toLowerCase())) {
+      return {
+        isValid: false,
+        error: `Tipo de arquivo não permitido. Use apenas: ${ALLOWED_TYPES.map(type => type.split('/')[1].toUpperCase()).join(', ')}`
+      };
+    }
+
+    // Validar tamanho do arquivo
+    if (file.size > MAX_FILE_SIZE) {
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      const maxSizeMB = (MAX_FILE_SIZE / (1024 * 1024)).toFixed(0);
+      return {
+        isValid: false,
+        error: `Arquivo muito grande (${fileSizeMB}MB). O tamanho máximo permitido é ${maxSizeMB}MB.`
+      };
+    }
+
+    // Validar nome do arquivo
+    if (file.name.length > 100) {
+      return {
+        isValid: false,
+        error: 'Nome do arquivo muito longo. Use um nome com menos de 100 caracteres.'
+      };
+    }
+
+    return { isValid: true };
+  };
 
   const handleImageChange = async (fieldKey: string, files: FileList | null) => {
     console.log(`=== IMAGE CHANGE ===`);
     console.log(`Campo: ${fieldKey}`);
     console.log('Files:', files);
     
+    // Limpar erro global
+    setGlobalError('');
+    
     if (files && files[0]) {
       const file = files[0];
-      
-      // Validar tipo de arquivo
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Erro",
-          description: "Por favor, selecione apenas arquivos de imagem.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Validar tamanho (máximo 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Erro",
-          description: "A imagem deve ter no máximo 5MB.",
-          variant: "destructive",
-        });
-        return;
-      }
       
       console.log(`Processando imagem para campo ${fieldKey}:`, {
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type
       });
+
+      // Validar arquivo
+      const validation = validateFile(file);
+      if (!validation.isValid) {
+        console.error(`Erro de validação para ${fieldKey}:`, validation.error);
+        
+        // Mostrar erro específico
+        setImagePreviews(prev => ({
+          ...prev,
+          [fieldKey]: {
+            ...prev[fieldKey],
+            error: validation.error
+          }
+        }));
+
+        toast({
+          title: "Erro na Imagem",
+          description: `${imageFields.find(f => f.key === fieldKey)?.label}: ${validation.error}`,
+          variant: "destructive",
+        });
+
+        // Limpar o input
+        const input = document.getElementById(fieldKey) as HTMLInputElement;
+        if (input) {
+          input.value = '';
+        }
+        
+        return;
+      }
       
       // Mostrar preview e estado de carregamento
       const previewUrl = URL.createObjectURL(file);
       setImagePreviews(prev => ({
         ...prev,
-        [fieldKey]: { file, url: previewUrl, isUploading: true }
+        [fieldKey]: { 
+          file, 
+          url: previewUrl, 
+          isUploading: true,
+          error: undefined // Limpar erro anterior
+        }
       }));
       
       try {
@@ -146,7 +196,11 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
           // Atualizar preview com URL final
           setImagePreviews(prev => ({
             ...prev,
-            [fieldKey]: { url: uploadedUrl, isUploading: false }
+            [fieldKey]: { 
+              url: uploadedUrl, 
+              isUploading: false,
+              error: undefined
+            }
           }));
           
           // Atualizar valor no formulário
@@ -160,22 +214,28 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
           
           toast({
             title: "Sucesso",
-            description: "Imagem carregada com sucesso.",
+            description: `${imageFields.find(f => f.key === fieldKey)?.label} carregada com sucesso.`,
           });
         } else {
-          throw new Error('Falha no upload');
+          throw new Error('Falha no upload - URL não retornada');
         }
       } catch (error) {
         console.error('Erro no upload:', error);
-        setImagePreviews(prev => {
-          const newPreviews = { ...prev };
-          delete newPreviews[fieldKey];
-          return newPreviews;
-        });
+        
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido no upload';
+        
+        setImagePreviews(prev => ({
+          ...prev,
+          [fieldKey]: {
+            ...prev[fieldKey],
+            isUploading: false,
+            error: `Erro no upload: ${errorMessage}`
+          }
+        }));
         
         toast({
-          title: "Erro",
-          description: "Erro ao carregar a imagem. Tente novamente.",
+          title: "Erro no Upload",
+          description: `${imageFields.find(f => f.key === fieldKey)?.label}: ${errorMessage}`,
           variant: "destructive",
         });
         
@@ -212,7 +272,16 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
     if (setValue) {
       setValue(fieldKey, null);
     }
+
+    toast({
+      title: "Imagem Removida",
+      description: `${imageFields.find(f => f.key === fieldKey)?.label} foi removida com sucesso.`,
+    });
   };
+
+  // Verificar se há erros nas imagens
+  const hasImageErrors = Object.values(imagePreviews).some(preview => preview.error);
+  const imageErrorCount = Object.values(imagePreviews).filter(preview => preview.error).length;
 
   return (
     <Card className="p-6">
@@ -220,15 +289,54 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
         <Camera className="h-5 w-5" />
         Imagens do Imóvel
       </h3>
+
+      {/* Alert global para erros de imagem */}
+      {hasImageErrors && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            {imageErrorCount === 1 
+              ? 'Uma imagem possui erro e precisa ser corrigida antes de salvar.'
+              : `${imageErrorCount} imagens possuem erros e precisam ser corrigidas antes de salvar.`
+            }
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {globalError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{globalError}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="mb-4 p-3 bg-muted/50 rounded-lg">
+        <p className="text-sm text-muted-foreground">
+          <strong>Requisitos para imagens:</strong>
+        </p>
+        <ul className="text-xs text-muted-foreground mt-1 space-y-1">
+          <li>• Tamanho máximo: 5MB por arquivo</li>
+          <li>• Formatos aceitos: JPG, PNG, GIF, WebP</li>
+          <li>• Nome do arquivo: máximo 100 caracteres</li>
+        </ul>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {imageFields.map(({ key, label }) => {
           const preview = imagePreviews[key];
+          const hasError = preview?.error;
           
           return (
             <div key={key} className="space-y-2">
-              <Label htmlFor={key}>{label}</Label>
-              <div className="border-2 border-dashed border-border rounded-lg overflow-hidden bg-muted/20 relative">
-                {preview ? (
+              <Label htmlFor={key} className={hasError ? 'text-destructive' : ''}>
+                {label}
+                {hasError && <span className="ml-1">⚠️</span>}
+              </Label>
+              
+              <div className={`border-2 border-dashed rounded-lg overflow-hidden bg-muted/20 relative ${
+                hasError ? 'border-destructive bg-destructive/5' : 'border-border hover:border-primary/50 transition-colors duration-200'
+              }`}>
+                {preview && !hasError ? (
                   <div className="relative">
                     <img 
                       src={preview.url} 
@@ -267,6 +375,31 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
                       </p>
                     </div>
                   </div>
+                ) : hasError ? (
+                  <div className="p-4 text-center h-32 flex flex-col justify-center">
+                    <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-destructive" />
+                    <p className="text-sm text-destructive font-medium mb-2">Erro na Imagem</p>
+                    <p className="text-xs text-destructive">{preview.error}</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => {
+                        // Limpar erro e permitir nova tentativa
+                        setImagePreviews(prev => {
+                          const newPreviews = { ...prev };
+                          delete newPreviews[key];
+                          return newPreviews;
+                        });
+                        // Reset input
+                        const input = document.getElementById(key) as HTMLInputElement;
+                        if (input) input.value = '';
+                      }}
+                    >
+                      Tentar Novamente
+                    </Button>
+                  </div>
                 ) : (
                   <label htmlFor={key} className="block cursor-pointer">
                     <div className="p-4 text-center h-32 flex flex-col justify-center">
@@ -294,6 +427,13 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
                   disabled={preview?.isUploading}
                 />
               </div>
+              
+              {/* Erro específico do campo */}
+              {hasError && (
+                <p className="text-xs text-destructive mt-1">
+                  {preview.error}
+                </p>
+              )}
             </div>
           );
         })}
