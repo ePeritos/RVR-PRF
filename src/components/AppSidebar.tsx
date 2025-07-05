@@ -145,15 +145,11 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild isActive={currentPath === item.url}>
                     <NavLink 
                       to={item.url} 
                       end 
-                      className={({ isActive }) =>
-                        isActive 
-                          ? "bg-muted text-primary font-medium flex items-center w-full px-3 py-2 rounded-md" 
-                          : "hover:bg-muted/50 flex items-center w-full px-3 py-2 rounded-md"
-                      }
+                      className="flex items-center w-full px-3 py-2 rounded-md"
                     >
                       <item.icon className="mr-2 h-4 w-4" />
                       {state !== "collapsed" && <span>{item.title}</span>}
@@ -187,7 +183,6 @@ export function AppSidebar() {
                   </div>
                 </SidebarMenuItem>
               )}
-
 
               {/* Botão editar perfil */}
               <SidebarMenuItem>
