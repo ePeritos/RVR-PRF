@@ -43,14 +43,29 @@ export const useValoresCUB = () => {
   }, []);
 
   const getValorCUB = (uf: string, padraoConstrutivo: string): ValorCUB | undefined => {
-    return valoresCUB.find(
+    // Primeiro tenta encontrar valor exato para UF e padrão
+    let valor = valoresCUB.find(
       v => v.uf === uf && v.padrao_construtivo === padraoConstrutivo
     );
+    
+    // Se não encontrar para a UF específica, tenta usar AP como fallback
+    if (!valor && uf !== 'AP') {
+      valor = valoresCUB.find(
+        v => v.uf === 'AP' && v.padrao_construtivo === padraoConstrutivo
+      );
+    }
+    
+    return valor;
   };
 
   const getUfsDisponiveis = (): string[] => {
-    const ufs = [...new Set(valoresCUB.map(v => v.uf))];
-    return ufs.sort();
+    // Retorna todos os estados brasileiros, não apenas os que têm dados CUB
+    const todosUFs = [
+      'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 
+      'MG', 'MS', 'MT', 'PA', 'PB', 'PE', 'PI', 'PR', 'RJ', 'RN', 
+      'RO', 'RR', 'RS', 'SC', 'SE', 'SP', 'TO'
+    ];
+    return todosUFs;
   };
 
   const getPadroesDisponiveis = (uf?: string): string[] => {

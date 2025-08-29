@@ -56,9 +56,18 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
           ...prev,
           cubM2: valorCUB.valor_m2
         }));
+        
+        // Mostrar aviso se está usando dados de fallback (AP)
+        if (valorCUB.uf !== parameters.uf) {
+          toast({
+            title: "Valor CUB aplicado",
+            description: `Usando dados do Amapá como referência para ${parameters.uf}. Valores específicos para este estado serão adicionados em breve.`,
+            variant: "default",
+          });
+        }
       }
     }
-  }, [parameters.padraoConstrutivo, parameters.uf, getValorCUB]);
+  }, [parameters.padraoConstrutivo, parameters.uf, getValorCUB, toast]);
 
   const fetchResponsaveisTecnicos = async () => {
     try {
