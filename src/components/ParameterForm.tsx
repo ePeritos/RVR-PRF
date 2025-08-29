@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { DataRow } from '@/hooks/useSupabaseData';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useValoresCUB } from '@/hooks/useValoresCUB';
 
 interface ResponsavelTecnico {
   id: string;
@@ -18,6 +19,7 @@ interface ResponsavelTecnico {
   uf: string;
 }
 
+
 interface ParameterFormProps {
   onSubmit: (parameters: any) => void;
   selectedData: DataRow[];
@@ -27,6 +29,7 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
   const [responsaveisTecnicos, setResponsaveisTecnicos] = useState<ResponsavelTecnico[]>([]);
   const [loadingResponsaveis, setLoadingResponsaveis] = useState(true);
   const { toast } = useToast();
+  const { valoresCUB, getValorCUB, getUfsDisponiveis } = useValoresCUB();
   
   const [parameters, setParameters] = useState({
     valorM2: 150,
@@ -36,12 +39,26 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
     fonteValorTerreno: 'Planta Genérica de Valores do Município',
     justificativaValores: 'Valores baseados em pesquisa de mercado local e dados oficiais do município.',
     responsavelTecnicoId: '',
-    padraoConstrutivo: 'R8'
+    padraoConstrutivo: 'R8-N',
+    uf: 'AP'
   });
 
   useEffect(() => {
     fetchResponsaveisTecnicos();
   }, []);
+
+  // Atualizar CUB automaticamente quando padrão ou UF mudar
+  useEffect(() => {
+    if (parameters.padraoConstrutivo && parameters.uf) {
+      const valorCUB = getValorCUB(parameters.uf, parameters.padraoConstrutivo);
+      if (valorCUB) {
+        setParameters(prev => ({
+          ...prev,
+          cubM2: valorCUB.valor_m2
+        }));
+      }
+    }
+  }, [parameters.padraoConstrutivo, parameters.uf, getValorCUB]);
 
   const fetchResponsaveisTecnicos = async () => {
     try {
@@ -82,6 +99,45 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
       setLoadingResponsaveis(false);
     }
   };
+
+
+  // Definir opções de padrões construtivos organizadas por categoria
+  const padroesConstrutivos = {
+    'Residencial Baixo': [
+      { value: 'R1-B', label: 'R1-B - Residencial Unifamiliar Baixo' },
+      { value: 'PP-4-B', label: 'PP-4-B - Prédio Popular 4 Pavimentos Baixo' },
+      { value: 'R8-B', label: 'R8-B - Residencial 8 Pavimentos Baixo' },
+      { value: 'PIS', label: 'PIS - Projeto de Interesse Social' }
+    ],
+    'Residencial Normal': [
+      { value: 'R1-N', label: 'R1-N - Residencial Unifamiliar Normal' },
+      { value: 'PP-4-N', label: 'PP-4-N - Prédio Popular 4 Pavimentos Normal' },
+      { value: 'R8-N', label: 'R8-N - Residencial 8 Pavimentos Normal' },
+      { value: 'R16-N', label: 'R16-N - Residencial 16 Pavimentos Normal' }
+    ],
+    'Residencial Alto': [
+      { value: 'R1-A', label: 'R1-A - Residencial Unifamiliar Alto' },
+      { value: 'R8-A', label: 'R8-A - Residencial 8 Pavimentos Alto' },
+      { value: 'R16-A', label: 'R16-A - Residencial 16 Pavimentos Alto' }
+    ],
+    'Comercial Normal': [
+      { value: 'CAL-8-N', label: 'CAL-8-N - Comercial Andares Livres 8 Pavimentos Normal' },
+      { value: 'CSL-8-N', label: 'CSL-8-N - Comercial Salas Livres 8 Pavimentos Normal' },
+      { value: 'CSL-16-N', label: 'CSL-16-N - Comercial Salas Livres 16 Pavimentos Normal' }
+    ],
+    'Comercial Alto': [
+      { value: 'CAL-8-A', label: 'CAL-8-A - Comercial Andares Livres 8 Pavimentos Alto' },
+      { value: 'CSL-8-A', label: 'CSL-8-A - Comercial Salas Livres 8 Pavimentos Alto' },
+      { value: 'CSL-16-A', label: 'CSL-16-A - Comercial Salas Livres 16 Pavimentos Alto' }
+    ],
+    'Outros': [
+      { value: 'RP1Q', label: 'RP1Q - Residência Popular 1 Quarto' },
+      { value: 'GI', label: 'GI - Galpão Industrial' }
+    ]
+  };
+
+  // UFs disponíveis serão obtidas dinamicamente do banco de dados
+  const ufsDisponiveis = getUfsDisponiveis();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,8 +241,31 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="uf" className="text-sm font-medium">
+                Estado (UF) *
+              </Label>
+              <Select
+                value={parameters.uf}
+                onValueChange={(value) => setParameters({...parameters, uf: value})}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Selecione o estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ufsDisponiveis.length > 0 ? (
+                    ufsDisponiveis.map((uf) => (
+                      <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>Carregando...</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="padraoConstrutivo" className="text-sm font-medium">
-                Padrão Construtivo *
+                Padrão Construtivo (CUB) *
               </Label>
               <Select
                 value={parameters.padraoConstrutivo}
@@ -195,18 +274,24 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
                 <SelectTrigger className="h-9">
                   <SelectValue placeholder="Selecione o padrão construtivo" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="R1">R1 - Residencial Popular</SelectItem>
-                  <SelectItem value="R8">R8 - Residencial Normal</SelectItem>
-                  <SelectItem value="R16">R16 - Residencial Elevado</SelectItem>
-                  <SelectItem value="C8">C8 - Comercial Popular</SelectItem>
-                  <SelectItem value="C12">C12 - Comercial Normal</SelectItem>
-                  <SelectItem value="C16">C16 - Comercial Elevado</SelectItem>
-                  <SelectItem value="I">I - Industrial</SelectItem>
-                  <SelectItem value="IG">IG - Galpão Industrial</SelectItem>
+                <SelectContent className="max-h-64">
+                  {Object.entries(padroesConstrutivos).map(([categoria, padroes]) => (
+                    <div key={categoria}>
+                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">
+                        {categoria}
+                      </div>
+                      {padroes.map((padrao) => (
+                        <SelectItem key={padrao.value} value={padrao.value}>
+                          {padrao.label}
+                        </SelectItem>
+                      ))}
+                    </div>
+                  ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Baseado nos padrões ABNT</p>
+              <p className="text-xs text-muted-foreground">
+                Baseado nos padrões CUB/SINDUSCON. O valor CUB/m² será preenchido automaticamente.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -236,7 +321,9 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
                   required
                   className="h-9"
                 />
-                <p className="text-xs text-muted-foreground">Para cálculo da benfeitoria</p>
+                <p className="text-xs text-muted-foreground">
+                  Preenchido automaticamente baseado no padrão construtivo e UF selecionados
+                </p>
               </div>
             </div>
 

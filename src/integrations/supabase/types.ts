@@ -710,6 +710,39 @@ export type Database = {
         }
         Relationships: []
       }
+      valores_cub: {
+        Row: {
+          created_at: string
+          data_referencia: string
+          fonte: string | null
+          id: string
+          padrao_construtivo: string
+          uf: string
+          updated_at: string
+          valor_m2: number
+        }
+        Insert: {
+          created_at?: string
+          data_referencia?: string
+          fonte?: string | null
+          id?: string
+          padrao_construtivo: string
+          uf: string
+          updated_at?: string
+          valor_m2: number
+        }
+        Update: {
+          created_at?: string
+          data_referencia?: string
+          fonte?: string | null
+          id?: string
+          padrao_construtivo?: string
+          uf?: string
+          updated_at?: string
+          valor_m2?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
