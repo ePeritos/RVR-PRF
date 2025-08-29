@@ -248,17 +248,13 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
                 value={parameters.uf}
                 onValueChange={(value) => setParameters({...parameters, uf: value})}
               >
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Selecione o estado" />
-                </SelectTrigger>
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder={ufsDisponiveis.length > 0 ? "Selecione o estado" : "Carregando estados..."} />
+              </SelectTrigger>
                 <SelectContent>
-                  {ufsDisponiveis.length > 0 ? (
-                    ufsDisponiveis.map((uf) => (
-                      <SelectItem key={uf} value={uf}>{uf}</SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="" disabled>Carregando...</SelectItem>
-                  )}
+                  {ufsDisponiveis.map((uf) => (
+                    <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
