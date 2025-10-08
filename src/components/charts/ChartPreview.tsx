@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   BarChart, 
@@ -20,6 +20,7 @@ import {
 } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ChartConfig } from '@/hooks/useChartData';
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface ChartPreviewProps {
   data: any[];
@@ -40,6 +41,9 @@ const COLORS = [
 ];
 
 export function ChartPreview({ data, config }: ChartPreviewProps) {
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
   if (!data.length) {
     return (
       <Card className="flex-1">
@@ -54,6 +58,24 @@ export function ChartPreview({ data, config }: ChartPreviewProps) {
       </Card>
     );
   }
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (column: string) => {
+    if (sortColumn !== column) {
+      return <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />;
+    }
+    return sortDirection === 'asc' 
+      ? <ArrowUp className="ml-2 h-4 w-4" />
+      : <ArrowDown className="ml-2 h-4 w-4" />;
+  };
 
   const renderChart = () => {
     switch (config.type) {
@@ -71,20 +93,71 @@ export function ChartPreview({ data, config }: ChartPreviewProps) {
         });
         const columnArray = Array.from(columns);
         
+        // Ordenar os dados
+        const sortedData = [...data].sort((a, b) => {
+          if (!sortColumn) return 0;
+          
+          const aVal = sortColumn === 'row' ? a.row : 
+                       sortColumn === 'total' ? a.total : 
+                       a[sortColumn] || 0;
+          const bVal = sortColumn === 'row' ? b.row : 
+                       sortColumn === 'total' ? b.total : 
+                       b[sortColumn] || 0;
+          
+          // Comparação numérica ou alfabética
+          if (typeof aVal === 'number' && typeof bVal === 'number') {
+            return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+          }
+          
+          const aStr = String(aVal).toLowerCase();
+          const bStr = String(bVal).toLowerCase();
+          
+          if (sortDirection === 'asc') {
+            return aStr.localeCompare(bStr, 'pt-BR');
+          } else {
+            return bStr.localeCompare(aStr, 'pt-BR');
+          }
+        });
+        
         return (
           <div className="w-full">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="font-bold">{config.xField}</TableHead>
+                  <TableHead 
+                    className="font-bold cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => handleSort('row')}
+                  >
+                    <div className="flex items-center">
+                      {config.xField}
+                      {getSortIcon('row')}
+                    </div>
+                  </TableHead>
                   {columnArray.map(col => (
-                    <TableHead key={col} className="text-right">{col}</TableHead>
+                    <TableHead 
+                      key={col} 
+                      className="text-right cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => handleSort(col)}
+                    >
+                      <div className="flex items-center justify-end">
+                        {col}
+                        {getSortIcon(col)}
+                      </div>
+                    </TableHead>
                   ))}
-                  <TableHead className="text-right font-bold">Total</TableHead>
+                  <TableHead 
+                    className="text-right font-bold cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => handleSort('total')}
+                  >
+                    <div className="flex items-center justify-end">
+                      Total
+                      {getSortIcon('total')}
+                    </div>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((row, idx) => (
+                {sortedData.map((row, idx) => (
                   <TableRow key={idx}>
                     <TableCell className="font-medium">{row.row}</TableCell>
                     {columnArray.map(col => (
