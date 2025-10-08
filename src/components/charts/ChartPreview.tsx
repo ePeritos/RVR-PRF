@@ -72,7 +72,7 @@ export function ChartPreview({ data, config }: ChartPreviewProps) {
         const columnArray = Array.from(columns);
         
         return (
-          <div className="overflow-auto max-h-96">
+          <div className="w-full">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -165,9 +165,7 @@ export function ChartPreview({ data, config }: ChartPreviewProps) {
       </CardHeader>
       <CardContent>
         {config.type === 'table' ? (
-          <div className="h-96">
-            {renderChart()}
-          </div>
+          renderChart()
         ) : (
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
