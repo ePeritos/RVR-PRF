@@ -492,6 +492,7 @@ export type Database = {
           nome_unidade: string
           rip: string | null
           tipo_imovel_id: string
+          unidade_gestora: string | null
         }
         Insert: {
           created_at?: string | null
@@ -500,6 +501,7 @@ export type Database = {
           nome_unidade: string
           rip?: string | null
           tipo_imovel_id: string
+          unidade_gestora?: string | null
         }
         Update: {
           created_at?: string | null
@@ -508,6 +510,7 @@ export type Database = {
           nome_unidade?: string
           rip?: string | null
           tipo_imovel_id?: string
+          unidade_gestora?: string | null
         }
         Relationships: [
           {
@@ -758,7 +761,7 @@ export type Database = {
       }
       get_user_role: {
         Args: Record<PropertyKey, never> | { _user_id: string }
-        Returns: Database["public"]["Enums"]["app_role"]
+        Returns: string
       }
       has_role: {
         Args:
