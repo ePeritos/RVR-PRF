@@ -18,6 +18,7 @@ import {
   ResponsiveContainer,
   Cell
 } from 'recharts';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ChartConfig } from '@/hooks/useChartData';
 
 interface ChartPreviewProps {
@@ -56,6 +57,49 @@ export function ChartPreview({ data, config }: ChartPreviewProps) {
 
   const renderChart = () => {
     switch (config.type) {
+      case 'table':
+        if (!data.length) return <div>Sem dados para exibir</div>;
+        
+        // Obter todas as colunas únicas
+        const columns = new Set<string>();
+        data.forEach(row => {
+          Object.keys(row).forEach(key => {
+            if (key !== 'row' && key !== 'total') {
+              columns.add(key);
+            }
+          });
+        });
+        const columnArray = Array.from(columns);
+        
+        return (
+          <div className="overflow-auto max-h-96">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-bold">{config.xField}</TableHead>
+                  {columnArray.map(col => (
+                    <TableHead key={col} className="text-right">{col}</TableHead>
+                  ))}
+                  <TableHead className="text-right font-bold">Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.map((row, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell className="font-medium">{row.row}</TableCell>
+                    {columnArray.map(col => (
+                      <TableCell key={col} className="text-right">
+                        {row[col] || 0}
+                      </TableCell>
+                    ))}
+                    <TableCell className="text-right font-bold">{row.total}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        );
+        
       case 'bar':
         return (
           <BarChart data={data}>
@@ -117,14 +161,20 @@ export function ChartPreview({ data, config }: ChartPreviewProps) {
   return (
     <Card className="flex-1">
       <CardHeader>
-        <CardTitle>{config.name || 'Gráfico Personalizado'}</CardTitle>
+        <CardTitle>{config.name || 'Visualização Personalizada'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-96">
-          <ResponsiveContainer width="100%" height="100%">
+        {config.type === 'table' ? (
+          <div className="h-96">
             {renderChart()}
-          </ResponsiveContainer>
-        </div>
+          </div>
+        ) : (
+          <div className="h-96">
+            <ResponsiveContainer width="100%" height="100%">
+              {renderChart()}
+            </ResponsiveContainer>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

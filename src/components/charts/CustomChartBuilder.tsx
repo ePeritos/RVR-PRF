@@ -14,7 +14,7 @@ interface CustomChartBuilderProps {
 const DEFAULT_CONFIG: ChartConfig = {
   id: '',
   name: '',
-  type: 'bar',
+  type: 'table',
   xField: '',
   yField: '',
   aggregation: 'count',

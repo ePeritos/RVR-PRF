@@ -19,6 +19,7 @@ const CHART_TYPES = [
   { value: 'pie', label: 'Gráfico de Pizza' },
   { value: 'line', label: 'Gráfico de Linha' },
   { value: 'area', label: 'Gráfico de Área' },
+  { value: 'table', label: 'Tabela' },
 ];
 
 const AGGREGATIONS = [
@@ -70,7 +71,7 @@ export function ChartConfigPanel({ config, onConfigChange, onSave, onReset }: Ch
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="x-field">Campo X (Eixo Horizontal)</Label>
+          <Label htmlFor="x-field">{config.type === 'table' ? 'Linhas' : 'Campo X (Eixo Horizontal)'}</Label>
           <SimpleSelect
             options={allFields.map(field => field.label)}
             value={allFields.find(field => field.key === config.xField)?.label || ''}
@@ -78,20 +79,24 @@ export function ChartConfigPanel({ config, onConfigChange, onSave, onReset }: Ch
               const field = allFields.find(f => f.label === value)?.key || '';
               handleFieldChange('xField', field);
             }}
-            placeholder="Selecione o campo X"
+            placeholder={config.type === 'table' ? 'Selecione o campo para linhas' : 'Selecione o campo X'}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="y-field">Campo Y (Eixo Vertical)</Label>
+          <Label htmlFor="y-field">{config.type === 'table' ? 'Colunas' : 'Campo Y (Eixo Vertical)'}</Label>
           <SimpleSelect
-            options={numericFields.map(field => field.label)}
-            value={numericFields.find(field => field.key === config.yField)?.label || ''}
+            options={config.type === 'table' ? allFields.map(field => field.label) : numericFields.map(field => field.label)}
+            value={config.type === 'table' 
+              ? allFields.find(field => field.key === config.yField)?.label || ''
+              : numericFields.find(field => field.key === config.yField)?.label || ''}
             onChange={(value) => {
-              const field = numericFields.find(f => f.label === value)?.key || '';
+              const field = config.type === 'table'
+                ? allFields.find(f => f.label === value)?.key || ''
+                : numericFields.find(f => f.label === value)?.key || '';
               handleFieldChange('yField', field);
             }}
-            placeholder="Selecione o campo Y"
+            placeholder={config.type === 'table' ? 'Selecione o campo para colunas' : 'Selecione o campo Y'}
           />
         </div>
 

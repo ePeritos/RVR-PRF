@@ -350,12 +350,12 @@ const RVR = () => {
   return (
     <div className="p-3 sm:p-6 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4 sm:mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold text-foreground">RVR - Relatórios de Valor de Reposição</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">RVR - Relatórios de Valor Referencial</h1>
       </div>
       
       <div className="text-center mb-4 sm:mb-6">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-1">
-          Geração de Relatórios de Valor de Reposição
+          Geração de Relatórios de Valor Referencial
         </h2>
         <p className="text-sm text-muted-foreground px-2">
           Selecione os parâmetros para gerar relatórios RVR baseados nos dados do CAIP
