@@ -24,7 +24,15 @@ A aplicação RVR coleta os seguintes dados pessoais:
 - Matrícula funcional
 
 **Dados Funcionais e Operacionais:**
-- [preencher com dados específicos da aplicação: relatórios gerados, registros de atividades, dados operacionais, etc.]
+- Unidade gestora de lotação do servidor
+- Perfil de acesso (usuário padrão ou administrador)
+- Registros de avaliações imobiliárias pelo método Ross-Heideck
+- Relatórios RVR gerados (datas, parâmetros utilizados)
+- Dados cadastrais de imóveis (CAIP): localização, características técnicas, infraestrutura
+- Imagens e documentação fotográfica de imóveis
+- Notas de adequação e avaliações de manutenção
+- Configurações de dashboards e gráficos customizados
+- Histórico de operações realizadas na aplicação
 
 **Dados Técnicos:**
 - Endereço IP e informações de acesso
@@ -35,15 +43,20 @@ A aplicação RVR coleta os seguintes dados pessoais:
 
 Os dados pessoais são tratados exclusivamente para as seguintes finalidades:
 
-a) **Autenticação e Controle de Acesso:** Verificar a identidade do usuário e garantir acesso autorizado à aplicação
+a) **Autenticação e Controle de Acesso:** Verificar a identidade do usuário via Google Workspace institucional e garantir acesso autorizado conforme perfil e unidade gestora
 
-b) **Execução das Funcionalidades:** [preencher com as finalidades específicas da aplicação relacionadas às atividades da PRF]
+b) **Execução das Funcionalidades:** 
+   - Reavaliação de valores contábeis de imóveis da PRF (método Ross-Heideck)
+   - Cadastro e gestão de informações técnicas de imóveis próprios (CAIP)
+   - Geração de relatórios técnicos e gerenciais
+   - Visualização de dados através de dashboards customizáveis
+   - Acompanhamento de manutenção e adequação de imóveis
 
-c) **Segurança da Informação:** Monitoramento, auditoria e prevenção de acessos não autorizados
+c) **Segurança da Informação:** Monitoramento contínuo, auditoria de alterações críticas (mudanças de perfil), prevenção de acessos não autorizados e escalação de privilégios
 
-d) **Cumprimento de Obrigação Legal:** Atendimento às normas internas da PRF e legislação aplicável
+d) **Cumprimento de Obrigação Legal:** Atendimento às normas internas da PRF, legislação patrimonial e regulamentos contábeis
 
-e) **Exercício Regular de Direitos:** Execução das atribuições institucionais da PRF
+e) **Exercício Regular de Direitos:** Execução das atribuições institucionais da PRF relacionadas à gestão patrimonial e tomada de decisões estratégicas
 
 ### 1.3. Base Legal
 
@@ -62,10 +75,23 @@ O tratamento dos dados pessoais fundamenta-se nas seguintes bases legais da LGPD
 
 ### 2.2. Medidas de Segurança Técnicas
 
-- **Transmissão:** Criptografia TLS 1.2+ para dados em trânsito
-- **Acesso:** Autenticação multifator e controle de acesso baseado em perfis
-- **Isolamento:** Row Level Security (RLS) garantindo acesso apenas aos dados autorizados
-- **Monitoramento:** Logs de auditoria e monitoramento contínuo de segurança
+- **Transmissão:** Criptografia TLS 1.3 para todos os dados em trânsito
+- **Acesso:** 
+  - Autenticação OAuth2 via Google Workspace institucional
+  - Controle de acesso baseado em perfis (usuário/administrador)
+  - Isolamento por unidade gestora
+- **Isolamento:** 
+  - Row Level Security (RLS) implementado em todas as tabelas
+  - Prevenção de escalação de privilégios no nível de banco de dados
+  - Políticas específicas por perfil e unidade gestora
+- **Proteção de Código:**
+  - Funções PostgreSQL com search_path explícito
+  - Prevenção de ataques de manipulação de schema
+- **Monitoramento:** 
+  - Logs de auditoria automáticos via triggers
+  - Tabela dedicada para eventos de segurança críticos
+  - Rastreamento de alterações de perfil
+  - Monitoramento contínuo via Supabase Analytics
 
 ### 2.3. Medidas de Segurança Organizacionais
 
@@ -115,9 +141,10 @@ Os dados pessoais são mantidos pelo tempo necessário para:
 
 ### 4.2. Critérios de Retenção
 
-- **Dados de Acesso:** Mantidos por [preencher com período - ex: 2 anos] para fins de auditoria
-- **Dados Funcionais:** [preencher com período específico conforme necessidade operacional]
-- **Logs de Segurança:** Mantidos conforme políticas de segurança da PRF
+- **Dados de Acesso:** Mantidos por 5 anos para fins de auditoria e conformidade
+- **Dados Funcionais (RVR/CAIP):** Mantidos indefinidamente enquanto o imóvel pertencer à PRF, para histórico patrimonial
+- **Logs de Segurança:** Mantidos indefinidamente para rastreabilidade de eventos críticos
+- **Imagens e Documentos:** Mantidos enquanto o registro do imóvel estiver ativo no sistema
 
 ### 4.3. Eliminação
 
@@ -153,9 +180,10 @@ Conforme a LGPD, você possui os seguintes direitos:
 
 ### 5.2. Exercício dos Direitos
 
-Para exercer seus direitos, entre em contato através dos canais oficiais da PRF:
-- **E-mail:** [preencher com e-mail oficial para solicitações LGPD]
-- **Canal Oficial:** [preencher com canal específico da PRF para LGPD]
+Para exercer seus direitos, entre em contato através dos canais oficiais:
+- **E-mail do Desenvolvedor/DPO:** daniel.avila@prf.gov.br
+- **Telefone:** 81 97116-8618
+- **Canal Oficial PRF:** Através da chefia imediata ou ouvidoria da PRF
 
 **Prazo de Resposta:** As solicitações serão respondidas em até 15 (quinze) dias, conforme Art. 19 da LGPD.
 
@@ -164,8 +192,8 @@ Para exercer seus direitos, entre em contato através dos canais oficiais da PRF
 ### 6.1. Controlador de Dados
 
 **Instituição:** Polícia Rodoviária Federal  
-**Endereço:** [preencher com endereço oficial da PRF]  
-**E-mail:** [preencher com e-mail oficial para questões de privacidade]
+**Endereço:** Setor Policial Sul, Área 5, Quadra 2, Bloco H - Brasília/DF  
+**Site:** https://www.gov.br/prf
 
 ### 6.2. Encarregado de Proteção de Dados (DPO)
 
@@ -201,8 +229,16 @@ Esta política entra em vigor na data de sua publicação e permanece válida at
 
 ---
 
-**Data de Elaboração:** [preencher com data atual]  
-**Versão:** 1.0  
+**Data de Elaboração:** 12/06/2025  
+**Última Atualização:** 08/10/2025  
+**Versão:** 2.0  
 **Responsável:** Polícia Rodoviária Federal  
 
 *Esta Política de Privacidade foi elaborada em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018) e demais normas aplicáveis à administração pública federal.*
+
+## Histórico de Versões
+
+| Versão | Data | Descrição |
+|--------|------|-----------|
+| 1.0 | 12/06/2025 | Versão inicial da Política de Privacidade |
+| 2.0 | 08/10/2025 | Atualização com detalhamento de dados coletados, finalidades específicas, medidas de segurança aprimoradas e critérios de retenção |
