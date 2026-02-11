@@ -311,14 +311,14 @@ export function DataTable({ data, selectedItems, onSelectionChange, onDelete }: 
                    <td className="p-4">
                      <AlertDialog>
                        <AlertDialogTrigger asChild>
-                         <Button
-                           variant="ghost"
-                           size="sm"
-                           className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                           title="Deletar registro"
-                         >
-                           <Trash2 className="h-4 w-4" />
-                         </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-destructive hover:text-destructive dark:bg-destructive dark:text-white dark:hover:bg-destructive/90"
+                            title="Deletar registro"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                        </AlertDialogTrigger>
                        <AlertDialogContent>
                          <AlertDialogHeader>
