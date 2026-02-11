@@ -250,6 +250,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
       <section className="mb-6">
         <h2 className="text-base font-bold mb-3 bg-gray-100 p-2">III. IDENTIFICAÇÃO E CARACTERIZAÇÃO DO IMÓVEL</h2>
         <div className="grid grid-cols-2 gap-4 text-xs">
+          <div className="col-span-2"><strong>Nome da Unidade:</strong> {data.nome || '[Nome não informado]'}</div>
           <div><strong>Tipo:</strong> {data.categoria}</div>
           <div><strong>RIP:</strong> {data.rip || '[Número RIP]'}</div>
           <div><strong>Matrícula:</strong> {data.matriculaImovel || '[Número da Matrícula]'}</div>
