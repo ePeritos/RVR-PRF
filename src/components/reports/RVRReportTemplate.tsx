@@ -21,6 +21,18 @@ interface RVRReportData {
   endereco?: string;
   rip?: string;
   matriculaImovel?: string;
+  zona?: string;
+  coordenadas?: string;
+  fornecimento_de_agua?: string;
+  fornecimento_de_energia_eletrica?: string;
+  esgotamento_sanitario?: string;
+  conexao_de_internet?: string;
+  possui_wireless_wifi?: string;
+  climatizacao_de_ambientes?: string;
+  sala_cofre?: string;
+  protecao_contra_incendios?: string;
+  protecao_contra_intrusao?: string;
+  muro_ou_alambrado?: string;
   parametros?: {
     cub?: number;
     cubM2?: number;
@@ -283,15 +295,35 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
       <section className="mb-6">
         <h2 className="text-base font-bold mb-3 bg-gray-100 p-2">V. CARACTERÍSTICAS DAS BENFEITORIAS</h2>
         <div className="text-xs space-y-2">
+          <div><strong>Área Construída:</strong> {areaBenfeitoria.toLocaleString('pt-BR')} m²</div>
           <div><strong>Descrição Geral:</strong> Edificação destinada a {data.categoria}</div>
           <div><strong>Tipo de Uso:</strong> Institucional - Segurança Pública</div>
-          <div><strong>Número de Pavimentos:</strong> [Número]</div>
-          <div><strong>Estrutura:</strong> Concreto armado</div>
-          <div><strong>Vedação:</strong> Alvenaria de tijolos cerâmicos</div>
-          <div><strong>Cobertura:</strong> Telhas cerâmicas</div>
           <div><strong>Idade Aparente:</strong> {idadeAparente ? `${idadeAparente} anos` : '[Não informado]'}</div>
+          <div><strong>Vida Útil Estimada:</strong> {vidaUtil ? `${vidaUtil} anos` : '[Não informado]'}</div>
           <div><strong>Estado de Conservação:</strong> {estadoConservacao || '[Não informado]'}</div>
           <div><strong>Padrão Construtivo:</strong> {data.parametros?.padraoConstrutivo || '[Não informado]'}</div>
+          
+          <div className="mt-3">
+            <strong>Infraestrutura Disponível:</strong>
+            <div className="grid grid-cols-2 gap-1 mt-1">
+              <div>• Fornecimento de Água: {data.fornecimento_de_agua || 'Não informado'}</div>
+              <div>• Energia Elétrica: {data.fornecimento_de_energia_eletrica || 'Não informado'}</div>
+              <div>• Esgotamento Sanitário: {data.esgotamento_sanitario || 'Não informado'}</div>
+              <div>• Internet: {data.conexao_de_internet || 'Não informado'}</div>
+              <div>• Wi-Fi: {data.possui_wireless_wifi || 'Não informado'}</div>
+              <div>• Climatização: {data.climatizacao_de_ambientes || 'Não informado'}</div>
+            </div>
+          </div>
+
+          <div className="mt-3">
+            <strong>Sistemas de Segurança:</strong>
+            <div className="grid grid-cols-2 gap-1 mt-1">
+              <div>• Sala Cofre: {data.sala_cofre || 'Não informado'}</div>
+              <div>• Proteção contra Incêndio: {data.protecao_contra_incendios || 'Não informado'}</div>
+              <div>• Proteção contra Intrusão: {data.protecao_contra_intrusao || 'Não informado'}</div>
+              <div>• Muro/Alambrado: {data.muro_ou_alambrado || 'Não informado'}</div>
+            </div>
+          </div>
         </div>
       </section>
 

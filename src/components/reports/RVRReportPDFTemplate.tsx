@@ -287,12 +287,12 @@ export function RVRReportPDFTemplate({ data, className = "" }: RVRReportPDFTempl
           <div style={{ marginTop: '16px' }}>
             <strong>Infraestrutura Disponível:</strong>
             <div style={{ marginTop: '8px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
-              <div>• Fornecimento de Água: {data.fornecimento_de_agua === 'true' ? 'Sim' : 'Não'}</div>
-              <div>• Energia Elétrica: {data.fornecimento_de_energia_eletrica === 'true' ? 'Sim' : 'Não'}</div>
-              <div>• Esgotamento Sanitário: {data.esgotamento_sanitario === 'true' ? 'Sim' : 'Não'}</div>
-              <div>• Internet: {data.conexao_de_internet === 'true' ? 'Sim' : 'Não'}</div>
-              <div>• Wi-Fi: {data.possui_wireless_wifi === 'true' ? 'Sim' : 'Não'}</div>
-              <div>• Climatização: {data.climatizacao_de_ambientes === 'true' ? 'Sim' : 'Não'}</div>
+              <div>• Fornecimento de Água: {data.fornecimento_de_agua || 'Não informado'}</div>
+              <div>• Energia Elétrica: {data.fornecimento_de_energia_eletrica || 'Não informado'}</div>
+              <div>• Esgotamento Sanitário: {data.esgotamento_sanitario || 'Não informado'}</div>
+              <div>• Internet: {data.conexao_de_internet || 'Não informado'}</div>
+              <div>• Wi-Fi: {data.possui_wireless_wifi || 'Não informado'}</div>
+              <div>• Climatização: {data.climatizacao_de_ambientes || 'Não informado'}</div>
             </div>
           </div>
 
@@ -300,10 +300,10 @@ export function RVRReportPDFTemplate({ data, className = "" }: RVRReportPDFTempl
           <div style={{ marginTop: '16px' }}>
             <strong>Sistemas de Segurança:</strong>
             <div style={{ marginTop: '8px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
-              <div>• Sala Cofre: {data.sala_cofre === 'true' ? 'Sim' : 'Não'}</div>
-              <div>• Proteção contra Incêndio: {data.protecao_contra_incendios === 'true' ? 'Sim' : 'Não'}</div>
-              <div>• Proteção contra Intrusão: {data.protecao_contra_intrusao === 'true' ? 'Sim' : 'Não'}</div>
-              <div>• Muro/Alambrado: {data.muro_ou_alambrado === 'true' ? 'Sim' : 'Não'}</div>
+              <div>• Sala Cofre: {data.sala_cofre || 'Não informado'}</div>
+              <div>• Proteção contra Incêndio: {data.protecao_contra_incendios || 'Não informado'}</div>
+              <div>• Proteção contra Intrusão: {data.protecao_contra_intrusao || 'Não informado'}</div>
+              <div>• Muro/Alambrado: {data.muro_ou_alambrado || 'Não informado'}</div>
             </div>
           </div>
         </div>
