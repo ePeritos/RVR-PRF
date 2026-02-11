@@ -158,28 +158,18 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
       const avaliacoesMap: {[key: string]: number} = {};
       
       if (avaliacoes && avaliacoes.length > 0) {
-        // Debug: mostrar todos os nomes de ambientes encontrados
-        const nomesEncontrados = avaliacoes.map(a => a.caderno_ambientes?.nome_ambiente);
-        console.log('🏷️ Nomes de ambientes no banco:', nomesEncontrados);
-        
-        // Debug: mostrar mapeamento disponível
-        console.log('🗺️ Mapeamento disponível:', Object.values(camposAmbientes));
-
         avaliacoes.forEach(avaliacao => {
           const nomeAmbiente = avaliacao.caderno_ambientes?.nome_ambiente;
-          console.log(`🔍 Processando ambiente: "${nomeAmbiente}"`);
           
-          // Encontrar o campo correspondente pelo nome do ambiente
-          const campoCorrespondente = Object.keys(camposAmbientes).find(campo => 
+          // Find ALL matching fields (not just the first) for shared environment names
+          const camposCorrespondentes = Object.keys(camposAmbientes).filter(campo => 
             camposAmbientes[campo as keyof typeof camposAmbientes] === nomeAmbiente
           );
           
-          if (campoCorrespondente) {
-            avaliacoesMap[campoCorrespondente] = avaliacao.score_conservacao;
-            console.log(`✅ Mapeado: ${campoCorrespondente} = ${avaliacao.score_conservacao}`);
-          } else {
-            console.warn(`⚠️ Ambiente não encontrado no mapeamento: "${nomeAmbiente}"`);
-          }
+          camposCorrespondentes.forEach(campo => {
+            avaliacoesMap[campo] = avaliacao.score_conservacao;
+            console.log(`✅ Mapeado: ${campo} = ${avaliacao.score_conservacao}`);
+          });
         });
       }
 
@@ -308,7 +298,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
             ambiente_id: ambiente.id,
             score_conservacao: scoreConservacao,
             observacoes: null
-          });
+          }, { onConflict: 'imovel_id,ambiente_id' });
 
         if (error) {
           console.error('Erro ao salvar avaliação:', error);
