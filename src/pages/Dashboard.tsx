@@ -10,6 +10,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CustomChartBuilder } from '@/components/charts/CustomChartBuilder';
+import { CompletionDashboard } from '@/components/dashboard/CompletionDashboard';
 
 interface DashboardStats {
   totalImoveis: number;
@@ -274,11 +275,12 @@ const Dashboard = () => {
 
       {/* Tabs com Gráficos */}
       <Tabs defaultValue="geral" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="geral">Visão Geral</TabsTrigger>
-          <TabsTrigger value="conservacao">Estado de Conservação</TabsTrigger>
-          <TabsTrigger value="temporal">Análise Temporal</TabsTrigger>
-          <TabsTrigger value="customizados">Gráficos Customizados</TabsTrigger>
+          <TabsTrigger value="preenchimento">Preenchimento</TabsTrigger>
+          <TabsTrigger value="conservacao">Conservação</TabsTrigger>
+          <TabsTrigger value="temporal">Temporal</TabsTrigger>
+          <TabsTrigger value="customizados">Customizados</TabsTrigger>
         </TabsList>
         
         <TabsContent value="geral" className="space-y-4">
@@ -302,6 +304,10 @@ const Dashboard = () => {
           </Card>
         </TabsContent>
         
+        <TabsContent value="preenchimento" className="space-y-4">
+          <CompletionDashboard data={filteredData} />
+        </TabsContent>
+
         <TabsContent value="conservacao" className="space-y-4">
           <Card className="bg-card border-border">
             <CardHeader>
