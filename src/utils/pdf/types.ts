@@ -53,6 +53,7 @@ export interface RVRReportData {
     dataReferencia?: string;
     fonteValorTerreno?: string;
     padraoConstrutivo?: string;
+    uf?: string;
     responsavelTecnico?: {
       id: string;
       nome_completo: string;

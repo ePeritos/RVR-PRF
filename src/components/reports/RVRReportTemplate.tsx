@@ -29,6 +29,7 @@ interface RVRReportData {
     dataReferencia?: string;
     fonteValorTerreno?: string;
     padraoConstrutivo?: string;
+    uf?: string;
     responsavelTecnico?: {
       id: string;
       nome_completo: string;
@@ -164,7 +165,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
   };
 
   const uf = getUfFromUnidade(data.unidadeGestora);
-  const ufCub = (data.parametros as any)?.uf || uf;
+  const ufCub = data.parametros?.uf || uf;
   const solicitante = data.unidadeGestora || 'PRF/XX';
 
   // Data de referência dos parâmetros
