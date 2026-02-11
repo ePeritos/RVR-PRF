@@ -19,6 +19,7 @@ const CAIP = () => {
   const [filteredData, setFilteredData] = useState<DadosCAIP[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<DadosCAIP | null>(null);
+  const [filterResetKey, setFilterResetKey] = useState(0);
 
   useEffect(() => {
     fetchExistingData();
@@ -133,6 +134,8 @@ const CAIP = () => {
 
   const handleDialogSuccess = () => {
     fetchExistingData();
+    setSearchTerm('');
+    setFilterResetKey(prev => prev + 1);
   };
 
   const handleFilterChange = (filters: any) => {
@@ -198,7 +201,7 @@ const CAIP = () => {
 
       <div className="space-y-4 w-full">
         <div className="w-full">
-          <DataFilter onFilterChange={handleFilterChange} />
+          <DataFilter onFilterChange={handleFilterChange} resetKey={filterResetKey} />
         </div>
         <div className="w-full">
           <ExistingRecordsList 

@@ -18,9 +18,10 @@ interface FilterData {
 
 interface DataFilterProps {
   onFilterChange: (filters: FilterData) => void;
+  resetKey?: number;
 }
 
-export function DataFilter({ onFilterChange }: DataFilterProps) {
+export function DataFilter({ onFilterChange, resetKey }: DataFilterProps) {
   const { profile, isAdmin, loading: profileLoading } = useUserProfile();
   
   const [filters, setFilters] = useState<FilterData>({
@@ -172,6 +173,13 @@ export function DataFilter({ onFilterChange }: DataFilterProps) {
   useEffect(() => {
     fetchAllFilterValues();
   }, []);
+
+  // Reset filters when resetKey changes (e.g., after editing)
+  useEffect(() => {
+    if (resetKey !== undefined && resetKey > 0) {
+      clearFilters();
+    }
+  }, [resetKey]);
 
   // Aplicar pré-filtro baseado na unidade gestora do usuário (se não for admin)
   useEffect(() => {
