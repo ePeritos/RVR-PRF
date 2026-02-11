@@ -69,6 +69,14 @@ interface RVRReportTemplateProps {
   className?: string;
 }
 
+const normalizeSimNao = (value: string | null | undefined): string => {
+  if (!value) return 'Não informado';
+  const lower = value.toLowerCase().trim();
+  if (lower === 'on' || lower === 'sim' || lower === 'true' || lower === 'yes') return 'Sim';
+  if (lower === 'off' || lower === 'não' || lower === 'nao' || lower === 'false' || lower === 'no') return 'Não';
+  return value;
+};
+
 export function RVRReportTemplate({ data, className = "" }: RVRReportTemplateProps) {
   const { user } = useAuth();
   const currentDate = new Date();
@@ -306,22 +314,22 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
           <div className="mt-3">
             <strong>Infraestrutura Disponível:</strong>
             <div className="grid grid-cols-2 gap-1 mt-1">
-              <div>• Fornecimento de Água: {data.fornecimento_de_agua || 'Não informado'}</div>
-              <div>• Energia Elétrica: {data.fornecimento_de_energia_eletrica || 'Não informado'}</div>
-              <div>• Esgotamento Sanitário: {data.esgotamento_sanitario || 'Não informado'}</div>
-              <div>• Internet: {data.conexao_de_internet || 'Não informado'}</div>
-              <div>• Wi-Fi: {data.possui_wireless_wifi || 'Não informado'}</div>
-              <div>• Climatização: {data.climatizacao_de_ambientes || 'Não informado'}</div>
+              <div>• Fornecimento de Água: {normalizeSimNao(data.fornecimento_de_agua)}</div>
+              <div>• Energia Elétrica: {normalizeSimNao(data.fornecimento_de_energia_eletrica)}</div>
+              <div>• Esgotamento Sanitário: {normalizeSimNao(data.esgotamento_sanitario)}</div>
+              <div>• Internet: {normalizeSimNao(data.conexao_de_internet)}</div>
+              <div>• Wi-Fi: {normalizeSimNao(data.possui_wireless_wifi)}</div>
+              <div>• Climatização: {normalizeSimNao(data.climatizacao_de_ambientes)}</div>
             </div>
           </div>
 
           <div className="mt-3">
             <strong>Sistemas de Segurança:</strong>
             <div className="grid grid-cols-2 gap-1 mt-1">
-              <div>• Sala Cofre: {data.sala_cofre || 'Não informado'}</div>
-              <div>• Proteção contra Incêndio: {data.protecao_contra_incendios || 'Não informado'}</div>
-              <div>• Proteção contra Intrusão: {data.protecao_contra_intrusao || 'Não informado'}</div>
-              <div>• Muro/Alambrado: {data.muro_ou_alambrado || 'Não informado'}</div>
+              <div>• Sala Cofre: {normalizeSimNao(data.sala_cofre)}</div>
+              <div>• Proteção contra Incêndio: {normalizeSimNao(data.protecao_contra_incendios)}</div>
+              <div>• Proteção contra Intrusão: {normalizeSimNao(data.protecao_contra_intrusao)}</div>
+              <div>• Muro/Alambrado: {normalizeSimNao(data.muro_ou_alambrado)}</div>
             </div>
           </div>
         </div>
