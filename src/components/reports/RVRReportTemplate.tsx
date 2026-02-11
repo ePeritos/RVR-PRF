@@ -164,6 +164,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
   };
 
   const uf = getUfFromUnidade(data.unidadeGestora);
+  const ufCub = (data.parametros as any)?.uf || uf;
   const solicitante = data.unidadeGestora || 'PRF/XX';
 
   // Data de referência dos parâmetros
@@ -306,7 +307,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
           <p>6.2. Os valores de referência utilizados têm as seguintes fontes e datas-base:</p>
           <ul className="list-disc list-inside ml-4 space-y-1">
             <li>Valor unitário do terreno: {valorUnitarioTerreno.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: [Fonte] - Data-base: {format(currentDate, 'MM/yyyy')}</li>
-            <li>CUB/m²: {cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: SINDUSCON/{uf} - Data-base: {format(currentDate, 'MM/yyyy')}</li>
+            <li>CUB/m²: {cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: SINDUSCON/{ufCub} - Data-base: {format(currentDate, 'MM/yyyy')}</li>
           </ul>
           <p>6.3. A avaliação refere-se ao imóvel nas condições em que se encontra na data da vistoria.</p>
           <p>6.4. Este relatório destina-se exclusivamente à finalidade declarada no item I.</p>
@@ -363,7 +364,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
               <p><strong>Passo 2: Custo Unitário Básico (CUB/m²)</strong></p>
               <ul className="list-disc list-inside ml-4">
                 <li>Padrão Construtivo: {data.parametros?.padraoConstrutivo || '[Não informado]'}</li>
-                <li>Fonte: SINDUSCON/{uf}</li>
+                <li>Fonte: SINDUSCON/{ufCub}</li>
                 <li>Data-Base do CUB: {format(dataReferencia, 'MM/yyyy')}</li>
                 <li>Valor do CUB/m²: {cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m²</li>
               </ul>

@@ -99,6 +99,7 @@ export class HTMLGenerator {
     };
 
     const uf = extrairUfDoEndereco(data.endereco);
+    const ufCub = (data.parametros as any)?.uf || uf;
 
     // Dados do responsável técnico selecionado
     const responsavelTecnico = data.parametros?.responsavelTecnico;
@@ -313,7 +314,7 @@ export class HTMLGenerator {
             <p style="margin: 0 0 10px 0;"><strong>4.2. Os valores de referência utilizados têm as seguintes fontes e datas-base:</strong></p>
             <ul style="margin: 0 0 15px 20px; line-height: 1.5;">
               <li><strong>Valor unitário do terreno: ${valorUnitarioTerreno.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m²</strong> - Fonte: ${data.parametros?.fonteValorTerreno || '[Fonte]'} - Data-base: ${data.parametros?.dataReferencia ? new Date(data.parametros.dataReferencia).toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' }) : '06/2025'}</li>
-              <li><strong>CUB/m²: ${cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m²</strong> - Fonte: SINDUSCON/${uf} - Data-base: ${data.parametros?.dataReferencia ? new Date(data.parametros.dataReferencia).toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' }) : '06/2025'}</li>
+              <li><strong>CUB/m²: ${cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m²</strong> - Fonte: SINDUSCON/${ufCub} - Data-base: ${data.parametros?.dataReferencia ? new Date(data.parametros.dataReferencia).toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' }) : '06/2025'}</li>
             </ul>
           </div>
 

@@ -147,6 +147,7 @@ export function RVRReportPDFTemplate({ data, className = "" }: RVRReportPDFTempl
   };
 
   const uf = getUfFromUnidade(data.unidadeGestora);
+  const ufCub = (data.parametros as any)?.uf || uf;
   const solicitante = data.unidadeGestora || 'PRF/XX';
 
   // Data de referência dos parâmetros
@@ -320,7 +321,7 @@ export function RVRReportPDFTemplate({ data, className = "" }: RVRReportPDFTempl
           <p style={{ marginBottom: '8px' }}>6.2. Os valores de referência utilizados têm as seguintes fontes e datas-base:</p>
           <ul style={{ listStyleType: 'disc', marginLeft: '20px', marginBottom: '12px' }}>
             <li style={{ marginBottom: '4px' }}>Valor unitário do terreno: {valorUnitarioTerreno.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: [Fonte] - Data-base: {format(currentDate, 'MM/yyyy')}</li>
-            <li style={{ marginBottom: '4px' }}>CUB/m²: {cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: SINDUSCON/{uf} - Data-base: {format(currentDate, 'MM/yyyy')}</li>
+            <li style={{ marginBottom: '4px' }}>CUB/m²: {cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m² - Fonte: SINDUSCON/{ufCub} - Data-base: {format(currentDate, 'MM/yyyy')}</li>
           </ul>
           <p style={{ marginBottom: '8px' }}>6.3. A avaliação refere-se ao imóvel nas condições em que se encontra na data da vistoria.</p>
           <p>6.4. Este relatório destina-se exclusivamente à finalidade declarada no item I.</p>
@@ -377,7 +378,7 @@ export function RVRReportPDFTemplate({ data, className = "" }: RVRReportPDFTempl
               <p style={{ marginBottom: '8px' }}><strong>Passo 2: Custo Unitário Básico (CUB/m²)</strong></p>
               <ul style={{ listStyleType: 'disc', marginLeft: '16px', marginBottom: '12px' }}>
                 <li>Padrão Construtivo: {data.parametros?.padraoConstrutivo || '[Não informado]'}</li>
-                <li>Fonte: SINDUSCON/{uf}</li>
+                <li>Fonte: SINDUSCON/{ufCub}</li>
                 <li>Data-Base do CUB: {format(dataReferencia, 'MM/yyyy')}</li>
                 <li>Valor do CUB/m²: {cubValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/m²</li>
               </ul>

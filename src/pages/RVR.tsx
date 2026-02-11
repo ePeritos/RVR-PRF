@@ -105,7 +105,8 @@ const RVR = () => {
       dataReferencia: parameters.dataReferencia,
       fonteValorTerreno: parameters.fonteValorTerreno,
       responsavelTecnico: parameters.responsavelTecnico,
-      padraoConstrutivo: parameters.padraoConstrutivo
+      padraoConstrutivo: parameters.padraoConstrutivo,
+      uf: parameters.uf
     };
     
     console.log('PARÂMETROS FORÇADOS que serão usados nos cálculos:', PARAMETROS_FORMULARIO);
