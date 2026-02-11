@@ -751,33 +751,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      calcular_nota_global: {
-        Args: Record<PropertyKey, never> | { p_imovel_id: string }
-        Returns: number
-      }
+      calcular_nota_global:
+        | { Args: never; Returns: undefined }
+        | { Args: { p_imovel_id: string }; Returns: number }
       calcular_nota_manutencao: {
         Args: { p_imovel_id: string }
         Returns: number
       }
-      get_user_role: {
-        Args: Record<PropertyKey, never> | { _user_id: string }
-        Returns: string
-      }
-      has_role: {
-        Args:
-          | Record<PropertyKey, never>
-          | { _role: Database["public"]["Enums"]["app_role"]; _user_id: string }
-          | { role_name: string; user_id: number }
-        Returns: boolean
-      }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_super_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      get_user_role:
+        | { Args: never; Returns: string }
+        | {
+            Args: { _user_id: string }
+            Returns: Database["public"]["Enums"]["app_role"]
+          }
+      has_role:
+        | { Args: never; Returns: boolean }
+        | {
+            Args: {
+              _role: Database["public"]["Enums"]["app_role"]
+              _user_id: string
+            }
+            Returns: boolean
+          }
+        | { Args: { role_name: string; user_id: number }; Returns: boolean }
+      is_admin: { Args: never; Returns: boolean }
+      is_super_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "usuario_padrao"
