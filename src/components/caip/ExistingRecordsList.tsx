@@ -154,7 +154,7 @@ export const ExistingRecordsList = ({
                   
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                      <Button variant="outline" size="sm" className="bg-destructive text-white hover:bg-destructive/90 hover:text-white border-destructive">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </AlertDialogTrigger>
