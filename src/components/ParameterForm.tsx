@@ -31,6 +31,7 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
   const { toast } = useToast();
   const { valoresCUB, getValorCUB, getUfsDisponiveis } = useValoresCUB();
   
+  const [cubManuallyEdited, setCubManuallyEdited] = useState(false);
   const [parameters, setParameters] = useState({
     valorM2: 150,
     cubM2: 2100,
@@ -47,9 +48,9 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
     fetchResponsaveisTecnicos();
   }, []);
 
-  // Atualizar CUB automaticamente quando padrão ou UF mudar
+  // Atualizar CUB automaticamente quando padrão ou UF mudar (só se não foi editado manualmente)
   useEffect(() => {
-    if (parameters.padraoConstrutivo && parameters.uf) {
+    if (parameters.padraoConstrutivo && parameters.uf && !cubManuallyEdited) {
       const valorCUB = getValorCUB(parameters.uf, parameters.padraoConstrutivo);
       if (valorCUB) {
         setParameters(prev => ({
@@ -57,7 +58,6 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
           cubM2: valorCUB.valor_m2
         }));
         
-        // Mostrar aviso se está usando dados de fallback (AP)
         if (valorCUB.uf !== parameters.uf) {
           toast({
             title: "Valor CUB aplicado",
@@ -67,7 +67,9 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
         }
       }
     }
-  }, [parameters.padraoConstrutivo, parameters.uf, getValorCUB, toast]);
+    // Reset manual flag when UF or padrão changes
+    setCubManuallyEdited(false);
+  }, [parameters.padraoConstrutivo, parameters.uf]);
 
   const fetchResponsaveisTecnicos = async () => {
     try {
@@ -320,7 +322,10 @@ export const ParameterForm = ({ onSubmit, selectedData }: ParameterFormProps) =>
                   id="cubM2"
                   type="number"
                   value={parameters.cubM2}
-                  onChange={(e) => setParameters({...parameters, cubM2: Number(e.target.value)})}
+                  onChange={(e) => {
+                    setCubManuallyEdited(true);
+                    setParameters({...parameters, cubM2: Number(e.target.value)});
+                  }}
                   min="0"
                   step="0.01"
                   required
