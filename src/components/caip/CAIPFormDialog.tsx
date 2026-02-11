@@ -130,7 +130,19 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
             {editingItem ? 'Editar Registro CAIP' : 'Novo Registro CAIP'}
           </DialogTitle>
           {editingItem && (
-            <Badge variant="outline">Editando ID: {editingItem.id}</Badge>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline">Editando ID: {editingItem.id}</Badge>
+              {editingItem.updated_at && (
+                <Badge variant="secondary" className="text-xs">
+                  Última alteração: {new Date(editingItem.updated_at).toLocaleString('pt-BR')}
+                </Badge>
+              )}
+              {editingItem.ultima_alteracao && (
+                <Badge variant="secondary" className="text-xs">
+                  Data alteração: {editingItem.ultima_alteracao}
+                </Badge>
+              )}
+            </div>
           )}
         </DialogHeader>
         

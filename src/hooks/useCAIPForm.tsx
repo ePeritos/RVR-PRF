@@ -192,12 +192,14 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
       if (editingItem) {
         console.log('📝 Atualizando registro existente:', editingItem.id);
         
-        // Atualizar registro existente
+        // Atualizar registro existente - processFormData already removes id/created_at/updated_at
         const { error } = await supabase
           .from('dados_caip')
           .update({
             ...processedData,
             updated_at: new Date().toISOString(),
+            ultima_alteracao: new Date().toISOString().split('T')[0],
+            alterador: profile?.nome_completo || processedData.alterador,
           })
           .eq('id', editingItem.id);
 
