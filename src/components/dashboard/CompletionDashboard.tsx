@@ -3,7 +3,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
-import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Image } from 'lucide-react';
+
+const IMAGE_FIELDS = [
+  { key: 'imagem_geral', label: 'Imagem Geral' },
+  { key: 'imagem_fachada', label: 'Fachada' },
+  { key: 'imagem_lateral_1', label: 'Lateral 1' },
+  { key: 'imagem_lateral_2', label: 'Lateral 2' },
+  { key: 'imagem_fundos', label: 'Fundos' },
+  { key: 'imagem_sala_cofre', label: 'Sala Cofre' },
+  { key: 'imagem_cofre', label: 'Cofre' },
+  { key: 'imagem_interna_alojamento_masculino', label: 'Alojamento Masculino' },
+  { key: 'imagem_interna_alojamento_feminino', label: 'Alojamento Feminino' },
+  { key: 'imagem_interna_plantao_uop', label: 'Plantão UOP' },
+];
 
 interface CompletionDashboardProps {
   data: any[];
@@ -72,6 +85,18 @@ export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
       else baixo++;
     });
     return { media: Math.round(soma / total), completos, parcial, baixo };
+  }, [data]);
+
+  const imageStats = useMemo(() => {
+    if (data.length === 0) return { perField: [] as { label: string; count: number; pct: number }[], avgImages: 0 };
+    const total = data.length;
+    const perField = IMAGE_FIELDS.map(f => {
+      const count = data.filter(item => item[f.key] && item[f.key] !== '').length;
+      return { label: f.label, count, pct: Math.round((count / total) * 100) };
+    });
+    const totalImages = perField.reduce((s, f) => s + f.count, 0);
+    const avgImages = Math.round((totalImages / (total * IMAGE_FIELDS.length)) * 100);
+    return { perField, avgImages };
   }, [data]);
 
   const CustomTooltip = ({ active, payload }: any) => {
@@ -206,6 +231,42 @@ export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
                 })}
               </tbody>
             </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Image Completion */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Image className="h-5 w-5" />
+            Preenchimento de Imagens
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">Percentual de imóveis com cada tipo de imagem cadastrada</p>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm font-medium text-foreground">Média geral de imagens</span>
+              <span className="text-sm font-bold text-foreground">{imageStats.avgImages}%</span>
+            </div>
+            <Progress value={imageStats.avgImages} className="h-3" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {imageStats.perField.map((f, i) => (
+              <div key={i} className="flex items-center gap-3 p-2 rounded-md border border-border">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{f.label}</p>
+                  <p className="text-xs text-muted-foreground">{f.count}/{data.length} imóveis</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Progress value={f.pct} className="w-16 h-2" />
+                  <span className={`text-xs font-bold min-w-[3ch] text-right ${f.pct >= 80 ? 'text-green-600' : f.pct >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    {f.pct}%
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
