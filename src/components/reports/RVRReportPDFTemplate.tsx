@@ -242,6 +242,7 @@ export function RVRReportPDFTemplate({ data, className = "" }: RVRReportPDFTempl
       <section style={{ marginBottom: '24px' }}>
         <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', backgroundColor: '#f3f4f6', padding: '8px' }}>III. IDENTIFICAÇÃO E CARACTERIZAÇÃO DO IMÓVEL</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', fontSize: '12px' }}>
+          <div style={{ gridColumn: '1 / -1' }}><strong>Nome da Unidade:</strong> {data.nome || '[Nome não informado]'}</div>
           <div><strong>Tipo:</strong> {data.categoria}</div>
           <div><strong>RIP:</strong> {data.rip || '[Número RIP]'}</div>
           <div><strong>Matrícula:</strong> {data.matriculaImovel || '[Número da Matrícula]'}</div>

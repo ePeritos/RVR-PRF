@@ -252,6 +252,10 @@ export class HTMLGenerator {
           
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px;">
             <tr>
+              <td style="padding: 6px; border: 1px solid #000; font-weight: bold; width: 30%; background-color: #f8f8f8;">Nome da Unidade:</td>
+              <td style="padding: 6px; border: 1px solid #000;">${data.nome || '[Nome não informado]'}</td>
+            </tr>
+            <tr>
               <td style="padding: 6px; border: 1px solid #000; font-weight: bold; width: 30%; background-color: #f8f8f8;">Tipo:</td>
               <td style="padding: 6px; border: 1px solid #000;">${data.categoria}</td>
             </tr>
