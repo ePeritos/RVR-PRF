@@ -68,6 +68,14 @@ interface RVRReportPDFTemplateProps {
   className?: string;
 }
 
+const normalizeSimNao = (value: string | null | undefined): string => {
+  if (!value) return 'Não informado';
+  const lower = value.toLowerCase().trim();
+  if (lower === 'on' || lower === 'sim' || lower === 'true' || lower === 'yes') return 'Sim';
+  if (lower === 'off' || lower === 'não' || lower === 'nao' || lower === 'false' || lower === 'no') return 'Não';
+  return value;
+};
+
 export function RVRReportPDFTemplate({ data, className = "" }: RVRReportPDFTemplateProps) {
   const currentDate = new Date();
   const reportNumber = `${data.id}/2025`;
@@ -287,12 +295,12 @@ export function RVRReportPDFTemplate({ data, className = "" }: RVRReportPDFTempl
           <div style={{ marginTop: '16px' }}>
             <strong>Infraestrutura Disponível:</strong>
             <div style={{ marginTop: '8px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
-              <div>• Fornecimento de Água: {data.fornecimento_de_agua || 'Não informado'}</div>
-              <div>• Energia Elétrica: {data.fornecimento_de_energia_eletrica || 'Não informado'}</div>
-              <div>• Esgotamento Sanitário: {data.esgotamento_sanitario || 'Não informado'}</div>
-              <div>• Internet: {data.conexao_de_internet || 'Não informado'}</div>
-              <div>• Wi-Fi: {data.possui_wireless_wifi || 'Não informado'}</div>
-              <div>• Climatização: {data.climatizacao_de_ambientes || 'Não informado'}</div>
+              <div>• Fornecimento de Água: {normalizeSimNao(data.fornecimento_de_agua)}</div>
+              <div>• Energia Elétrica: {normalizeSimNao(data.fornecimento_de_energia_eletrica)}</div>
+              <div>• Esgotamento Sanitário: {normalizeSimNao(data.esgotamento_sanitario)}</div>
+              <div>• Internet: {normalizeSimNao(data.conexao_de_internet)}</div>
+              <div>• Wi-Fi: {normalizeSimNao(data.possui_wireless_wifi)}</div>
+              <div>• Climatização: {normalizeSimNao(data.climatizacao_de_ambientes)}</div>
             </div>
           </div>
 
@@ -300,10 +308,10 @@ export function RVRReportPDFTemplate({ data, className = "" }: RVRReportPDFTempl
           <div style={{ marginTop: '16px' }}>
             <strong>Sistemas de Segurança:</strong>
             <div style={{ marginTop: '8px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
-              <div>• Sala Cofre: {data.sala_cofre || 'Não informado'}</div>
-              <div>• Proteção contra Incêndio: {data.protecao_contra_incendios || 'Não informado'}</div>
-              <div>• Proteção contra Intrusão: {data.protecao_contra_intrusao || 'Não informado'}</div>
-              <div>• Muro/Alambrado: {data.muro_ou_alambrado || 'Não informado'}</div>
+              <div>• Sala Cofre: {normalizeSimNao(data.sala_cofre)}</div>
+              <div>• Proteção contra Incêndio: {normalizeSimNao(data.protecao_contra_incendios)}</div>
+              <div>• Proteção contra Intrusão: {normalizeSimNao(data.protecao_contra_intrusao)}</div>
+              <div>• Muro/Alambrado: {normalizeSimNao(data.muro_ou_alambrado)}</div>
             </div>
           </div>
         </div>
