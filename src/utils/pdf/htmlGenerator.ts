@@ -99,7 +99,7 @@ export class HTMLGenerator {
     };
 
     const uf = extrairUfDoEndereco(data.endereco);
-    const ufCub = (data.parametros as any)?.uf || uf;
+    const ufCub = data.parametros?.uf || uf;
 
     // Dados do responsável técnico selecionado
     const responsavelTecnico = data.parametros?.responsavelTecnico;
