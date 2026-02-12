@@ -12,11 +12,12 @@ interface SavedChartsManagerProps {
   currentConfig: ChartConfig;
   onSaveChart: (config: ChartConfig) => boolean;
   refreshTrigger?: number;
+  onExportImage?: (chart: ChartConfig) => void;
 }
 
 const STORAGE_KEY = 'sigi-saved-charts';
 
-export function SavedChartsManager({ onLoadChart, currentConfig, onSaveChart, refreshTrigger }: SavedChartsManagerProps) {
+export function SavedChartsManager({ onLoadChart, currentConfig, onSaveChart, refreshTrigger, onExportImage }: SavedChartsManagerProps) {
   const [savedCharts, setSavedCharts] = useState<ChartConfig[]>([]);
   const { toast } = useToast();
 
@@ -150,7 +151,8 @@ export function SavedChartsManager({ onLoadChart, currentConfig, onSaveChart, re
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => exportChart(chart)}
+                    onClick={() => onExportImage ? onExportImage(chart) : null}
+                    title="Baixar imagem do gráfico"
                   >
                     <Download className="h-4 w-4" />
                   </Button>
