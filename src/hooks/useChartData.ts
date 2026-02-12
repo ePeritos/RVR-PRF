@@ -24,6 +24,7 @@ export interface ChartConfig {
 // Campos disponíveis dos dados CAIP
 export const CHART_FIELDS: ChartField[] = [
   // Campos básicos
+  { key: 'nome_da_unidade', label: 'Nome da Unidade', type: 'string', category: 'Básico' },
   { key: 'unidade_gestora', label: 'Unidade Gestora', type: 'string', category: 'Básico' },
   { key: 'tipo_de_unidade', label: 'Tipo de Unidade', type: 'string', category: 'Básico' },
   { key: 'estado_de_conservacao', label: 'Estado de Conservação', type: 'string', category: 'Básico' },
