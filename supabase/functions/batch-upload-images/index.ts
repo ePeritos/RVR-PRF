@@ -6,6 +6,34 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Map image type from filename to database column
+const IMAGE_TYPE_MAP: Record<string, string> = {
+  "Imagem Geral": "imagem_geral",
+  "Imagem Fachada": "imagem_fachada",
+  "Imagem Lateral 1": "imagem_lateral_1",
+  "Imagem Lateral 2": "imagem_lateral_2",
+  "Imagem Fundos": "imagem_fundos",
+  "Imagem Sala Cofre": "imagem_sala_cofre",
+  "Imagem Cofre": "imagem_cofre",
+  "Imagem Interna Alojamento Masculino": "imagem_interna_alojamento_masculino",
+  "Imagem Interna Alojamento Feminino": "imagem_interna_alojamento_feminino",
+  "Imagem Interna Plantão UOP": "imagem_interna_plantao_uop",
+};
+
+// Parse filename like "0cec8139.Imagem Fachada.135429.jpg"
+function parseImageFilename(filename: string): { idCaip: string; imageType: string; dbColumn: string } | null {
+  // Pattern: {id_caip}.{Imagem Tipo}.{timestamp}.{ext}
+  const match = filename.match(/^([^.]+)\.(Imagem [^.]+)\.(\d+)\.\w+$/);
+  if (!match) return null;
+
+  const idCaip = match[1];
+  const imageType = match[2];
+  const dbColumn = IMAGE_TYPE_MAP[imageType];
+
+  if (!dbColumn) return null;
+  return { idCaip, imageType, dbColumn };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -50,13 +78,15 @@ Deno.serve(async (req) => {
       uploaded: [] as string[],
       skipped: [] as string[],
       errors: [] as { file: string; error: string }[],
+      linked: [] as string[],
+      linkErrors: [] as { file: string; error: string }[],
     };
 
     for (const file of files) {
       const filePath = `dCAIP_Images/${file.name}`;
 
       try {
-        // Check if the file already exists by trying to get its public URL info
+        // Check if the file already exists
         const { data: existingFiles } = await supabase.storage
           .from("caip-images")
           .list("dCAIP_Images", {
@@ -68,27 +98,65 @@ Deno.serve(async (req) => {
 
         if (alreadyExists) {
           results.skipped.push(file.name);
-          continue;
+        } else {
+          // Upload the file
+          const arrayBuffer = await file.arrayBuffer();
+          const { error: uploadError } = await supabase.storage
+            .from("caip-images")
+            .upload(filePath, arrayBuffer, {
+              contentType: file.type || "image/jpeg",
+              upsert: false,
+            });
+
+          if (uploadError) {
+            if (uploadError.message?.includes("already exists") || uploadError.message?.includes("Duplicate")) {
+              results.skipped.push(file.name);
+            } else {
+              results.errors.push({ file: file.name, error: uploadError.message });
+              continue; // Skip linking if upload failed
+            }
+          } else {
+            results.uploaded.push(file.name);
+          }
         }
 
-        // Upload the file
-        const arrayBuffer = await file.arrayBuffer();
-        const { error: uploadError } = await supabase.storage
-          .from("caip-images")
-          .upload(filePath, arrayBuffer, {
-            contentType: file.type || "image/jpeg",
-            upsert: false,
-          });
+        // After upload (or skip), link the image to the database record
+        const parsed = parseImageFilename(file.name);
+        if (parsed) {
+          const { idCaip, dbColumn } = parsed;
+          const storagePath = `dCAIP_Images/${file.name}`;
 
-        if (uploadError) {
-          // Could be a race condition duplicate
-          if (uploadError.message?.includes("already exists") || uploadError.message?.includes("Duplicate")) {
-            results.skipped.push(file.name);
-          } else {
-            results.errors.push({ file: file.name, error: uploadError.message });
+          // Find the record by id_caip
+          const { data: records, error: findError } = await supabase
+            .from("dados_caip")
+            .select("id")
+            .eq("id_caip", idCaip);
+
+          if (findError) {
+            results.linkErrors.push({ file: file.name, error: `Erro ao buscar registro: ${findError.message}` });
+            continue;
+          }
+
+          if (!records || records.length === 0) {
+            results.linkErrors.push({ file: file.name, error: `Registro com id_caip '${idCaip}' não encontrado` });
+            continue;
+          }
+
+          // Update all matching records (could be multiple years)
+          for (const record of records) {
+            const { error: updateError } = await supabase
+              .from("dados_caip")
+              .update({ [dbColumn]: storagePath })
+              .eq("id", record.id);
+
+            if (updateError) {
+              results.linkErrors.push({ file: file.name, error: `Erro ao vincular: ${updateError.message}` });
+            } else {
+              results.linked.push(file.name);
+            }
           }
         } else {
-          results.uploaded.push(file.name);
+          results.linkErrors.push({ file: file.name, error: "Nome do arquivo não segue o padrão esperado" });
         }
       } catch (err) {
         results.errors.push({ file: file.name, error: String(err) });

@@ -2,8 +2,7 @@ import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Upload, CheckCircle, SkipForward, AlertTriangle, X, FileImage } from 'lucide-react';
+import { Upload, CheckCircle, SkipForward, AlertTriangle, FileImage, Link2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -16,9 +15,11 @@ interface UploadResults {
   uploaded: string[];
   skipped: string[];
   errors: { file: string; error: string }[];
+  linked: string[];
+  linkErrors: { file: string; error: string }[];
 }
 
-const BATCH_SIZE = 20; // Files per request
+const BATCH_SIZE = 20;
 
 export const BatchImageUploadDialog = ({ open, onOpenChange }: BatchImageUploadDialogProps) => {
   const { toast } = useToast();
@@ -42,7 +43,7 @@ export const BatchImageUploadDialog = ({ open, onOpenChange }: BatchImageUploadD
     setIsUploading(true);
     setProgress(0);
 
-    const allResults: UploadResults = { uploaded: [], skipped: [], errors: [] };
+    const allResults: UploadResults = { uploaded: [], skipped: [], errors: [], linked: [], linkErrors: [] };
     const totalBatches = Math.ceil(files.length / BATCH_SIZE);
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -74,9 +75,11 @@ export const BatchImageUploadDialog = ({ open, onOpenChange }: BatchImageUploadD
           batch.forEach(f => allResults.errors.push({ file: f.name, error: errText }));
         } else {
           const batchResult: UploadResults = await res.json();
-          allResults.uploaded.push(...batchResult.uploaded);
-          allResults.skipped.push(...batchResult.skipped);
-          allResults.errors.push(...batchResult.errors);
+          allResults.uploaded.push(...(batchResult.uploaded || []));
+          allResults.skipped.push(...(batchResult.skipped || []));
+          allResults.errors.push(...(batchResult.errors || []));
+          allResults.linked.push(...(batchResult.linked || []));
+          allResults.linkErrors.push(...(batchResult.linkErrors || []));
         }
       } catch (err) {
         batch.forEach(f => allResults.errors.push({ file: f.name, error: String(err) }));
@@ -90,7 +93,7 @@ export const BatchImageUploadDialog = ({ open, onOpenChange }: BatchImageUploadD
 
     toast({
       title: "Upload concluído",
-      description: `${allResults.uploaded.length} enviadas, ${allResults.skipped.length} já existiam, ${allResults.errors.length} erros.`,
+      description: `${allResults.uploaded.length} enviadas, ${allResults.linked.length} vinculadas, ${allResults.skipped.length} já existiam, ${allResults.errors.length} erros.`,
     });
   };
 
@@ -103,6 +106,8 @@ export const BatchImageUploadDialog = ({ open, onOpenChange }: BatchImageUploadD
     }
   };
 
+  const allErrors = [...(results?.errors || []), ...(results?.linkErrors || [])];
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
@@ -112,8 +117,9 @@ export const BatchImageUploadDialog = ({ open, onOpenChange }: BatchImageUploadD
             Upload em Lote de Imagens CAIP
           </DialogTitle>
           <DialogDescription>
-            Envie as imagens do sistema legado. Imagens que já existem no sistema novo <strong>não serão sobrescritas</strong>.
-            Os arquivos devem seguir o padrão de nomenclatura do CAIP (ex: <code>id.Imagem Fachada.123456.jpg</code>).
+            Envie as imagens do sistema legado. Os arquivos devem seguir o padrão <code>id_caip.Imagem Tipo.timestamp.jpg</code>.
+            As imagens serão automaticamente <strong>vinculadas aos registros</strong> pelo id_caip do nome do arquivo.
+            Imagens já existentes no storage não serão sobrescritas.
           </DialogDescription>
         </DialogHeader>
 
@@ -168,41 +174,48 @@ export const BatchImageUploadDialog = ({ open, onOpenChange }: BatchImageUploadD
             <div className="space-y-3">
               <h3 className="font-semibold text-foreground">Resultado do Upload</h3>
               
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
                   <div>
                     <p className="text-lg font-bold text-green-700 dark:text-green-400">{results.uploaded.length}</p>
                     <p className="text-xs text-green-600 dark:text-green-500">Enviadas</p>
                   </div>
                 </div>
+                <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <Link2 className="h-5 w-5 text-blue-600 shrink-0" />
+                  <div>
+                    <p className="text-lg font-bold text-blue-700 dark:text-blue-400">{results.linked.length}</p>
+                    <p className="text-xs text-blue-600 dark:text-blue-500">Vinculadas</p>
+                  </div>
+                </div>
                 <div className="flex items-center gap-2 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                  <SkipForward className="h-5 w-5 text-yellow-600" />
+                  <SkipForward className="h-5 w-5 text-yellow-600 shrink-0" />
                   <div>
                     <p className="text-lg font-bold text-yellow-700 dark:text-yellow-400">{results.skipped.length}</p>
                     <p className="text-xs text-yellow-600 dark:text-yellow-500">Já existiam</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950 rounded-lg border border-red-200 dark:border-red-800">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  <AlertTriangle className="h-5 w-5 text-red-600 shrink-0" />
                   <div>
-                    <p className="text-lg font-bold text-red-700 dark:text-red-400">{results.errors.length}</p>
+                    <p className="text-lg font-bold text-red-700 dark:text-red-400">{allErrors.length}</p>
                     <p className="text-xs text-red-600 dark:text-red-500">Erros</p>
                   </div>
                 </div>
               </div>
 
               {/* Error details */}
-              {results.errors.length > 0 && (
+              {allErrors.length > 0 && (
                 <div className="max-h-40 overflow-y-auto border border-border rounded p-2 space-y-1">
                   <p className="text-xs font-medium text-destructive">Detalhes dos erros:</p>
-                  {results.errors.slice(0, 50).map((e, i) => (
+                  {allErrors.slice(0, 50).map((e, i) => (
                     <p key={i} className="text-xs text-muted-foreground">
                       <span className="font-medium">{e.file}</span>: {e.error}
                     </p>
                   ))}
-                  {results.errors.length > 50 && (
-                    <p className="text-xs text-muted-foreground">...e mais {results.errors.length - 50} erros</p>
+                  {allErrors.length > 50 && (
+                    <p className="text-xs text-muted-foreground">...e mais {allErrors.length - 50} erros</p>
                   )}
                 </div>
               )}
