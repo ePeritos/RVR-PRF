@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, Search, FileText, Calendar, MapPin, Building } from 'lucide-react';
+import { Edit, Trash2, Search, FileText, Calendar, MapPin, Building, Ruler } from 'lucide-react';
 import { Tables } from '@/integrations/supabase/types';
 import { useCAIPReport } from '@/hooks/useCAIPReport';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -101,6 +101,12 @@ export const ExistingRecordsList = ({
                       <Badge variant="outline" className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         {item.ano_caip}
+                      </Badge>
+                    )}
+                    {item.area_construida_m2 != null && Number(item.area_construida_m2) > 0 && (
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <Ruler className="h-3 w-3" />
+                        {Number(item.area_construida_m2).toLocaleString('pt-BR')} m²
                       </Badge>
                     )}
                   </div>
