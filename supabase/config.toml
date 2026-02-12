@@ -1,1 +1,4 @@
 project_id = "sbefwlhezngkwsxybrsj"
+
+[functions.batch-upload-images]
+verify_jwt = false
