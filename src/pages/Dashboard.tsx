@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Building, FileText, TrendingUp, MapPin } from 'lucide-react';
+import { Building, FileText, TrendingUp, MapPin, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { DataFilter } from '@/components/DataFilter';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { supabase } from '@/integrations/supabase/client';
@@ -88,6 +88,8 @@ const Dashboard = () => {
   const [unidadeGestoraData, setUnidadeGestoraData] = useState<UnidadeGestoraData[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [geralView, setGeralView] = useState<'chart' | 'table'>('chart');
+  const [sortColumn, setSortColumn] = useState<'unidade' | 'numeroImoveis' | 'areaConstruidaMedia'>('areaConstruidaMedia');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     if (supabaseData.length > 0) {
@@ -320,13 +322,33 @@ const Dashboard = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Unidade Gestora</TableHead>
-                        <TableHead className="text-right">Nº Imóveis</TableHead>
-                        <TableHead className="text-right">Área Construída Média (m²)</TableHead>
+                        {([['unidade', 'Unidade Gestora', 'text-left'], ['numeroImoveis', 'Nº Imóveis', 'text-right'], ['areaConstruidaMedia', 'Área Construída Média (m²)', 'text-right']] as const).map(([key, label, align]) => (
+                          <TableHead
+                            key={key}
+                            className={`${align} cursor-pointer select-none hover:bg-muted/50`}
+                            onClick={() => {
+                              if (sortColumn === key) {
+                                setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+                              } else {
+                                setSortColumn(key);
+                                setSortDirection(key === 'unidade' ? 'asc' : 'desc');
+                              }
+                            }}
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              {label}
+                              {sortColumn === key ? (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
+                            </span>
+                          </TableHead>
+                        ))}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {unidadeGestoraData.map((item) => (
+                      {[...unidadeGestoraData].sort((a, b) => {
+                        const dir = sortDirection === 'asc' ? 1 : -1;
+                        if (sortColumn === 'unidade') return dir * a.unidade.localeCompare(b.unidade);
+                        return dir * (a[sortColumn] - b[sortColumn]);
+                      }).map((item) => (
                         <TableRow key={item.unidade}>
                           <TableCell className="font-medium">{item.unidade}</TableCell>
                           <TableCell className="text-right">{item.numeroImoveis.toLocaleString('pt-BR')}</TableCell>
