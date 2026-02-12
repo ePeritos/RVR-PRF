@@ -182,8 +182,14 @@ export function ChartPreview({ data, config, comparisonData }: ChartPreviewProps
         
         const sortedData = [...data].sort((a, b) => {
           if (!sortColumn) return 0;
-          const aVal = sortColumn === 'row' ? a.row : sortColumn === 'total' ? a.total : a[sortColumn] || 0;
-          const bVal = sortColumn === 'row' ? b.row : sortColumn === 'total' ? b.total : b[sortColumn] || 0;
+          let aVal: any, bVal: any;
+          if (sortColumn === 'percentSim') {
+            aVal = a.total > 0 && a['Sim'] != null ? (a['Sim'] / a.total) : -1;
+            bVal = b.total > 0 && b['Sim'] != null ? (b['Sim'] / b.total) : -1;
+          } else {
+            aVal = sortColumn === 'row' ? a.row : sortColumn === 'total' ? a.total : a[sortColumn] || 0;
+            bVal = sortColumn === 'row' ? b.row : sortColumn === 'total' ? b.total : b[sortColumn] || 0;
+          }
           if (typeof aVal === 'number' && typeof bVal === 'number') {
             return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
           }
@@ -208,18 +214,33 @@ export function ChartPreview({ data, config, comparisonData }: ChartPreviewProps
                   <TableHead className="text-right font-bold cursor-pointer hover:bg-muted/50" onClick={() => handleSort('total')}>
                     <div className="flex items-center justify-end">Total{getSortIcon('total')}</div>
                   </TableHead>
+                  {columnArray.includes('Sim') && (
+                    <TableHead className="text-right font-bold cursor-pointer hover:bg-muted/50" onClick={() => handleSort('percentSim')}>
+                      <div className="flex items-center justify-end">% Sim{getSortIcon('percentSim')}</div>
+                    </TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedData.map((row, idx) => (
+                {sortedData.map((row, idx) => {
+                  const percentSim = row.total > 0 && row['Sim'] != null ? Math.round((row['Sim'] / row.total) * 100) : null;
+                  return (
                   <TableRow key={idx}>
                     <TableCell className="font-medium">{row.row}</TableCell>
                     {columnArray.map(col => (
                       <TableCell key={col} className="text-right">{row[col] || 0}</TableCell>
                     ))}
                     <TableCell className="text-right font-bold">{row.total}</TableCell>
+                    {columnArray.includes('Sim') && (
+                      <TableCell className="text-right">
+                        <span className={`font-semibold ${percentSim != null && percentSim >= 50 ? 'text-green-600' : 'text-red-500'}`}>
+                          {percentSim != null ? `${percentSim}%` : '-'}
+                        </span>
+                      </TableCell>
+                    )}
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
