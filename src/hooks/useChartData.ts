@@ -12,7 +12,7 @@ export interface ChartField {
 export interface ChartConfig {
   id: string;
   name: string;
-  type: 'bar' | 'pie' | 'line' | 'area' | 'scatter' | 'table' | 'comparison';
+  type: 'bar' | 'pie' | 'line' | 'area' | 'scatter' | 'table' | 'comparison' | 'year_comparison';
   xField: string;
   yField: string;
   groupField?: string;
@@ -199,6 +199,123 @@ export const useComparisonData = (data: DataRow[], fields: string[], groupField?
         percentSim: Math.round((sim / data.length) * 100),
       };
     }).sort((a, b) => b.Sim - a.Sim);
+  }, [data, fields, groupField]);
+};
+
+// Gerar dados para evolução temporal (comparativo entre anos)
+export interface YearComparisonResult {
+  years: string[];
+  rows: Record<string, any>[];
+}
+
+export const useYearComparisonData = (
+  data: DataRow[],
+  fields: string[],
+  groupField?: string
+): YearComparisonResult => {
+  return useMemo(() => {
+    if (!data?.length || !fields.length) return { years: [], rows: [] };
+
+    const years = [...new Set(data.map(d => String(d.ano_caip || '')).filter(Boolean))].sort();
+    if (years.length < 2) return { years, rows: [] };
+
+    if (!groupField) {
+      // Rows = fields, columns = years with Sim count and %
+      const rows = fields.map(fieldKey => {
+        const fieldInfo = CHART_FIELDS.find(f => f.key === fieldKey);
+        const row: Record<string, any> = { name: fieldInfo?.label || fieldKey };
+
+        years.forEach(year => {
+          const yearData = data.filter(d => String(d.ano_caip) === year);
+          const sim = yearData.filter(d => normalizeSimNao(d[fieldKey]) === 'Sim').length;
+          const total = yearData.length;
+          row[`${year}_sim`] = sim;
+          row[`${year}_total`] = total;
+          row[`${year}_pct`] = total > 0 ? Math.round((sim / total) * 100) : 0;
+        });
+
+        // Calcular tendência (último ano vs primeiro ano)
+        const firstPct = row[`${years[0]}_pct`] || 0;
+        const lastPct = row[`${years[years.length - 1]}_pct`] || 0;
+        row._trend = lastPct - firstPct;
+
+        return row;
+      });
+
+      return { years, rows };
+    }
+
+    // Agrupado por campo (ex: nome_da_unidade)
+    const groups = [...new Set(data.map(d => String(d[groupField] || 'Não informado')))].sort(
+      (a, b) => a.localeCompare(b, 'pt-BR')
+    );
+
+    if (fields.length === 1) {
+      // Campo único: mostrar Sim/Não direto por unidade e ano
+      const fieldKey = fields[0];
+      const rows = groups.map(group => {
+        const row: Record<string, any> = { name: group };
+
+        years.forEach(year => {
+          const matches = data.filter(
+            d => String(d.ano_caip) === year && String(d[groupField] || 'Não informado') === group
+          );
+          if (matches.length === 0) {
+            row[year] = '—';
+          } else {
+            // Se houver múltiplos registros, usa contagem
+            if (matches.length === 1) {
+              row[year] = normalizeSimNao(matches[0][fieldKey]);
+            } else {
+              const sim = matches.filter(d => normalizeSimNao(d[fieldKey]) === 'Sim').length;
+              row[year] = `${sim}/${matches.length}`;
+            }
+          }
+        });
+
+        // Tendência: comparar primeiro e último ano
+        const firstVal = row[years[0]];
+        const lastVal = row[years[years.length - 1]];
+        if (firstVal === 'Sim' && lastVal === 'Não') row._trend = -1;
+        else if (firstVal === 'Não' && lastVal === 'Sim') row._trend = 1;
+        else row._trend = 0;
+
+        return row;
+      });
+
+      return { years, rows };
+    }
+
+    // Múltiplos campos: mostrar % médio de Sim por grupo e ano
+    const rows = groups.map(group => {
+      const row: Record<string, any> = { name: group };
+
+      years.forEach(year => {
+        const yearGroupData = data.filter(
+          d => String(d.ano_caip) === year && String(d[groupField] || 'Não informado') === group
+        );
+        let totalSim = 0;
+        let totalCount = 0;
+        fields.forEach(fieldKey => {
+          yearGroupData.forEach(d => {
+            const n = normalizeSimNao(d[fieldKey]);
+            if (n === 'Sim') totalSim++;
+            totalCount++;
+          });
+        });
+        row[`${year}_sim`] = totalSim;
+        row[`${year}_total`] = totalCount;
+        row[`${year}_pct`] = totalCount > 0 ? Math.round((totalSim / totalCount) * 100) : 0;
+      });
+
+      const firstPct = row[`${years[0]}_pct`] || 0;
+      const lastPct = row[`${years[years.length - 1]}_pct`] || 0;
+      row._trend = lastPct - firstPct;
+
+      return row;
+    });
+
+    return { years, rows };
   }, [data, fields, groupField]);
 };
 

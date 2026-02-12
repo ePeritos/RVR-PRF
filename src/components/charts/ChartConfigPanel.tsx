@@ -24,6 +24,7 @@ const CHART_TYPES = [
   { value: 'area', label: 'Gráfico de Área' },
   { value: 'table', label: 'Tabela' },
   { value: 'comparison', label: '📊 Comparativo Sim/Não' },
+  { value: 'year_comparison', label: '📅 Evolução Temporal (Anos)' },
 ];
 
 const AGGREGATIONS = [
@@ -66,6 +67,7 @@ export function ChartConfigPanel({ config, onConfigChange, onSave, onReset }: Ch
   };
 
   const isComparison = config.type === 'comparison';
+  const isYearComparison = config.type === 'year_comparison';
   const numericFields = CHART_FIELDS.filter(field => field.type === 'number');
   const allFields = CHART_FIELDS;
   const booleanFields = CHART_FIELDS.filter(f => f.type === 'boolean');
@@ -97,17 +99,22 @@ export function ChartConfigPanel({ config, onConfigChange, onSave, onReset }: Ch
               onConfigChange({
                 ...config,
                 type: type as ChartConfig['type'],
-                comparisonFields: type === 'comparison' ? (config.comparisonFields || []) : undefined,
+                comparisonFields: (type === 'comparison' || type === 'year_comparison') ? (config.comparisonFields || []) : undefined,
               });
             }}
             placeholder="Selecione o tipo"
           />
         </div>
 
-        {isComparison ? (
+        {(isComparison || isYearComparison) ? (
           <>
+            {isYearComparison && (
+              <div className="p-2 bg-muted/50 rounded-md text-xs text-muted-foreground">
+                ⚠️ Selecione <b>mais de um ano</b> nos filtros do dashboard para ver a evolução temporal.
+              </div>
+            )}
             <div className="space-y-2">
-              <Label>Agrupar por (opcional)</Label>
+              <Label>{isYearComparison ? 'Agrupar por (ex: Nome da Unidade)' : 'Agrupar por (opcional)'}</Label>
               <SimpleSelect
                 options={['Sem agrupamento', ...groupableFields.map(f => f.label)]}
                 value={config.groupField 

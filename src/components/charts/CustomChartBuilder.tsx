@@ -3,7 +3,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { ChartConfigPanel } from './ChartConfigPanel';
 import { ChartPreview } from './ChartPreview';
 import { SavedChartsManager } from './SavedChartsManager';
-import { ChartConfig, useChartData, useComparisonData } from '@/hooks/useChartData';
+import { ChartConfig, useChartData, useComparisonData, useYearComparisonData } from '@/hooks/useChartData';
 import { DataRow } from '@/hooks/useSupabaseData';
 import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
@@ -31,6 +31,11 @@ export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
   const comparisonData = useComparisonData(
     data, 
     config.comparisonFields || [], 
+    config.groupField
+  );
+  const yearComparisonData = useYearComparisonData(
+    data,
+    config.comparisonFields || [],
     config.groupField
   );
 
@@ -149,6 +154,7 @@ export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
             data={chartData} 
             config={config} 
             comparisonData={comparisonData}
+            yearComparisonData={yearComparisonData}
           />
         </div>
       </div>
