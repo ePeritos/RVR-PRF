@@ -63,24 +63,31 @@ export const ImagesSection = ({ setValue, watchedValues }: ImagesSectionProps) =
             imageUrl.trim() !== '' && 
             imageUrl !== 'null' && 
             imageUrl !== 'undefined' &&
-            (imageUrl.startsWith('http') || imageUrl.startsWith('https') || imageUrl.startsWith('blob:')) &&
             !imageUrl.toLowerCase().includes('placeholder') &&
             !imageUrl.toLowerCase().includes('example') &&
             !imageUrl.toLowerCase().includes('default')) {
           
-          const isValidImageUrl = imageUrl.includes('supabase') || 
-                                  /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(imageUrl) ||
-                                  imageUrl.startsWith('blob:');
+          let resolvedUrl = imageUrl;
+          
+          // Convert relative storage paths (e.g. "dCAIP_Images/xxx.jpg") to full public URLs
+          if (!imageUrl.startsWith('http') && !imageUrl.startsWith('blob:') && imageUrl.includes('dCAIP_Images/')) {
+            resolvedUrl = `https://sbefwlhezngkwsxybrsj.supabase.co/storage/v1/object/public/caip-images/${imageUrl}`;
+            console.log(`🔄 Convertendo path relativo para URL: ${resolvedUrl}`);
+          }
+          
+          const isValidImageUrl = resolvedUrl.includes('supabase') || 
+                                  /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(resolvedUrl) ||
+                                  resolvedUrl.startsWith('blob:');
           
           if (isValidImageUrl) {
             existingPreviews[key] = {
-              url: imageUrl,
+              url: resolvedUrl,
               isExisting: true
             };
             hasExistingImages = true;
-            console.log(`✅ Imagem existente válida encontrada para ${key}: ${imageUrl}`);
+            console.log(`✅ Imagem existente válida encontrada para ${key}: ${resolvedUrl}`);
           } else {
-            console.log(`⚠️ URL rejeitada para ${key} (não parece ser uma imagem válida): ${imageUrl}`);
+            console.log(`⚠️ URL rejeitada para ${key} (não parece ser uma imagem válida): ${resolvedUrl}`);
           }
         } else {
           console.log(`❌ Campo ${key} não contém imagem válida:`, imageUrl);
