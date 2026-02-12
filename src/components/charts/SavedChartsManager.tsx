@@ -11,17 +11,18 @@ interface SavedChartsManagerProps {
   onLoadChart: (config: ChartConfig) => void;
   currentConfig: ChartConfig;
   onSaveChart: (config: ChartConfig) => boolean;
+  refreshTrigger?: number;
 }
 
 const STORAGE_KEY = 'sigi-saved-charts';
 
-export function SavedChartsManager({ onLoadChart, currentConfig, onSaveChart }: SavedChartsManagerProps) {
+export function SavedChartsManager({ onLoadChart, currentConfig, onSaveChart, refreshTrigger }: SavedChartsManagerProps) {
   const [savedCharts, setSavedCharts] = useState<ChartConfig[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     loadSavedCharts();
-  }, []);
+  }, [refreshTrigger]);
 
   const loadSavedCharts = () => {
     try {
