@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CustomChartBuilder } from '@/components/charts/CustomChartBuilder';
 import { CompletionDashboard } from '@/components/dashboard/CompletionDashboard';
@@ -86,6 +87,7 @@ const Dashboard = () => {
   const [filteredStats, setFilteredStats] = useState<DashboardStats>(stats);
   const [unidadeGestoraData, setUnidadeGestoraData] = useState<UnidadeGestoraData[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>([]);
+  const [geralView, setGeralView] = useState<'chart' | 'table'>('chart');
 
   useEffect(() => {
     if (supabaseData.length > 0) {
@@ -281,23 +283,60 @@ const Dashboard = () => {
           <TabsTrigger value="customizados">Customizados</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="geral" className="space-y-4">
+      <TabsContent value="geral" className="space-y-4">
           <Card className="bg-card border-border">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg font-medium">Área Construída Média por Unidade Gestora</CardTitle>
+              <div className="flex gap-1 border rounded-md overflow-hidden">
+                <button
+                  onClick={() => setGeralView('chart')}
+                  className={`px-3 py-1 text-xs font-medium transition-colors ${geralView === 'chart' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
+                >
+                  Gráfico
+                </button>
+                <button
+                  onClick={() => setGeralView('table')}
+                  className={`px-3 py-1 text-xs font-medium transition-colors ${geralView === 'table' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
+                >
+                  Tabela
+                </button>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="h-96">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={unidadeGestoraData}>
-                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis dataKey="unidade" angle={-45} textAnchor="end" height={80} fontSize={12} />
-                    <YAxis />
-                    <Tooltip formatter={(value: any) => [`${Number(value).toLocaleString('pt-BR')} m²`, 'Área Construída Média']} />
-                    <Bar dataKey="areaConstruidaMedia" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              {geralView === 'chart' ? (
+                <div className="h-96">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={unidadeGestoraData}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis dataKey="unidade" angle={-45} textAnchor="end" height={80} fontSize={12} />
+                      <YAxis />
+                      <Tooltip formatter={(value: any) => [`${Number(value).toLocaleString('pt-BR')} m²`, 'Área Construída Média']} />
+                      <Bar dataKey="areaConstruidaMedia" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="overflow-auto max-h-96">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Unidade Gestora</TableHead>
+                        <TableHead className="text-right">Nº Imóveis</TableHead>
+                        <TableHead className="text-right">Área Construída Média (m²)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {unidadeGestoraData.map((item) => (
+                        <TableRow key={item.unidade}>
+                          <TableCell className="font-medium">{item.unidade}</TableCell>
+                          <TableCell className="text-right">{item.numeroImoveis.toLocaleString('pt-BR')}</TableCell>
+                          <TableCell className="text-right">{item.areaConstruidaMedia.toLocaleString('pt-BR')} m²</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
