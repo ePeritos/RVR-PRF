@@ -187,10 +187,12 @@ const CAIP = () => {
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">CAIP - Cadastro de Imóveis</h1>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Button onClick={() => setBatchUploadOpen(true)} variant="outline" className="flex items-center gap-2 w-full sm:w-auto">
-            <ImageUp className="h-4 w-4" />
-            Upload em Lote
-          </Button>
+          {isAdmin && (
+            <Button onClick={() => setBatchUploadOpen(true)} variant="outline" className="flex items-center gap-2 w-full sm:w-auto">
+              <ImageUp className="h-4 w-4" />
+              Upload em Lote
+            </Button>
+          )}
           <Button onClick={handleNew} className="flex items-center gap-2 w-full sm:w-auto">
             <Plus className="h-4 w-4" />
             Novo Registro
