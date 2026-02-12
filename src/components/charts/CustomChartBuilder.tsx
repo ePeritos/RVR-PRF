@@ -102,10 +102,21 @@ export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
         scale: 2,
         useCORS: true,
       });
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (b) => b ? resolve(b) : reject(new Error('Falha na conversão')),
+          'image/jpeg',
+          0.85
+        );
+      });
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
+      link.href = url;
       link.download = `grafico-${chart.name.replace(/\s+/g, '-').toLowerCase()}.jpg`;
-      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       toast({ title: "Sucesso", description: "Imagem do gráfico baixada!" });
     } catch {
       toast({ title: "Erro", description: "Erro ao exportar imagem do gráfico", variant: "destructive" });
