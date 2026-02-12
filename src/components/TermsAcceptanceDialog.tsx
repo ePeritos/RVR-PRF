@@ -40,7 +40,7 @@ export const TermsAcceptanceDialog: React.FC<TermsAcceptanceDialogProps> = ({
             Termos de Uso e Política de Privacidade
           </DialogTitle>
           <DialogDescription>
-            Para utilizar o Sistema RVR, é necessário aceitar os termos de uso e a política de privacidade.
+            Para utilizar o SIGI-PRF, é necessário aceitar os termos de uso e a política de privacidade.
           </DialogDescription>
         </DialogHeader>
 
@@ -51,7 +51,7 @@ export const TermsAcceptanceDialog: React.FC<TermsAcceptanceDialogProps> = ({
               <h3 className="font-semibold text-base mb-2">Termos de Uso</h3>
               <div className="text-xs text-muted-foreground space-y-1">
                 <p>
-                  <strong>1. Objeto:</strong> O Sistema RVR destina-se exclusivamente ao uso de servidores da Polícia Rodoviária Federal (PRF) para finalidades institucionais.
+                  <strong>1. Objeto:</strong> O SIGI-PRF destina-se exclusivamente ao uso de servidores da Polícia Rodoviária Federal (PRF) para finalidades institucionais.
                 </p>
                 <p>
                   <strong>2. Acesso:</strong> Requer credenciais válidas (@prf.gov.br) e uso conforme políticas internas de segurança.
@@ -110,7 +110,7 @@ export const TermsAcceptanceDialog: React.FC<TermsAcceptanceDialogProps> = ({
               onCheckedChange={(checked) => setTermsAccepted(checked === true)}
             />
             <Label htmlFor="terms" className="text-xs">
-              Li e aceito os <strong>Termos de Uso</strong> da aplicação RVR
+              Li e aceito os <strong>Termos de Uso</strong> do SIGI-PRF
             </Label>
           </div>
 
