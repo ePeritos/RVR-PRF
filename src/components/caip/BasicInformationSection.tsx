@@ -33,7 +33,7 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
   console.log('Valores atuais do formulário:', watchedValues);
 
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
+  const years = Array.from({ length: 10 }, (_, i) => currentYear - i).filter(y => y % 2 !== 0);
 
   return (
     <Card className="p-6">
