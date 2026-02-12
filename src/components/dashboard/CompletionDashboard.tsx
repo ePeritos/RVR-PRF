@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 import { AlertTriangle, CheckCircle, Clock, Image } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 
 const IMAGE_FIELDS = [
   { key: 'imagem_geral', label: 'Imagem Geral' },
@@ -31,10 +32,16 @@ interface RegionalStats {
   baixoCount: number;
 }
 
-const getCompletionColor = (value: number) => {
-  if (value >= 80) return 'hsl(var(--chart-1))';
-  if (value >= 50) return 'hsl(var(--chart-2))';
-  return 'hsl(var(--chart-3))';
+const getCompletionColor = (value: number, theme: string) => {
+  if (theme === 'dark') {
+    if (value >= 80) return '#93c5fd'; // blue-300
+    if (value >= 50) return '#60a5fa'; // blue-400
+    return '#3b82f6'; // blue-500
+  }
+  // light mode
+  if (value >= 80) return '#1d4ed8'; // blue-700
+  if (value >= 50) return '#2563eb'; // blue-600
+  return '#3b82f6'; // blue-500
 };
 
 const getCompletionBadge = (value: number) => {
@@ -44,6 +51,7 @@ const getCompletionBadge = (value: number) => {
 };
 
 export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
+  const { theme } = useTheme();
   const regionalStats = useMemo(() => {
     const map = new Map<string, { total: number; soma: number; completos: number; parcial: number; baixo: number }>();
 
@@ -175,7 +183,7 @@ export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
                 <ReferenceLine x={80} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" label={{ value: '80%', position: 'top', fontSize: 10 }} />
                 <Bar dataKey="mediaPreenchimento" radius={[0, 4, 4, 0]}>
                   {regionalStats.map((entry, index) => (
-                    <Cell key={index} fill={getCompletionColor(entry.mediaPreenchimento)} />
+                    <Cell key={index} fill={getCompletionColor(entry.mediaPreenchimento, theme)} />
                   ))}
                 </Bar>
               </BarChart>
