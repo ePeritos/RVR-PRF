@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   BarChart, Bar, PieChart, Pie, LineChart, Line, AreaChart, Area,
@@ -32,7 +32,7 @@ const SIM_COLOR = '#22c55e';
 const NAO_COLOR = '#ef4444';
 const NI_COLOR = '#94a3b8';
 
-export function ChartPreview({ data, config, comparisonData }: ChartPreviewProps) {
+export const ChartPreview = forwardRef<HTMLDivElement, ChartPreviewProps>(function ChartPreview({ data, config, comparisonData }, ref) {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -295,7 +295,7 @@ export function ChartPreview({ data, config, comparisonData }: ChartPreviewProps
   };
 
   return (
-    <Card className="flex-1">
+    <Card className="flex-1" ref={ref}>
       <CardHeader>
         <CardTitle>{config.name || 'Visualização Personalizada'}</CardTitle>
       </CardHeader>
@@ -312,4 +312,4 @@ export function ChartPreview({ data, config, comparisonData }: ChartPreviewProps
       </CardContent>
     </Card>
   );
-}
+});

@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { ChartConfigPanel } from './ChartConfigPanel';
 import { ChartPreview } from './ChartPreview';
 import { SavedChartsManager } from './SavedChartsManager';
 import { ChartConfig, useChartData, useComparisonData } from '@/hooks/useChartData';
 import { DataRow } from '@/hooks/useSupabaseData';
 import { useToast } from '@/hooks/use-toast';
+import html2canvas from 'html2canvas';
 
 interface CustomChartBuilderProps {
   data: DataRow[];
@@ -24,6 +25,7 @@ export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
   const [config, setConfig] = useState<ChartConfig>(DEFAULT_CONFIG);
   const [saveCounter, setSaveCounter] = useState(0);
   const { toast } = useToast();
+  const chartRef = useRef<HTMLDivElement>(null);
   
   const chartData = useChartData(data, config);
   const comparisonData = useComparisonData(
@@ -83,6 +85,33 @@ export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
     });
   };
 
+  const handleExportImage = useCallback(async (chart: ChartConfig) => {
+    // Load the chart first
+    setConfig(chart);
+    // Wait for render
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (!chartRef.current) {
+      toast({ title: "Erro", description: "Não foi possível capturar o gráfico", variant: "destructive" });
+      return;
+    }
+
+    try {
+      const canvas = await html2canvas(chartRef.current, { 
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+      });
+      const link = document.createElement('a');
+      link.download = `grafico-${chart.name.replace(/\s+/g, '-').toLowerCase()}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      link.click();
+      toast({ title: "Sucesso", description: "Imagem do gráfico baixada!" });
+    } catch {
+      toast({ title: "Erro", description: "Erro ao exportar imagem do gráfico", variant: "destructive" });
+    }
+  }, [toast]);
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -99,11 +128,13 @@ export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
             currentConfig={config}
             onSaveChart={handleSave}
             refreshTrigger={saveCounter}
+            onExportImage={handleExportImage}
           />
         </div>
 
         <div className="lg:col-span-3">
           <ChartPreview 
+            ref={chartRef}
             data={chartData} 
             config={config} 
             comparisonData={comparisonData}
