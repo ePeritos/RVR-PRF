@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Building, FileText, TrendingUp, MapPin, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Building, FileText, TrendingUp, MapPin, ArrowUpDown, ArrowUp, ArrowDown, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { DataFilter } from '@/components/DataFilter';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
 import { supabase } from '@/integrations/supabase/client';
@@ -289,19 +290,44 @@ const Dashboard = () => {
           <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg font-medium">Área Construída Média por Unidade Gestora</CardTitle>
-              <div className="flex gap-1 border rounded-md overflow-hidden">
-                <button
-                  onClick={() => setGeralView('chart')}
-                  className={`px-3 py-1 text-xs font-medium transition-colors ${geralView === 'chart' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
-                >
-                  Gráfico
-                </button>
-                <button
-                  onClick={() => setGeralView('table')}
-                  className={`px-3 py-1 text-xs font-medium transition-colors ${geralView === 'table' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
-                >
-                  Tabela
-                </button>
+              <div className="flex items-center gap-2">
+                {geralView === 'table' && (
+                  <button
+                    onClick={() => {
+                      const sorted = [...unidadeGestoraData].sort((a, b) => {
+                        const dir = sortDirection === 'asc' ? 1 : -1;
+                        if (sortColumn === 'unidade') return dir * a.unidade.localeCompare(b.unidade);
+                        return dir * (a[sortColumn] - b[sortColumn]);
+                      });
+                      const ws = XLSX.utils.json_to_sheet(sorted.map(item => ({
+                        'Unidade Gestora': item.unidade,
+                        'Nº Imóveis': item.numeroImoveis,
+                        'Área Construída Média (m²)': item.areaConstruidaMedia,
+                      })));
+                      const wb = XLSX.utils.book_new();
+                      XLSX.utils.book_append_sheet(wb, ws, 'Visão Geral');
+                      XLSX.writeFile(wb, 'visao-geral-area-construida.xlsx');
+                    }}
+                    className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                    title="Exportar para Excel"
+                  >
+                    <Download className="h-4 w-4" />
+                  </button>
+                )}
+                <div className="flex gap-1 border rounded-md overflow-hidden">
+                  <button
+                    onClick={() => setGeralView('chart')}
+                    className={`px-3 py-1 text-xs font-medium transition-colors ${geralView === 'chart' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
+                  >
+                    Gráfico
+                  </button>
+                  <button
+                    onClick={() => setGeralView('table')}
+                    className={`px-3 py-1 text-xs font-medium transition-colors ${geralView === 'table' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
+                  >
+                    Tabela
+                  </button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
