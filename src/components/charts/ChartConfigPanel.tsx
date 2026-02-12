@@ -186,19 +186,13 @@ export function ChartConfigPanel({ config, onConfigChange, onSave, onReset }: Ch
             <div className="space-y-2">
               <Label htmlFor="y-field">{config.type === 'table' ? 'Colunas' : 'Campo Y (Eixo Vertical)'}</Label>
               <SimpleSelect
-                options={config.type === 'table' 
-                  ? allFields.map(field => `${field.label}${field.category ? ` [${field.category}]` : ''}`)
-                  : numericFields.map(field => field.label)}
-                value={config.type === 'table' 
-                  ? (() => {
-                      const f = allFields.find(field => field.key === config.yField);
-                      return f ? `${f.label}${f.category ? ` [${f.category}]` : ''}` : '';
-                    })()
-                  : numericFields.find(field => field.key === config.yField)?.label || ''}
+                options={allFields.map(field => `${field.label}${field.category ? ` [${field.category}]` : ''}`)}
+                value={(() => {
+                  const f = allFields.find(field => field.key === config.yField);
+                  return f ? `${f.label}${f.category ? ` [${f.category}]` : ''}` : '';
+                })()}
                 onChange={(value) => {
-                  const field = config.type === 'table'
-                    ? allFields.find(f => `${f.label}${f.category ? ` [${f.category}]` : ''}` === value)?.key || ''
-                    : numericFields.find(f => f.label === value)?.key || '';
+                  const field = allFields.find(f => `${f.label}${f.category ? ` [${f.category}]` : ''}` === value)?.key || '';
                   handleFieldChange('yField', field);
                 }}
                 placeholder={config.type === 'table' ? 'Selecione o campo para colunas' : 'Selecione o campo Y'}
