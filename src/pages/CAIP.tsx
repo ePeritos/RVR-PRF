@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Database, Plus } from 'lucide-react';
+import { Database, Plus, ImageUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { ExistingRecordsList } from '@/components/caip/ExistingRecordsList';
 import { DataFilter } from '@/components/DataFilter';
 import { CAIPFormDialog } from '@/components/caip/CAIPFormDialog';
+import { BatchImageUploadDialog } from '@/components/caip/BatchImageUploadDialog';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
 type DadosCAIP = Tables<'dados_caip'>;
@@ -18,6 +19,7 @@ const CAIP = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState<DadosCAIP[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [batchUploadOpen, setBatchUploadOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<DadosCAIP | null>(null);
   const [filterResetKey, setFilterResetKey] = useState(0);
 
@@ -184,10 +186,16 @@ const CAIP = () => {
           <Database className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">CAIP - Cadastro de Imóveis</h1>
         </div>
-        <Button onClick={handleNew} className="flex items-center gap-2 w-full sm:w-auto">
-          <Plus className="h-4 w-4" />
-          Novo Registro
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button onClick={() => setBatchUploadOpen(true)} variant="outline" className="flex items-center gap-2 w-full sm:w-auto">
+            <ImageUp className="h-4 w-4" />
+            Upload em Lote
+          </Button>
+          <Button onClick={handleNew} className="flex items-center gap-2 w-full sm:w-auto">
+            <Plus className="h-4 w-4" />
+            Novo Registro
+          </Button>
+        </div>
       </div>
 
       <div className="text-center mb-4 sm:mb-6">
@@ -219,6 +227,11 @@ const CAIP = () => {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onSuccess={handleDialogSuccess}
+      />
+
+      <BatchImageUploadDialog
+        open={batchUploadOpen}
+        onOpenChange={setBatchUploadOpen}
       />
     </div>
   );
