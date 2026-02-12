@@ -22,6 +22,7 @@ const DEFAULT_CONFIG: ChartConfig = {
 
 export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
   const [config, setConfig] = useState<ChartConfig>(DEFAULT_CONFIG);
+  const [saveCounter, setSaveCounter] = useState(0);
   const { toast } = useToast();
   
   const chartData = useChartData(data, config);
@@ -41,13 +42,29 @@ export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
       return false;
     }
 
-    toast({
-      title: "Sucesso",
-      description: "Gráfico salvo com sucesso!",
-    });
-    
-    setConfig({ ...DEFAULT_CONFIG, id: Date.now().toString() });
-    return true;
+    try {
+      const STORAGE_KEY = 'sigi-saved-charts';
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const existing: ChartConfig[] = saved ? JSON.parse(saved) : [];
+      const newChart = { ...configToSave, id: Date.now().toString() };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([...existing, newChart]));
+      setSaveCounter(c => c + 1);
+
+      toast({
+        title: "Sucesso",
+        description: "Gráfico salvo com sucesso!",
+      });
+
+      setConfig({ ...DEFAULT_CONFIG, id: '' });
+      return true;
+    } catch {
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar o gráfico",
+        variant: "destructive",
+      });
+      return false;
+    }
   };
 
   const handleReset = () => {
@@ -81,6 +98,7 @@ export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
             onLoadChart={handleLoadChart}
             currentConfig={config}
             onSaveChart={handleSave}
+            refreshTrigger={saveCounter}
           />
         </div>
 
