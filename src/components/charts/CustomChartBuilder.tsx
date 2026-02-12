@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { ChartConfigPanel } from './ChartConfigPanel';
 import { ChartPreview } from './ChartPreview';
 import { SavedChartsManager } from './SavedChartsManager';
-import { ChartConfig, useChartData } from '@/hooks/useChartData';
+import { ChartConfig, useChartData, useComparisonData } from '@/hooks/useChartData';
 import { DataRow } from '@/hooks/useSupabaseData';
 import { useToast } from '@/hooks/use-toast';
 
@@ -25,6 +25,11 @@ export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
   const { toast } = useToast();
   
   const chartData = useChartData(data, config);
+  const comparisonData = useComparisonData(
+    data, 
+    config.comparisonFields || [], 
+    config.groupField
+  );
 
   const handleSave = (configToSave: ChartConfig) => {
     if (!configToSave.name.trim()) {
@@ -36,14 +41,11 @@ export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
       return false;
     }
 
-    // Aqui você pode implementar a lógica de salvamento
-    // Por enquanto, vamos apenas mostrar uma mensagem de sucesso
     toast({
       title: "Sucesso",
       description: "Gráfico salvo com sucesso!",
     });
     
-    // Reset form after successful save
     setConfig({ ...DEFAULT_CONFIG, id: Date.now().toString() });
     return true;
   };
@@ -67,7 +69,6 @@ export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Painel de Configuração */}
         <div className="lg:col-span-1 space-y-4">
           <ChartConfigPanel
             config={config}
@@ -83,9 +84,12 @@ export function CustomChartBuilder({ data }: CustomChartBuilderProps) {
           />
         </div>
 
-        {/* Preview do Gráfico */}
         <div className="lg:col-span-3">
-          <ChartPreview data={chartData} config={config} />
+          <ChartPreview 
+            data={chartData} 
+            config={config} 
+            comparisonData={comparisonData}
+          />
         </div>
       </div>
     </div>
