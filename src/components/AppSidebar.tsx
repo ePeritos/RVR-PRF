@@ -1,4 +1,4 @@
-import { Home, Calculator, Database, LogOut, User, Menu, Building, FileText } from "lucide-react";
+import { Home, Calculator, Database, LogOut, User, Menu, Building, FileText, Settings } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -29,6 +29,10 @@ const menuItems = [
   { title: "CAIP", url: "/caip", icon: Database },
   { title: "RVR", url: "/rvr", icon: Calculator },
   { title: "Relatórios", url: "/relatorios", icon: FileText },
+];
+
+const adminMenuItems = [
+  { title: "Gestão", url: "/gestao", icon: Settings },
 ];
 
 const unidadesGestoras = [
@@ -75,7 +79,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const { signOut, user } = useAuth();
-  const { profile, loading, updateProfile } = useProfile();
+  const { profile, loading, updateProfile, isAdmin } = useProfile();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
     nome_completo: '',
@@ -160,6 +164,31 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Administração</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {adminMenuItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={currentPath === item.url}>
+                      <NavLink
+                        to={item.url}
+                        end
+                        className="flex items-center w-full px-3 py-2 rounded-md"
+                      >
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {state !== "collapsed" && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
 
         <SidebarGroup className="mt-auto">
           <SidebarGroupLabel>Usuário</SidebarGroupLabel>
