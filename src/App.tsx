@@ -20,6 +20,7 @@ import Relatorios from "./pages/Relatorios";
 import RelatorioPreview from "./pages/RelatorioPreview";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Gestao from "./pages/Gestao";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,7 @@ const AppRoutes = () => {
                 <Route path="/caip" element={<CAIP />} />
                 <Route path="/relatorios" element={<Relatorios />} />
                 <Route path="/relatorio-preview" element={<RelatorioPreview />} />
+                <Route path="/gestao" element={<Gestao />} />
                 <Route path="/auth" element={<Navigate to="/" replace />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
