@@ -58,6 +58,22 @@ export const AMBIENTES_DELEGACIA = {
   vestiario_para_policiais: 6
 };
 
+// Mapeamento entre tipo_de_unidade do formulário e nome_tipo da tabela tipos_imoveis
+const TIPO_UNIDADE_MAP: {[key: string]: string} = {
+  'UOP': 'UOP',
+  'Delegacia': 'DEL',
+  'DEL': 'DEL',
+  'Sede Administrativa': 'Sede Administrativa',
+  'Posto de Fiscalização': 'Posto de Fiscalização',
+  'Centro de Treinamento': 'Centro de Treinamento',
+  'Núcleo de Capacitação': 'Núcleo de Capacitação',
+  'Unidade Operacional': 'UOP',
+};
+
+export const mapTipoUnidadeToNomeTipo = (tipoUnidade: string): string => {
+  return TIPO_UNIDADE_MAP[tipoUnidade] || tipoUnidade;
+};
+
 export const CAMPOS_JA_CALCULADOS = [
   'alojamento_masculino', 'alojamento_feminino', 'alojamento_misto',
   'banheiro_masculino_para_servidores', 'banheiro_feminino_para_servidoras', 'banheiro_misto_para_servidores'

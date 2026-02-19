@@ -8,6 +8,7 @@ import { StarRating } from '@/components/ui/star-rating';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
+import { mapTipoUnidadeToNomeTipo } from '@/constants/caipConstants';
 
 type DadosCAIP = Tables<'dados_caip'>;
 type CadernoAmbientes = Tables<'caderno_ambientes'>;
@@ -260,7 +261,7 @@ export const EnvironmentsSection = ({ register, setValue, watchedValues, onAvali
           nome_ambiente,
           tipos_imoveis!inner(nome_tipo)
         `)
-        .eq('tipos_imoveis.nome_tipo', watchedValues.tipo_de_unidade)
+        .eq('tipos_imoveis.nome_tipo', mapTipoUnidadeToNomeTipo(watchedValues.tipo_de_unidade))
         .eq('nome_ambiente', nomeAmbiente);
 
       if (errorCaderno) {
