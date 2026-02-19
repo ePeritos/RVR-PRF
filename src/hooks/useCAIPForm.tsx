@@ -5,6 +5,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { validateAnoCAIP, processFormData } from '@/utils/caipValidations';
+import { mapTipoUnidadeToNomeTipo } from '@/constants/caipConstants';
 
 type DadosCAIP = Tables<'dados_caip'>;
 
@@ -324,25 +325,25 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
         { campo: 'estacionamento_para_usuarios', nomeAmbiente: 'Estacionamento para usuários' },
         { campo: 'garagem_para_servidores', nomeAmbiente: 'Garagem para servidores' },
         { campo: 'garagem_para_viaturas', nomeAmbiente: 'Garagem para viaturas' },
-        { campo: 'lavabo_para_servidores_sem_box_para_chuveiro', nomeAmbiente: 'Lavabo para servidores sem box para chuveiro' },
+        { campo: 'lavabo_para_servidores_sem_box_para_chuveiro', nomeAmbiente: 'Lavabo para servidores' },
         { campo: 'local_para_custodia_temporaria_de_detidos', nomeAmbiente: 'Local para custódia temporária de detidos' },
         { campo: 'local_para_guarda_provisoria_de_animais', nomeAmbiente: 'Local para guarda provisória de animais' },
         { campo: 'patio_de_retencao_de_veiculos', nomeAmbiente: 'Pátio de retenção de veículos' },
-        { campo: 'plataforma_para_fiscalizacao_da_parte_superior_dos_veiculos', nomeAmbiente: 'Plataforma para fiscalização da parte superior dos veículos' },
+        { campo: 'plataforma_para_fiscalizacao_da_parte_superior_dos_veiculos', nomeAmbiente: 'Plataforma para fiscalização de veículos' },
         { campo: 'ponto_de_pouso_para_aeronaves', nomeAmbiente: 'Ponto de pouso para aeronaves' },
         { campo: 'rampa_de_fiscalizacao_de_veiculos', nomeAmbiente: 'Rampa de fiscalização de veículos' },
         { campo: 'recepcao', nomeAmbiente: 'Recepção' },
-        { campo: 'sala_administrativa_escritorio', nomeAmbiente: 'Sala administrativa/escritório' },
+        { campo: 'sala_administrativa_escritorio', nomeAmbiente: 'Sala administrativa / Escritório' },
         { campo: 'sala_de_assepsia', nomeAmbiente: 'Sala de assepsia' },
         { campo: 'sala_de_aula', nomeAmbiente: 'Sala de aula' },
         { campo: 'sala_de_reuniao', nomeAmbiente: 'Sala de reunião' },
         { campo: 'sala_de_revista_pessoal', nomeAmbiente: 'Sala de revista pessoal' },
-        { campo: 'sala_operacional_observatorio', nomeAmbiente: 'Sala operacional/observatório' },
+        { campo: 'sala_operacional_observatorio', nomeAmbiente: 'Sala operacional / Observatório' },
         { campo: 'sala_tecnica', nomeAmbiente: 'Sala técnica' },
         { campo: 'sanitario_publico', nomeAmbiente: 'Sanitário público' },
         { campo: 'telefone_publico', nomeAmbiente: 'Telefone público' },
         { campo: 'torre_de_telecomunicacoes', nomeAmbiente: 'Torre de telecomunicações' },
-        { campo: 'vestiario_para_nao_policiais', nomeAmbiente: 'Vestiário para não policiais' },
+        { campo: 'vestiario_para_nao_policiais', nomeAmbiente: 'Vestiário para não-policiais' },
         { campo: 'vestiario_para_policiais', nomeAmbiente: 'Vestiário para policiais' }
       ];
 
@@ -354,7 +355,7 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
           nome_ambiente,
           tipos_imoveis!inner(nome_tipo)
         `)
-        .eq('tipos_imoveis.nome_tipo', tipoUnidade);
+        .eq('tipos_imoveis.nome_tipo', mapTipoUnidadeToNomeTipo(tipoUnidade));
 
       if (errorCaderno) {
         console.error('Erro ao buscar caderno de ambientes:', errorCaderno);
