@@ -7,8 +7,8 @@ export const UNIDADES_GESTORAS = [
 ];
 
 export const TIPOS_UNIDADE = [
-  'UOP', 'Delegacia', 'Sede Administrativa', 'Posto de Fiscalização',
-  'Centro de Treinamento', 'Núcleo de Capacitação', 'Unidade Operacional'
+  'UOP', 'DEL', 'Sede Administrativa',
+  'Centro de Treinamento'
 ];
 
 export const ESTADOS_CONSERVACAO = [
@@ -61,13 +61,13 @@ export const AMBIENTES_DELEGACIA = {
 // Mapeamento entre tipo_de_unidade do formulário e nome_tipo da tabela tipos_imoveis
 const TIPO_UNIDADE_MAP: {[key: string]: string} = {
   'UOP': 'UOP',
+  'Unidade Operacional': 'UOP',
+  'Posto de Fiscalização': 'UOP',
   'Delegacia': 'DEL',
   'DEL': 'DEL',
   'Sede Administrativa': 'Sede Administrativa',
-  'Posto de Fiscalização': 'Posto de Fiscalização',
   'Centro de Treinamento': 'Centro de Treinamento',
-  'Núcleo de Capacitação': 'Núcleo de Capacitação',
-  'Unidade Operacional': 'UOP',
+  'Núcleo de Capacitação': 'UOP', // legado - mapeia para UOP
 };
 
 export const mapTipoUnidadeToNomeTipo = (tipoUnidade: string): string => {
