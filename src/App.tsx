@@ -20,6 +20,7 @@ import Relatorios from "./pages/Relatorios";
 import RelatorioPreview from "./pages/RelatorioPreview";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import ResetPassword from "./pages/ResetPassword";
 import Gestao from "./pages/Gestao";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const AppRoutes = () => {
     return (
       <Routes>
         <Route path="/auth" element={<Auth />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<Navigate to="/auth" replace />} />
       </Routes>
     );

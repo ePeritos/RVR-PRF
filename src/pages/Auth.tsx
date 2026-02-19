@@ -17,6 +17,7 @@ const Auth = () => {
   const [showTermsDialog, setShowTermsDialog] = useState(true);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { toast } = useToast();
@@ -134,6 +135,41 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, informe seu email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email enviado!",
+        description: "Verifique sua caixa de entrada para redefinir sua senha.",
+      });
+      setIsForgotPassword(false);
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao enviar email de recuperação.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleTermsAccept = () => {
     setTermsAccepted(true);
     setShowTermsDialog(false);
@@ -154,58 +190,109 @@ const Auth = () => {
             <CardTitle className="text-xl md:text-2xl font-bold">SIGI-PRF</CardTitle>
           </div>
           <CardDescription className="text-sm md:text-base">
-            {isSignUp ? 'Criar conta no' : 'Faça login para acessar o'} Sistema de Gestão de Imóveis da PRF
+            {isForgotPassword 
+              ? 'Informe seu email para recuperar a senha' 
+              : isSignUp 
+                ? 'Criar conta no' 
+                : 'Faça login para acessar o'} {!isForgotPassword && 'Sistema de Gestão de Imóveis da PRF'}
           </CardDescription>
         </CardHeader>
         
         <CardContent className="px-6 md:px-16">
-          <form onSubmit={handleEmailAuth} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-                disabled={loading || !termsAccepted}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Sua senha"
-                disabled={loading || !termsAccepted}
-                required
-                minLength={6}
-              />
-            </div>
+          {isForgotPassword ? (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  disabled={loading}
+                  required
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                {loading ? "Enviando..." : "Enviar Link de Recuperação"}
+              </Button>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsForgotPassword(false)}
+                  className="text-sm text-muted-foreground hover:text-foreground underline"
+                >
+                  Voltar ao login
+                </button>
+              </div>
+            </form>
+          ) : (
+            <>
+              <form onSubmit={handleEmailAuth} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                    disabled={loading || !termsAccepted}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password">Senha</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Sua senha"
+                    disabled={loading || !termsAccepted}
+                    required
+                    minLength={6}
+                  />
+                </div>
 
-            <Button
-              type="submit"
-              disabled={loading || !termsAccepted}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              {loading ? "Processando..." : (isSignUp ? "Criar Conta" : "Entrar")}
-            </Button>
-          </form>
+                {!isSignUp && (
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => setIsForgotPassword(true)}
+                      className="text-sm text-muted-foreground hover:text-foreground underline"
+                    >
+                      Esqueci minha senha
+                    </button>
+                  </div>
+                )}
 
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-muted-foreground hover:text-foreground underline"
-              disabled={loading}
-            >
-              {isSignUp ? 'Já tem conta? Fazer login' : 'Não tem conta? Criar conta'}
-            </button>
-          </div>
+                <Button
+                  type="submit"
+                  disabled={loading || !termsAccepted}
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  {loading ? "Processando..." : (isSignUp ? "Criar Conta" : "Entrar")}
+                </Button>
+              </form>
+
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-sm text-muted-foreground hover:text-foreground underline"
+                  disabled={loading}
+                >
+                  {isSignUp ? 'Já tem conta? Fazer login' : 'Não tem conta? Criar conta'}
+                </button>
+              </div>
+            </>
+          )}
 
           {!termsAccepted && (
             <p className="text-sm text-muted-foreground text-center mt-4">
