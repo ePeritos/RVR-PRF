@@ -18,33 +18,33 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for recovery token in URL hash or query params
     const hash = window.location.hash;
     const searchParams = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(hash.replace('#', ''));
-    
-    if (
-      hash.includes('type=recovery') ||
-      searchParams.get('type') === 'recovery' ||
-      hashParams.get('type') === 'recovery' ||
-      hash.includes('access_token') ||
-      searchParams.has('code')
-    ) {
+
+    // PKCE flow: Supabase sends a ?code= parameter
+    const code = searchParams.get('code');
+    if (code) {
+      // Exchange the code for a session
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) {
+          console.error('Erro ao trocar código por sessão:', error);
+          setIsRecovery(false);
+        } else {
+          setIsRecovery(true);
+        }
+      });
+      return; // Don't set up listener yet, wait for exchange
+    }
+
+    // Legacy implicit flow fallback
+    if (hash.includes('type=recovery') || hash.includes('access_token')) {
       setIsRecovery(true);
     }
 
     // Listen for PASSWORD_RECOVERY event
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
         setIsRecovery(true);
-      }
-      // Also treat SIGNED_IN with recovery context as valid
-      if (event === 'SIGNED_IN' && session) {
-        const currentHash = window.location.hash;
-        const currentSearch = window.location.search;
-        if (currentHash.includes('recovery') || currentSearch.includes('recovery') || currentSearch.includes('code')) {
-          setIsRecovery(true);
-        }
       }
     });
 
