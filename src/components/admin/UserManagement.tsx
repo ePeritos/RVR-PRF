@@ -20,7 +20,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Edit, UserCog, Shield, User } from "lucide-react";
+import { Search, Edit, UserCog, Shield, User, KeyRound } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface UserProfile {
   id: string;
@@ -59,7 +69,33 @@ export function UserManagement() {
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [editForm, setEditForm] = useState<Partial<UserProfile>>({});
   const [saving, setSaving] = useState(false);
+  const [resetUser, setResetUser] = useState<UserProfile | null>(null);
+  const [resetting, setResetting] = useState(false);
   const { toast } = useToast();
+
+  const handleResetPassword = async () => {
+    if (!resetUser?.email) return;
+    try {
+      setResetting(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(resetUser.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast({
+        title: "Email enviado",
+        description: `Link de redefinição de senha enviado para ${resetUser.email}.`,
+      });
+      setResetUser(null);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao enviar email",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setResetting(false);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -178,7 +214,7 @@ export function UserManagement() {
                 <TableHead>Matrícula</TableHead>
                 <TableHead>Unidade Gestora</TableHead>
                 <TableHead>Perfil</TableHead>
-                <TableHead className="w-[80px]">Ações</TableHead>
+                <TableHead className="w-[120px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -202,9 +238,16 @@ export function UserManagement() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(user)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(user)} title="Editar perfil">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        {user.email && (
+                          <Button variant="ghost" size="icon" onClick={() => setResetUser(user)} title="Resetar senha">
+                            <KeyRound className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -300,6 +343,23 @@ export function UserManagement() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!resetUser} onOpenChange={(open) => !open && setResetUser(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Resetar senha do usuário</AlertDialogTitle>
+            <AlertDialogDescription>
+              Um email de redefinição de senha será enviado para <strong>{resetUser?.email}</strong>. Deseja continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={resetting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResetPassword} disabled={resetting}>
+              {resetting ? "Enviando..." : "Enviar email"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
