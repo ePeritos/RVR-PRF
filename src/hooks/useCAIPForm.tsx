@@ -110,11 +110,9 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
           errors[field] = 'Upload em andamento. Aguarde a conclusão.';
           hasErrors = true;
         }
-        // Verificar se é uma URL válida de imagem
-        else if (!imageUrl.startsWith('http') && !imageUrl.startsWith('https')) {
-          errors[field] = 'URL de imagem inválida.';
-          hasErrors = true;
-        }
+        // Caminhos relativos do storage (ex: dCAIP_Images/xxx.jpg) são válidos
+        // URLs http/https são válidas
+        // Apenas rejeitar strings que claramente não são paths de imagem
       }
     });
 
