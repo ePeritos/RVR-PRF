@@ -212,8 +212,14 @@ export class PDFService {
       
       console.log('7. Canvas gerado, criando PDF...');
       
-      // Gera o nome do arquivo
-      const filename = PDFCreator.generateFilename(data.nome);
+      // Gera o nome do arquivo baseado no tipo de relatório
+      let prefix = 'RVR';
+      if (isCustomReport) {
+        prefix = 'Relatorio';
+      } else if (isCAIPReport) {
+        prefix = 'CAIP';
+      }
+      const filename = PDFCreator.generateFilename(data.nome, prefix);
       
       // Cria e salva o PDF
       await PDFCreator.createPDFFromCanvas(canvas, filename);

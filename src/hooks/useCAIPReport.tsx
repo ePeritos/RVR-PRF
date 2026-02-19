@@ -32,7 +32,7 @@ export const useCAIPReport = () => {
         
         // Para relatório customizado, usar dados como estão
         await pdfService.generateFromData({
-          nome: `Custom_${data.titulo.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}`,
+          nome: `${data.titulo.replace(/[^a-zA-Z0-9\s]/g, '_')}`,
           ...data
         });
       } else {
@@ -40,7 +40,7 @@ export const useCAIPReport = () => {
         
         // Para CAIP individual, usar formato antigo
         await pdfService.generateFromData({
-          nome: `CAIP_${(data as DadosCAIP).nome_da_unidade || 'Relatorio'}_${(data as DadosCAIP).ano_caip || '2024'}`,
+          nome: `${(data as DadosCAIP).nome_da_unidade || 'Relatorio'}_${(data as DadosCAIP).ano_caip || '2024'}`,
           ...data
         });
       }

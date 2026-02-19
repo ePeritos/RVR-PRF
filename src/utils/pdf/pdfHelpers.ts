@@ -125,6 +125,6 @@ export const addMultiPageImageToPDF = (
   console.log(`PDF gerado com ${pageNumber} página(s)`);
 };
 
-export const generateFileName = (nome: string): string => {
-  return `RVR_${nome.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+export const generateFileName = (nome: string, prefix: string = 'RVR'): string => {
+  return `${prefix}_${nome.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
 };
