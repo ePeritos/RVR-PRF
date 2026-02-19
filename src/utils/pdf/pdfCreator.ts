@@ -261,7 +261,7 @@ export class PDFCreator {
     console.log('Todas as imagens processadas');
   }
 
-  static generateFilename(name: string): string {
-    return `RVR_${name.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+  static generateFilename(name: string, prefix: string = 'RVR'): string {
+    return `${prefix}_${name.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
   }
 }
