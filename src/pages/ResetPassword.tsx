@@ -18,16 +18,33 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for recovery token in URL hash
+    // Check for recovery token in URL hash or query params
     const hash = window.location.hash;
-    if (hash && hash.includes('type=recovery')) {
+    const searchParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(hash.replace('#', ''));
+    
+    if (
+      hash.includes('type=recovery') ||
+      searchParams.get('type') === 'recovery' ||
+      hashParams.get('type') === 'recovery' ||
+      hash.includes('access_token') ||
+      searchParams.has('code')
+    ) {
       setIsRecovery(true);
     }
 
     // Listen for PASSWORD_RECOVERY event
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setIsRecovery(true);
+      }
+      // Also treat SIGNED_IN with recovery context as valid
+      if (event === 'SIGNED_IN' && session) {
+        const currentHash = window.location.hash;
+        const currentSearch = window.location.search;
+        if (currentHash.includes('recovery') || currentSearch.includes('recovery') || currentSearch.includes('code')) {
+          setIsRecovery(true);
+        }
       }
     });
 
