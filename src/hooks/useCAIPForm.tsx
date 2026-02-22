@@ -29,7 +29,6 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
 
   useEffect(() => {
     if (!editingItem && profile && open) {
-      console.log('🆕 Preenchendo campos automáticos para novo registro');
       setValue('cadastrador', profile.nome_completo);
       setValue('alterador', profile.nome_completo);
       setValue('ultima_alteracao', new Date().toISOString().split('T')[0]);
@@ -40,38 +39,17 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
   }, [profile, editingItem, setValue, open]);
 
   useEffect(() => {
-    console.log('🔄 === useCAIPForm: Effect de carregamento ===');
-    console.log('editingItem:', editingItem);
-    console.log('open:', open);
-    
     if (!open) {
-      console.log('❌ Dialog não está aberto, resetando formulário');
       reset();
       return;
     }
 
     if (editingItem) {
-      console.log('✅ Carregando dados para edição:', editingItem.id);
-      console.log('📋 Dados do item:', {
-        id: editingItem.id,
-        nome_da_unidade: editingItem.nome_da_unidade,
-        ano_caip: editingItem.ano_caip,
-        endereco: editingItem.endereco,
-        unidade_gestora: editingItem.unidade_gestora,
-        tipo_de_unidade: editingItem.tipo_de_unidade
-      });
-      
-      // Carregar todos os campos do editingItem
       Object.entries(editingItem).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
-          console.log(`📝 Definindo campo ${key}:`, value);
           setValue(key as keyof DadosCAIP, value);
         }
       });
-      
-      console.log('✅ Carregamento de dados concluído');
-    } else {
-      console.log('🆕 Novo registro - campos serão preenchidos pelo useEffect de campos automáticos');
     }
   }, [editingItem, open, setValue, reset]);
 
@@ -88,7 +66,6 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
     }
   }, [watchedValues]);
 
-  // Função para validar imagens antes do submit
   const validateImages = (): boolean => {
     const imageFields = [
       'imagem_geral', 'imagem_fachada', 'imagem_lateral_1', 'imagem_lateral_2', 
@@ -103,16 +80,11 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
     imageFields.forEach(field => {
       const imageUrl = watchedValues[field as keyof DadosCAIP];
       
-      // Se há uma URL de imagem, verificar se é válida
       if (imageUrl && typeof imageUrl === 'string') {
-        // Verificar se não é uma URL temporária (blob) que indica upload em andamento
         if (imageUrl.startsWith('blob:')) {
           errors[field] = 'Upload em andamento. Aguarde a conclusão.';
           hasErrors = true;
         }
-        // Caminhos relativos do storage (ex: dCAIP_Images/xxx.jpg) são válidos
-        // URLs http/https são válidas
-        // Apenas rejeitar strings que claramente não são paths de imagem
       }
     });
 
@@ -135,14 +107,9 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
   };
 
   const onSubmit = async (data: any) => {
-    console.log('🚀 === INICIANDO SUBMIT ===');
-    console.log('Dados do formulário:', data);
-    console.log('É edição?', !!editingItem);
-    
     setIsLoading(true);
     
     try {
-      // Validar imagens primeiro
       if (!validateImages()) {
         setIsLoading(false);
         return;
@@ -168,10 +135,6 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
         return;
       }
 
-      // Validação simplificada para ambientes (detalhada no CAIPFormDialog)
-      console.log('useCAIPForm: Validação básica dos campos obrigatórios');
-
-      // Validate Ano CAIP
       if (data.ano_caip) {
         const validation = validateAnoCAIP(data.ano_caip);
         if (validation !== true) {
@@ -186,12 +149,8 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
       }
 
       const processedData = await processFormData(data);
-      console.log('Dados processados para salvamento:', processedData);
 
       if (editingItem) {
-        console.log('📝 Atualizando registro existente:', editingItem.id);
-        
-        // Atualizar registro existente - processFormData already removes id/created_at/updated_at
         const { error } = await supabase
           .from('dados_caip')
           .update({
@@ -202,21 +161,13 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
           })
           .eq('id', editingItem.id);
 
-        if (error) {
-          console.error('❌ Erro ao atualizar:', error);
-          throw error;
-        }
+        if (error) throw error;
 
-        console.log('✅ Registro atualizado com sucesso');
-        
         toast({
           title: "Sucesso",
           description: "Registro atualizado com sucesso.",
         });
       } else {
-        console.log('🆕 Criando novo registro');
-        
-        // Criar novo registro
         const { data: newRecord, error } = await supabase
           .from('dados_caip')
           .insert([{
@@ -227,26 +178,18 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
           .select()
           .single();
 
-        if (error) {
-          console.error('❌ Erro ao criar:', error);
-          throw error;
-        }
-
-        console.log('✅ Novo registro criado:', newRecord);
+        if (error) throw error;
 
         if (newRecord && avaliacoesLocais && Object.keys(avaliacoesLocais).length > 0) {
-          console.log('Salvando avaliações para novo registro...');
           await salvarAvaliacoesAmbientes(newRecord.id, processedData.tipo_de_unidade, avaliacoesLocais);
           
           await new Promise(resolve => setTimeout(resolve, 500));
           
-          const { data: notasAtualizadas } = await supabase
+          await supabase
             .from('dados_caip')
             .select('nota_para_manutencao, nota_global')
             .eq('id', newRecord.id)
             .single();
-            
-          console.log('Notas após salvamento:', notasAtualizadas);
         }
 
         toast({
@@ -256,13 +199,12 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
       }
 
       reset();
-      setImageErrors({}); // Limpar erros de imagem
+      setImageErrors({});
       onOpenChange(false);
       onSuccess();
     } catch (error) {
-      console.error('❌ Erro ao salvar:', error);
+      console.error('Erro ao salvar registro CAIP');
       
-      // Verificar se é erro relacionado a imagem
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       if (errorMessage.toLowerCase().includes('image') || errorMessage.toLowerCase().includes('storage')) {
         toast({
@@ -284,17 +226,11 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
 
   const handleNew = () => {
     reset();
-    setImageErrors({}); // Limpar erros de imagem
+    setImageErrors({});
   };
 
   const salvarAvaliacoesAmbientes = async (imovelId: string, tipoUnidade: string, avaliacoes: {[key: string]: number}) => {
-    console.log('=== SALVANDO AVALIAÇÕES DE AMBIENTES ===');
-    console.log('Imóvel ID:', imovelId);
-    console.log('Tipo de Unidade:', tipoUnidade);
-    console.log('Avaliações:', avaliacoes);
-
     try {
-      // Mapear campos do formulário para nomes de ambientes
       const camposAmbientes = [
         { campo: 'almoxarifado', nomeAmbiente: 'Almoxarifado' },
         { campo: 'alojamento_feminino', nomeAmbiente: 'Alojamento' },
@@ -345,7 +281,6 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
         { campo: 'vestiario_para_policiais', nomeAmbiente: 'Vestiário para policiais' }
       ];
 
-      // Buscar ambientes do caderno baseado no tipo de unidade
       const { data: cadernoAmbientes, error: errorCaderno } = await supabase
         .from('caderno_ambientes')
         .select(`
@@ -356,17 +291,14 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
         .eq('tipos_imoveis.nome_tipo', mapTipoUnidadeToNomeTipo(tipoUnidade));
 
       if (errorCaderno) {
-        console.error('Erro ao buscar caderno de ambientes:', errorCaderno);
+        console.error('Erro ao buscar caderno de ambientes');
         return;
       }
 
-      console.log('Caderno de ambientes encontrado:', cadernoAmbientes);
-
-      // Preparar dados para inserção
       const avaliacoesParaInserir = [];
       
       for (const [campo, score] of Object.entries(avaliacoes)) {
-        if (score > 0) { // Só salvar avaliações válidas
+        if (score > 0) {
           const campoCorrespondente = camposAmbientes.find(c => c.campo === campo);
           if (campoCorrespondente) {
             const ambiente = cadernoAmbientes?.find(a => a.nome_ambiente === campoCorrespondente.nomeAmbiente);
@@ -377,32 +309,23 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
                 score_conservacao: score,
                 observacoes: null
               });
-              console.log(`✅ Preparada avaliação para ${campo}: ${score}`);
-            } else {
-              console.log(`❌ Ambiente não encontrado para ${campo} (${campoCorrespondente.nomeAmbiente})`);
             }
           }
         }
       }
 
-      console.log('Avaliações para inserir:', avaliacoesParaInserir);
-
-      // Inserir avaliações em lote
       if (avaliacoesParaInserir.length > 0) {
         const { error: errorInsert } = await supabase
           .from('manutencao_ambientes')
           .insert(avaliacoesParaInserir);
 
         if (errorInsert) {
-          console.error('Erro ao inserir avaliações:', errorInsert);
           throw errorInsert;
         }
-
-        console.log(`✅ ${avaliacoesParaInserir.length} avaliações salvas com sucesso`);
       }
 
     } catch (error) {
-      console.error('Erro ao salvar avaliações de ambientes:', error);
+      console.error('Erro ao salvar avaliações de ambientes');
       throw error;
     }
   };
@@ -419,6 +342,6 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
     percentualPreenchimento,
     onSubmit,
     handleNew,
-    imageErrors // Exportar erros de imagem para componente pai se necessário
+    imageErrors
   };
 };

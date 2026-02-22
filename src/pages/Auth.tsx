@@ -37,7 +37,6 @@ const Auth = () => {
     const checkAuthStatus = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        console.log('👤 Usuário já logado, redirecionando para dashboard');
         navigate('/', { replace: true });
       }
     };
@@ -68,7 +67,7 @@ const Auth = () => {
 
     try {
       setLoading(true);
-      console.log(`🚀 Tentando ${isSignUp ? 'cadastro' : 'login'} com email...`);
+      
 
       let result;
       if (isSignUp) {
@@ -88,10 +87,7 @@ const Auth = () => {
 
       const { data, error } = result;
 
-      if (error) {
-        console.error('❌ Erro na autenticação:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       if (isSignUp && !data.session) {
         toast({
@@ -99,7 +95,6 @@ const Auth = () => {
           description: "Um link de confirmação foi enviado para seu email.",
         });
       } else if (data.session) {
-        console.log('✅ Autenticação bem-sucedida');
         toast({
           title: "Login realizado com sucesso!",
           description: "Redirecionando para o dashboard...",
@@ -111,7 +106,7 @@ const Auth = () => {
       }
 
     } catch (error: any) {
-      console.error('❌ Erro na autenticação:', error);
+      
       
       let errorMessage = "Erro desconhecido. Tente novamente.";
       
