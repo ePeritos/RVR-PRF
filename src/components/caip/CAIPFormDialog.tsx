@@ -33,10 +33,6 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
   const [avaliacoesLocais, setAvaliacoesLocais] = useState<{[key: string]: number}>({});
   const { toast } = useToast();
   
-  // Debug log to check if editingItem is being received correctly
-  console.log('=== CAIPFormDialog ===');
-  console.log('editingItem recebido:', editingItem);
-  console.log('dialog open:', open);
   
   const {
     register,
@@ -56,11 +52,6 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
 
   // Custom onSubmit with validation
   const onSubmit = async (data: any) => {
-    console.log('=== DEBUGGING FORM SUBMISSION ===');
-    console.log('Dados do formulário:', data);
-    console.log('Avaliações locais state:', avaliacoesLocais);
-    console.log('É novo registro?', !editingItem);
-    
     // Validate environment evaluations for new records only if environments are selected
     if (!editingItem) {
       const environmentFields = [
@@ -83,23 +74,23 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
       ];
 
       const ambientesSelecionados = environmentFields.filter(campo => data[campo] === 'Sim');
-      console.log('Ambientes selecionados:', ambientesSelecionados);
+      
 
       // Só validar se há ambientes selecionados
       if (ambientesSelecionados.length > 0) {
-        console.log('Verificando avaliações para ambientes selecionados...');
+        
         
         // Verificar cada ambiente selecionado
         const ambientesSemAvaliacao = [];
         ambientesSelecionados.forEach(ambiente => {
           const nota = avaliacoesLocais[ambiente];
-          console.log(`Ambiente ${ambiente}: nota = ${nota}`);
+          
           if (!nota || nota === 0) {
             ambientesSemAvaliacao.push(ambiente);
           }
         });
 
-        console.log('Ambientes sem avaliação:', ambientesSemAvaliacao);
+        
 
         if (ambientesSemAvaliacao.length > 0) {
           toast({
@@ -110,14 +101,11 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
           return;
         }
         
-        console.log('✅ Todas as avaliações estão completas');
       } else {
-        console.log('Nenhum ambiente selecionado, prosseguindo...');
+        // Nenhum ambiente selecionado
       }
     }
 
-    // Proceed with original submit
-    console.log('Prosseguindo para o salvamento original...');
     await originalOnSubmit(data);
   };
 

@@ -20,10 +20,14 @@ const IMAGE_TYPE_MAP: Record<string, string> = {
   "Imagem Interna Plantão UOP": "imagem_interna_plantao_uop",
 };
 
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILES_PER_REQUEST = 50;
+
 // Parse filename like "0cec8139.Imagem Fachada.135429.jpg"
 function parseImageFilename(filename: string): { idCaip: string; imageType: string; dbColumn: string } | null {
-  // Pattern: {id_caip}.{Imagem Tipo}.{timestamp}.{ext}
-  const match = filename.match(/^([^.]+)\.(Imagem [^.]+)\.(\d+)\.\w+$/);
+  const sanitizedFilename = filename.replace(/[<>:"\/\\|?*]/g, '');
+  const match = sanitizedFilename.match(/^([^.]+)\.(Imagem [^.]+)\.(\d+)\.\w+$/);
   if (!match) return null;
 
   const idCaip = match[1];
@@ -41,7 +45,7 @@ Deno.serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Não autorizado" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -74,6 +78,13 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (files.length > MAX_FILES_PER_REQUEST) {
+      return new Response(JSON.stringify({ error: `Máximo de ${MAX_FILES_PER_REQUEST} arquivos por requisição` }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const results = {
       uploaded: [] as string[],
       skipped: [] as string[],
@@ -83,6 +94,24 @@ Deno.serve(async (req) => {
     };
 
     for (const file of files) {
+      // Validate file size
+      if (file.size > MAX_FILE_SIZE) {
+        results.errors.push({ file: file.name, error: `Arquivo excede o tamanho máximo de ${MAX_FILE_SIZE / (1024 * 1024)}MB` });
+        continue;
+      }
+
+      // Validate file type
+      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+        results.errors.push({ file: file.name, error: `Tipo de arquivo não permitido: ${file.type}` });
+        continue;
+      }
+
+      // Validate filename length
+      if (file.name.length > 200) {
+        results.errors.push({ file: file.name.substring(0, 50) + '...', error: "Nome do arquivo muito longo" });
+        continue;
+      }
+
       const filePath = `dCAIP_Images/${file.name}`;
 
       try {
@@ -99,7 +128,6 @@ Deno.serve(async (req) => {
         if (alreadyExists) {
           results.skipped.push(file.name);
         } else {
-          // Upload the file
           const arrayBuffer = await file.arrayBuffer();
           const { error: uploadError } = await supabase.storage
             .from("caip-images")
@@ -113,36 +141,34 @@ Deno.serve(async (req) => {
               results.skipped.push(file.name);
             } else {
               results.errors.push({ file: file.name, error: uploadError.message });
-              continue; // Skip linking if upload failed
+              continue;
             }
           } else {
             results.uploaded.push(file.name);
           }
         }
 
-        // After upload (or skip), link the image to the database record
+        // Link image to database record
         const parsed = parseImageFilename(file.name);
         if (parsed) {
           const { idCaip, dbColumn } = parsed;
           const storagePath = `dCAIP_Images/${file.name}`;
 
-          // Find the record by id_caip
           const { data: records, error: findError } = await supabase
             .from("dados_caip")
             .select("id")
             .eq("id_caip", idCaip);
 
           if (findError) {
-            results.linkErrors.push({ file: file.name, error: `Erro ao buscar registro: ${findError.message}` });
+            results.linkErrors.push({ file: file.name, error: `Erro ao buscar registro` });
             continue;
           }
 
           if (!records || records.length === 0) {
-            results.linkErrors.push({ file: file.name, error: `Registro com id_caip '${idCaip}' não encontrado` });
+            results.linkErrors.push({ file: file.name, error: `Registro não encontrado` });
             continue;
           }
 
-          // Update all matching records (could be multiple years)
           for (const record of records) {
             const { error: updateError } = await supabase
               .from("dados_caip")
@@ -150,7 +176,7 @@ Deno.serve(async (req) => {
               .eq("id", record.id);
 
             if (updateError) {
-              results.linkErrors.push({ file: file.name, error: `Erro ao vincular: ${updateError.message}` });
+              results.linkErrors.push({ file: file.name, error: `Erro ao vincular` });
             } else {
               results.linked.push(file.name);
             }
@@ -159,7 +185,7 @@ Deno.serve(async (req) => {
           results.linkErrors.push({ file: file.name, error: "Nome do arquivo não segue o padrão esperado" });
         }
       } catch (err) {
-        results.errors.push({ file: file.name, error: String(err) });
+        results.errors.push({ file: file.name, error: "Erro interno no processamento" });
       }
     }
 
@@ -167,7 +193,7 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: String(err) }), {
+    return new Response(JSON.stringify({ error: "Erro interno do servidor" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

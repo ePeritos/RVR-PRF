@@ -18,7 +18,6 @@ interface BasicInformationSectionProps {
 }
 
 export const BasicInformationSection = ({ register, setValue, watch, errors }: BasicInformationSectionProps) => {
-  console.log('🏢 === BASIC INFORMATION SECTION ===');
   const watchedValues = {
     unidade_gestora: watch('unidade_gestora'),
     tipo_de_unidade: watch('tipo_de_unidade'),
@@ -29,8 +28,6 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
     endereco: watch('endereco'),
     observacoes: watch('observacoes')
   };
-  
-  console.log('Valores atuais do formulário:', watchedValues);
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 10 }, (_, i) => currentYear - i).filter(y => y % 2 !== 0);
@@ -46,7 +43,7 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
           <Select 
             value={watchedValues.unidade_gestora || ''} 
             onValueChange={(value) => {
-              console.log('🔄 Selecionando unidade gestora:', value);
+              
               setValue('unidade_gestora', value);
             }}
           >
@@ -73,7 +70,7 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
           <Select 
             value={watchedValues.tipo_de_unidade || ''} 
             onValueChange={(value) => {
-              console.log('🔄 Selecionando tipo de unidade:', value);
+              
               setValue('tipo_de_unidade', value);
             }}
           >
@@ -102,7 +99,7 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
             placeholder="Nome da unidade"
             value={watchedValues.nome_da_unidade || ''}
             onChange={(e) => {
-              console.log('🔄 Alterando nome da unidade:', e.target.value);
+              
               setValue('nome_da_unidade', e.target.value);
             }}
           />
@@ -118,7 +115,7 @@ export const BasicInformationSection = ({ register, setValue, watch, errors }: B
           <Select 
             value={watchedValues.ano_caip || ''} 
             onValueChange={(value) => {
-              console.log('🔄 Selecionando ano CAIP:', value);
+              
               setValue('ano_caip', value);
             }}
           >
