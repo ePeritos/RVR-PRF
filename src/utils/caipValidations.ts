@@ -51,10 +51,11 @@ export const processFormData = async (data: any) => {
     'imagem_interna_plantao_uop'
   ];
 
-  // Process image fields - now they should contain URLs or null
+  // Process image fields - preserve URLs and relative paths, only null empty values
   for (const field of imageFields) {
     const value = data[field];
-    if (value && typeof value === 'string' && value.trim() !== '' && value.startsWith('http')) {
+    if (value && typeof value === 'string' && value.trim() !== '') {
+      // Preserve both absolute URLs (http) and relative paths (dCAIP_Images/...)
       processedData[field] = value;
     } else {
       processedData[field] = null;
