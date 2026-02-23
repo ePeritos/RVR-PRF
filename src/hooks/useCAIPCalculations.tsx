@@ -39,7 +39,7 @@ export const useCAIPCalculations = ({ watchedValues, setValue, setPercentualPree
       // Definir peso total possível baseado no tipo de unidade
       if (tipoUnidade === 'UOP') {
         pesoTotalPossivel = 192;
-      } else if (tipoUnidade === 'Delegacia') {
+      } else if (tipoUnidade === 'Delegacia' || tipoUnidade === 'DEL') {
         pesoTotalPossivel = 154;
       } else {
         setValue('nota_para_adequacao', '0');
@@ -70,7 +70,7 @@ export const useCAIPCalculations = ({ watchedValues, setValue, setPercentualPree
         pesoAlcancado += 5; // Meia pontuação
       }
 
-      const ambientes = tipoUnidade === 'UOP' ? AMBIENTES_UOP : AMBIENTES_DELEGACIA;
+      const ambientes = tipoUnidade === 'UOP' ? AMBIENTES_UOP : (tipoUnidade === 'Delegacia' || tipoUnidade === 'DEL' ? AMBIENTES_DELEGACIA : AMBIENTES_DELEGACIA);
 
       Object.keys(ambientes).forEach(ambiente => {
         if (!CAMPOS_JA_CALCULADOS.includes(ambiente) && watchedValues[ambiente as keyof DadosCAIP] === 'Sim') {
@@ -97,12 +97,12 @@ export const useCAIPCalculations = ({ watchedValues, setValue, setPercentualPree
       console.log('Avaliações de manutenção:', avaliacoesManutencao);
 
       const tipoUnidade = watchedValues.tipo_de_unidade;
-      const ambientes = tipoUnidade === 'UOP' ? AMBIENTES_UOP : AMBIENTES_DELEGACIA;
+      const ambientes = (tipoUnidade === 'UOP') ? AMBIENTES_UOP : AMBIENTES_DELEGACIA;
       
       let potencialMaximo = 0;
       let scoreEfetivo = 0;
 
-      // Iterar sobre todos os ambientes e calcular apenas os que estão selecionados E avaliados
+      // Iterar sobre todos os ambientes selecionados - incluir no potencial mesmo sem avaliação
       Object.keys(ambientes).forEach(ambiente => {
         const peso = ambientes[ambiente as keyof typeof ambientes];
         const isSelected = watchedValues[ambiente as keyof DadosCAIP] === 'Sim';
@@ -120,11 +120,9 @@ export const useCAIPCalculations = ({ watchedValues, setValue, setPercentualPree
             const avaliacaoMisto = avaliacoesManutencao['alojamento_misto'] || 0;
             const maiorAvaliacao = Math.max(avaliacaoMasc, avaliacaoFem, avaliacaoMisto);
             
-            if (maiorAvaliacao > 0) {
-              potencialMaximo += peso * 5; // Máximo é peso * 5 estrelas
-              scoreEfetivo += peso * maiorAvaliacao;
-              console.log(`✅ Alojamento: peso=${peso}, avaliação=${maiorAvaliacao}`);
-            }
+            potencialMaximo += peso * 5;
+            scoreEfetivo += peso * maiorAvaliacao;
+            console.log(`✅ Alojamento: peso=${peso}, avaliação=${maiorAvaliacao}`);
           }
         }
         // Tratamento especial para banheiros
@@ -139,16 +137,14 @@ export const useCAIPCalculations = ({ watchedValues, setValue, setPercentualPree
             const avaliacaoMisto = avaliacoesManutencao['banheiro_misto_para_servidores'] || 0;
             const maiorAvaliacao = Math.max(avaliacaoMasc, avaliacaoFem, avaliacaoMisto);
             
-            if (maiorAvaliacao > 0) {
-              potencialMaximo += peso * 5;
-              scoreEfetivo += peso * maiorAvaliacao;
-              console.log(`✅ Banheiro: peso=${peso}, avaliação=${maiorAvaliacao}`);
-            }
+            potencialMaximo += peso * 5;
+            scoreEfetivo += peso * maiorAvaliacao;
+            console.log(`✅ Banheiro: peso=${peso}, avaliação=${maiorAvaliacao}`);
           }
         }
-        // Tratamento normal para outros ambientes
-        else if (isSelected && avaliacao > 0 && peso > 0) {
-          potencialMaximo += peso * 5; // Máximo é peso * 5 estrelas
+        // Tratamento normal para outros ambientes - incluir no potencial se selecionado
+        else if (isSelected && peso > 0) {
+          potencialMaximo += peso * 5;
           scoreEfetivo += peso * avaliacao;
           console.log(`✅ ${ambiente}: peso=${peso}, avaliação=${avaliacao}`);
         }
