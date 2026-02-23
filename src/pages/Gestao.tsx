@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserManagement } from "@/components/admin/UserManagement";
+import { PermissionsManagement } from "@/components/admin/PermissionsManagement";
 import { Settings, Users, ShieldCheck } from "lucide-react";
 
 const Gestao = () => {
@@ -40,7 +41,7 @@ const Gestao = () => {
             <Users className="h-4 w-4" />
             Usuários
           </TabsTrigger>
-          <TabsTrigger value="permissoes" className="flex items-center gap-2" disabled>
+          <TabsTrigger value="permissoes" className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4" />
             Permissões
           </TabsTrigger>
@@ -59,6 +60,23 @@ const Gestao = () => {
             </CardHeader>
             <CardContent>
               <UserManagement />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="permissoes">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5" />
+                Perfis de Permissão
+              </CardTitle>
+              <CardDescription>
+                Crie e gerencie perfis de permissão com controle granular por módulo, ação e unidade gestora.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PermissionsManagement />
             </CardContent>
           </Card>
         </TabsContent>

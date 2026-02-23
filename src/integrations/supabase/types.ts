@@ -603,6 +603,68 @@ export type Database = {
           },
         ]
       }
+      perfil_permissao_acoes: {
+        Row: {
+          acao: string
+          created_at: string
+          id: string
+          modulo: string
+          perfil_permissao_id: string
+          permitido: boolean
+        }
+        Insert: {
+          acao: string
+          created_at?: string
+          id?: string
+          modulo: string
+          perfil_permissao_id: string
+          permitido?: boolean
+        }
+        Update: {
+          acao?: string
+          created_at?: string
+          id?: string
+          modulo?: string
+          perfil_permissao_id?: string
+          permitido?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perfil_permissao_acoes_perfil_permissao_id_fkey"
+            columns: ["perfil_permissao_id"]
+            isOneToOne: false
+            referencedRelation: "perfis_permissao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      perfis_permissao: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          unidades_gestoras: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          unidades_gestoras?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          unidades_gestoras?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           cargo: string | null
@@ -612,6 +674,7 @@ export type Database = {
           id: string
           matricula: string | null
           nome_completo: string
+          perfil_permissao_id: string | null
           responsavel_tecnico_id: string | null
           role: Database["public"]["Enums"]["app_role"]
           telefone: string | null
@@ -627,6 +690,7 @@ export type Database = {
           id: string
           matricula?: string | null
           nome_completo: string
+          perfil_permissao_id?: string | null
           responsavel_tecnico_id?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           telefone?: string | null
@@ -642,6 +706,7 @@ export type Database = {
           id?: string
           matricula?: string | null
           nome_completo?: string
+          perfil_permissao_id?: string | null
           responsavel_tecnico_id?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           telefone?: string | null
@@ -650,6 +715,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_perfil_permissao_id_fkey"
+            columns: ["perfil_permissao_id"]
+            isOneToOne: false
+            referencedRelation: "perfis_permissao"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_responsavel_tecnico_id_fkey"
             columns: ["responsavel_tecnico_id"]
