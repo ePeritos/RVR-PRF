@@ -40,6 +40,8 @@ export const CHART_FIELDS: ChartField[] = [
   { key: 'vida_util_estimada_anos', label: 'Vida Útil Estimada (anos)', type: 'number', category: 'Numérico' },
   { key: 'rvr', label: 'RVR (R$)', type: 'number', category: 'Numérico' },
   { key: 'nota_global', label: 'Nota Global', type: 'number', category: 'Numérico' },
+  { key: 'nota_para_adequacao', label: 'Nota para Adequação', type: 'string', category: 'Numérico' },
+  { key: 'nota_para_manutencao', label: 'Nota para Manutenção', type: 'string', category: 'Numérico' },
 
   // Campos de ambientes (Sim/Não)
   { key: 'almoxarifado', label: 'Almoxarifado', type: 'boolean', category: 'Ambientes' },
