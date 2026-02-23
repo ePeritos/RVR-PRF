@@ -46,6 +46,7 @@ const Relatorios = () => {
   const [reportDescription, setReportDescription] = useState(savedData?.reportDescription || '');
   const [includeImages, setIncludeImages] = useState(savedData?.includeImages ?? true);
   const [reportFormat, setReportFormat] = useState(savedData?.reportFormat || 'pdf');
+  const [includeAggregation, setIncludeAggregation] = useState(savedData?.includeAggregation ?? false);
 
   // Campos organizados por categoria
   const fieldsByCategory: Record<string, { key: string; label: string }[]> = {
@@ -207,11 +208,12 @@ const Relatorios = () => {
       reportTitle,
       reportDescription,
       includeImages,
+      includeAggregation,
       reportFormat,
       selectedFields
     };
     localStorage.setItem('relatorio_customizacao', JSON.stringify(dataToSave));
-  }, [selectedItems, reportTitle, reportDescription, includeImages, reportFormat, selectedFields]);
+  }, [selectedItems, reportTitle, reportDescription, includeImages, includeAggregation, reportFormat, selectedFields]);
 
   useEffect(() => {
     setFilteredData(supabaseData);
@@ -314,6 +316,7 @@ const Relatorios = () => {
         descricao: reportDescription,
         campos_incluidos: selectedFields,
         incluir_imagens: includeImages,
+        incluir_agregacao: includeAggregation,
         formato: reportFormat,
         dados: selectedData,
         total_imoveis: selectedData.length,
@@ -405,6 +408,7 @@ const Relatorios = () => {
     setReportDescription('');
     setIncludeImages(true);
     setReportFormat('pdf');
+    setIncludeAggregation(false);
     setSelectedFields(['nome_da_unidade', 'tipo_de_unidade', 'endereco', 'area_construida_m2', 'estado_de_conservacao']);
     localStorage.removeItem('relatorio_customizacao');
     toast({
@@ -489,6 +493,17 @@ const Relatorios = () => {
                 />
                 <Label htmlFor="includeImages" className="text-sm">
                   Incluir imagens dos imóveis
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="includeAggregation"
+                  checked={includeAggregation}
+                  onCheckedChange={(checked) => setIncludeAggregation(checked === true)}
+                />
+                <Label htmlFor="includeAggregation" className="text-sm">
+                  Incluir resumo agregado (campos Sim/Não)
                 </Label>
               </div>
             </CardContent>

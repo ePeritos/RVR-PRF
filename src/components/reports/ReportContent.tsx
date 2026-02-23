@@ -6,6 +6,7 @@ interface ReportContentData {
   descricao?: string;
   campos_incluidos: string[];
   incluir_imagens: boolean;
+  incluir_agregacao?: boolean;
   dados: any[];
   total_imoveis: number;
   data_geracao: string;
@@ -360,6 +361,106 @@ export const ReportContent: React.FC<ReportContentProps> = ({
           <p className="text-xs mt-2">Verifique se os imóveis foram selecionados corretamente</p>
         </div>
       )}
+
+      {/* Seção de Resumo Agregado */}
+      {data.incluir_agregacao && data.dados && data.dados.length > 0 && (() => {
+        const booleanFields = [
+          'almoxarifado', 'alojamento_feminino', 'alojamento_masculino', 'alojamento_misto',
+          'area_de_servico', 'area_de_uso_compartilhado_com_outros_orgaos', 'arquivo', 'auditorio',
+          'banheiro_para_zeladoria', 'banheiro_feminino_para_servidoras', 'banheiro_masculino_para_servidores',
+          'banheiro_misto_para_servidores', 'box_com_chuveiro_externo', 'box_para_lavagem_de_veiculos',
+          'canil', 'casa_de_maquinas', 'central_de_gas', 'cobertura_para_aglomeracao_de_usuarios',
+          'cobertura_para_fiscalizacao_de_veiculos', 'copa_e_cozinha', 'deposito_de_lixo',
+          'deposito_de_materiais_de_descarte_e_baixa', 'deposito_de_material_de_limpeza',
+          'deposito_de_material_operacional', 'estacionamento_para_usuarios', 'garagem_para_servidores',
+          'garagem_para_viaturas', 'lavabo_para_servidores_sem_box_para_chuveiro',
+          'local_para_custodia_temporaria_de_detidos', 'local_para_guarda_provisoria_de_animais',
+          'patio_de_retencao_de_veiculos', 'plataforma_para_fiscalizacao_da_parte_superior_dos_veiculos',
+          'ponto_de_pouso_para_aeronaves', 'rampa_de_fiscalizacao_de_veiculos', 'recepcao',
+          'sala_administrativa_escritorio', 'sala_de_assepsia', 'sala_de_aula', 'sala_de_reuniao',
+          'sala_de_revista_pessoal', 'sala_operacional_observatorio', 'sala_tecnica', 'sanitario_publico',
+          'telefone_publico', 'torre_de_telecomunicacoes', 'vestiario_para_nao_policiais',
+          'vestiario_para_policiais', 'fornecimento_de_agua', 'fornecimento_de_energia_eletrica',
+          'esgotamento_sanitario', 'conexao_de_internet', 'possui_wireless_wifi', 'identidade_visual',
+          'blindagem', 'abastecimento_de_agua', 'energia_eletrica_de_emergencia', 'iluminacao_externa',
+          'protecao_contra_incendios', 'protecao_contra_intrusao', 'radiocomunicacao',
+          'cabeamento_estruturado', 'claviculario', 'sala_cofre', 'concertina', 'muro_ou_alambrado',
+          'acessibilidade', 'sustentabilidade', 'aproveitamento_da_agua_da_chuva', 'energia_solar',
+          'climatizacao_de_ambientes', 'coleta_de_lixo', 'ha_contrato_de_manutencao_predial',
+          'ha_plano_de_manutencao_do_imovel', 'o_trecho_e_concessionado', 'adere_ao_pgprf_teletrabalho'
+        ];
+
+        const selectedBooleanFields = (data.campos_incluidos || []).filter((f: string) => booleanFields.includes(f));
+        if (selectedBooleanFields.length === 0) return null;
+
+        const total = data.dados.length;
+
+        return (
+          <div
+            className="mt-8 border border-gray-300 rounded p-4"
+            style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}
+          >
+            <h2 className="text-base font-bold mb-4 pb-2 border-b border-gray-300">
+              Resumo Agregado — Campos Sim/Não
+            </h2>
+            <p className="text-xs text-gray-500 mb-3">
+              Base: {total} imóveis selecionados
+            </p>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f3f4f6' }}>
+                  <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '2px solid #d1d5db' }}>Campo</th>
+                  <th style={{ textAlign: 'center', padding: '6px 8px', borderBottom: '2px solid #d1d5db' }}>Sim</th>
+                  <th style={{ textAlign: 'center', padding: '6px 8px', borderBottom: '2px solid #d1d5db' }}>Não</th>
+                  <th style={{ textAlign: 'center', padding: '6px 8px', borderBottom: '2px solid #d1d5db' }}>N/I</th>
+                  <th style={{ textAlign: 'center', padding: '6px 8px', borderBottom: '2px solid #d1d5db' }}>% Sim</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedBooleanFields.map((field: string, idx: number) => {
+                  let simCount = 0;
+                  let naoCount = 0;
+                  let niCount = 0;
+
+                  data.dados.forEach((item: any) => {
+                    const val = String(item[field] || '').toLowerCase().trim();
+                    if (val === 'sim' || val === 'on' || val === 'true' || val === '1') {
+                      simCount++;
+                    } else if (val === 'não' || val === 'nao' || val === 'off' || val === 'false' || val === '0') {
+                      naoCount++;
+                    } else {
+                      niCount++;
+                    }
+                  });
+
+                  const pctSim = total > 0 ? ((simCount / total) * 100).toFixed(1) : '0.0';
+                  const bgColor = idx % 2 === 0 ? '#ffffff' : '#f9fafb';
+
+                  return (
+                    <tr key={field} style={{ backgroundColor: bgColor }}>
+                      <td style={{ padding: '5px 8px', borderBottom: '1px solid #e5e7eb' }}>
+                        {fieldLabels[field] || field}
+                      </td>
+                      <td style={{ textAlign: 'center', padding: '5px 8px', borderBottom: '1px solid #e5e7eb', fontWeight: 600, color: '#16a34a' }}>
+                        {simCount}
+                      </td>
+                      <td style={{ textAlign: 'center', padding: '5px 8px', borderBottom: '1px solid #e5e7eb', fontWeight: 600, color: '#dc2626' }}>
+                        {naoCount}
+                      </td>
+                      <td style={{ textAlign: 'center', padding: '5px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b7280' }}>
+                        {niCount}
+                      </td>
+                      <td style={{ textAlign: 'center', padding: '5px 8px', borderBottom: '1px solid #e5e7eb', fontWeight: 700 }}>
+                        {simCount} ({pctSim}%)
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        );
+      })()}
 
       {/* Rodapé - Sempre na última página */}
       <div 
