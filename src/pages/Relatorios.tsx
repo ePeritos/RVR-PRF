@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { MultiSelect } from '@/components/ui/multi-select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileText, Download, Search, Filter, Image, Building, MapPin, Eye } from 'lucide-react';
 import { DataFilter } from '@/components/DataFilter';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
@@ -47,72 +47,154 @@ const Relatorios = () => {
   const [includeImages, setIncludeImages] = useState(savedData?.includeImages ?? true);
   const [reportFormat, setReportFormat] = useState(savedData?.reportFormat || 'pdf');
 
-  // Todos os campos disponíveis do CAIP organizados por categoria
-  const availableFields = [
-    // Básico
-    'nome_da_unidade', 'tipo_de_unidade', 'unidade_gestora', 'endereco', 'ano_caip',
-    'processo_sei', 'servo2_pdi', 'coordenadas', 'zona', 'rip', 'matricula_do_imovel',
-    
-    // Dimensões
-    'area_construida_m2', 'area_do_terreno_m2', 'area_do_patio_para_retencao_de_veiculos_m2',
-    'area_da_cobertura_de_pista_m2', 'area_da_cobertura_para_fiscalizacao_de_veiculos_m2',
-    
-    // Avaliação
-    'estado_de_conservacao', 'idade_aparente_do_imovel', 'nota_global', 'vida_util_estimada_anos',
-    'nota_para_adequacao', 'nota_para_manutencao',
-    
-    // Financeiro
-    'rvr',
-    
-    // Propriedade
-    'tipo_de_imovel', 'situacao_do_imovel', 'implantacao_da_unidade',
-    
-    // Infraestrutura
-    'fornecimento_de_agua', 'fornecimento_de_energia_eletrica', 'esgotamento_sanitario',
-    'conexao_de_internet', 'possui_wireless_wifi', 'abastecimento_de_agua',
-    'energia_eletrica_de_emergencia', 'iluminacao_externa', 'radiocomunicacao',
-    'cabeamento_estruturado',
-    
-    // Segurança
-    'blindagem', 'protecao_contra_incendios', 'protecao_contra_intrusao',
-    'aterramento_e_protecao_contra_descargas_atmosfericas', 'claviculario',
-    'sala_cofre', 'concertina', 'muro_ou_alambrado',
-    
-    // Sustentabilidade
-    'acessibilidade', 'sustentabilidade', 'aproveitamento_da_agua_da_chuva', 'energia_solar',
-    
-    // Manutenção
-    'ano_da_ultima_reavaliacao_rvr', 'ano_da_ultima_intervencao_na_infraestrutura_do_imovel',
-    'tempo_de_intervencao', 'ha_contrato_de_manutencao_predial', 'ha_plano_de_manutencao_do_imovel',
-    'precisaria_de_qual_intervencao',
-    
-    // Ambientes
-    'almoxarifado', 'alojamento_feminino', 'alojamento_masculino', 'alojamento_misto',
-    'area_de_servico', 'area_de_uso_compartilhado_com_outros_orgaos', 'arquivo', 'auditorio',
-    'banheiro_para_zeladoria', 'banheiro_feminino_para_servidoras', 'banheiro_masculino_para_servidores',
-    'banheiro_misto_para_servidores', 'box_com_chuveiro_externo', 'box_para_lavagem_de_veiculos',
-    'canil', 'casa_de_maquinas', 'central_de_gas', 'cobertura_para_aglomeracao_de_usuarios',
-    'cobertura_para_fiscalizacao_de_veiculos', 'copa_e_cozinha', 'deposito_de_lixo',
-    'deposito_de_materiais_de_descarte_e_baixa', 'deposito_de_material_de_limpeza',
-    'deposito_de_material_operacional', 'estacionamento_para_usuarios', 'garagem_para_servidores',
-    'garagem_para_viaturas', 'lavabo_para_servidores_sem_box_para_chuveiro',
-    'local_para_custodia_temporaria_de_detidos', 'local_para_guarda_provisoria_de_animais',
-    'patio_de_retencao_de_veiculos', 'plataforma_para_fiscalizacao_da_parte_superior_dos_veiculos',
-    'ponto_de_pouso_para_aeronaves', 'rampa_de_fiscalizacao_de_veiculos', 'recepcao',
-    'sala_administrativa_escritorio', 'sala_de_assepsia', 'sala_de_aula', 'sala_de_reuniao',
-    'sala_de_revista_pessoal', 'sala_operacional_observatorio', 'sala_tecnica', 'sanitario_publico',
-    'telefone_publico', 'torre_de_telecomunicacoes', 'vestiario_para_nao_policiais',
-    'vestiario_para_policiais',
-    
-    // Imagens
-    'imagem_geral', 'imagem_fachada', 'imagem_lateral_1', 'imagem_lateral_2', 'imagem_fundos',
-    'imagem_sala_cofre', 'imagem_cofre', 'imagem_interna_alojamento_masculino',
-    'imagem_interna_alojamento_feminino', 'imagem_interna_plantao_uop',
-    
-    // Outras
-    'o_trecho_e_concessionado', 'adere_ao_pgprf_teletrabalho', 'identidade_visual',
-    'climatizacao_de_ambientes', 'coleta_de_lixo', 'observacoes'
-  ];
+  // Campos organizados por categoria
+  const fieldsByCategory: Record<string, { key: string; label: string }[]> = {
+    'Básico': [
+      { key: 'nome_da_unidade', label: 'Nome da Unidade' },
+      { key: 'tipo_de_unidade', label: 'Tipo de Unidade' },
+      { key: 'unidade_gestora', label: 'Unidade Gestora' },
+      { key: 'endereco', label: 'Endereço' },
+      { key: 'ano_caip', label: 'Ano CAIP' },
+      { key: 'processo_sei', label: 'Processo SEI' },
+      { key: 'servo2_pdi', label: 'Servo2/PDI' },
+      { key: 'coordenadas', label: 'Coordenadas' },
+      { key: 'zona', label: 'Zona' },
+      { key: 'rip', label: 'RIP' },
+      { key: 'matricula_do_imovel', label: 'Matrícula do Imóvel' },
+    ],
+    'Dimensões': [
+      { key: 'area_construida_m2', label: 'Área Construída (m²)' },
+      { key: 'area_do_terreno_m2', label: 'Área do Terreno (m²)' },
+      { key: 'area_do_patio_para_retencao_de_veiculos_m2', label: 'Área do Pátio para Retenção (m²)' },
+      { key: 'area_da_cobertura_de_pista_m2', label: 'Área da Cobertura de Pista (m²)' },
+      { key: 'area_da_cobertura_para_fiscalizacao_de_veiculos_m2', label: 'Área Cobertura Fiscalização (m²)' },
+    ],
+    'Avaliação': [
+      { key: 'estado_de_conservacao', label: 'Estado de Conservação' },
+      { key: 'idade_aparente_do_imovel', label: 'Idade Aparente (anos)' },
+      { key: 'nota_global', label: 'Nota Global' },
+      { key: 'vida_util_estimada_anos', label: 'Vida Útil Estimada (anos)' },
+      { key: 'nota_para_adequacao', label: 'Nota para Adequação' },
+      { key: 'nota_para_manutencao', label: 'Nota para Manutenção' },
+      { key: 'rvr', label: 'RVR' },
+    ],
+    'Propriedade': [
+      { key: 'tipo_de_imovel', label: 'Tipo de Imóvel' },
+      { key: 'situacao_do_imovel', label: 'Situação do Imóvel' },
+      { key: 'implantacao_da_unidade', label: 'Implantação da Unidade' },
+    ],
+    'Infraestrutura': [
+      { key: 'fornecimento_de_agua', label: 'Fornecimento de Água' },
+      { key: 'fornecimento_de_energia_eletrica', label: 'Energia Elétrica' },
+      { key: 'esgotamento_sanitario', label: 'Esgotamento Sanitário' },
+      { key: 'conexao_de_internet', label: 'Conexão de Internet' },
+      { key: 'possui_wireless_wifi', label: 'WiFi' },
+      { key: 'abastecimento_de_agua', label: 'Abastecimento de Água' },
+      { key: 'energia_eletrica_de_emergencia', label: 'Energia de Emergência' },
+      { key: 'iluminacao_externa', label: 'Iluminação Externa' },
+      { key: 'radiocomunicacao', label: 'Radiocomunicação' },
+      { key: 'cabeamento_estruturado', label: 'Cabeamento Estruturado' },
+      { key: 'climatizacao_de_ambientes', label: 'Climatização' },
+      { key: 'coleta_de_lixo', label: 'Coleta de Lixo' },
+    ],
+    'Segurança': [
+      { key: 'blindagem', label: 'Blindagem' },
+      { key: 'protecao_contra_incendios', label: 'Proteção Contra Incêndios' },
+      { key: 'protecao_contra_intrusao', label: 'Proteção Contra Intrusão' },
+      { key: 'aterramento_e_protecao_contra_descargas_atmosfericas', label: 'Proteção Descargas' },
+      { key: 'claviculario', label: 'Claviculário' },
+      { key: 'sala_cofre', label: 'Sala Cofre' },
+      { key: 'concertina', label: 'Concertina' },
+      { key: 'muro_ou_alambrado', label: 'Muro/Alambrado' },
+    ],
+    'Sustentabilidade': [
+      { key: 'acessibilidade', label: 'Acessibilidade' },
+      { key: 'sustentabilidade', label: 'Sustentabilidade' },
+      { key: 'aproveitamento_da_agua_da_chuva', label: 'Aproveitamento Água da Chuva' },
+      { key: 'energia_solar', label: 'Energia Solar' },
+    ],
+    'Manutenção': [
+      { key: 'ano_da_ultima_reavaliacao_rvr', label: 'Última Reavaliação RVR' },
+      { key: 'ano_da_ultima_intervencao_na_infraestrutura_do_imovel', label: 'Última Intervenção' },
+      { key: 'tempo_de_intervencao', label: 'Tempo de Intervenção' },
+      { key: 'ha_contrato_de_manutencao_predial', label: 'Contrato Manutenção' },
+      { key: 'ha_plano_de_manutencao_do_imovel', label: 'Plano de Manutenção' },
+      { key: 'precisaria_de_qual_intervencao', label: 'Intervenção Necessária' },
+    ],
+    'Ambientes': [
+      { key: 'almoxarifado', label: 'Almoxarifado' },
+      { key: 'alojamento_feminino', label: 'Alojamento Feminino' },
+      { key: 'alojamento_masculino', label: 'Alojamento Masculino' },
+      { key: 'alojamento_misto', label: 'Alojamento Misto' },
+      { key: 'area_de_servico', label: 'Área de Serviço' },
+      { key: 'area_de_uso_compartilhado_com_outros_orgaos', label: 'Área de Uso Compartilhado' },
+      { key: 'arquivo', label: 'Arquivo' },
+      { key: 'auditorio', label: 'Auditório' },
+      { key: 'banheiro_para_zeladoria', label: 'Banheiro Zeladoria' },
+      { key: 'banheiro_feminino_para_servidoras', label: 'Banheiro Feminino' },
+      { key: 'banheiro_masculino_para_servidores', label: 'Banheiro Masculino' },
+      { key: 'banheiro_misto_para_servidores', label: 'Banheiro Misto' },
+      { key: 'box_com_chuveiro_externo', label: 'Box Chuveiro Externo' },
+      { key: 'box_para_lavagem_de_veiculos', label: 'Box Lavagem Veículos' },
+      { key: 'canil', label: 'Canil' },
+      { key: 'casa_de_maquinas', label: 'Casa de Máquinas' },
+      { key: 'central_de_gas', label: 'Central de Gás' },
+      { key: 'cobertura_para_aglomeracao_de_usuarios', label: 'Cobertura Aglomeração' },
+      { key: 'cobertura_para_fiscalizacao_de_veiculos', label: 'Cobertura Fiscalização' },
+      { key: 'copa_e_cozinha', label: 'Copa e Cozinha' },
+      { key: 'deposito_de_lixo', label: 'Depósito de Lixo' },
+      { key: 'deposito_de_materiais_de_descarte_e_baixa', label: 'Depósito Descarte/Baixa' },
+      { key: 'deposito_de_material_de_limpeza', label: 'Depósito Limpeza' },
+      { key: 'deposito_de_material_operacional', label: 'Depósito Material Operacional' },
+      { key: 'estacionamento_para_usuarios', label: 'Estacionamento Usuários' },
+      { key: 'garagem_para_servidores', label: 'Garagem Servidores' },
+      { key: 'garagem_para_viaturas', label: 'Garagem Viaturas' },
+      { key: 'lavabo_para_servidores_sem_box_para_chuveiro', label: 'Lavabo Servidores' },
+      { key: 'local_para_custodia_temporaria_de_detidos', label: 'Custódia Temporária' },
+      { key: 'local_para_guarda_provisoria_de_animais', label: 'Guarda Animais' },
+      { key: 'patio_de_retencao_de_veiculos', label: 'Pátio Retenção Veículos' },
+      { key: 'plataforma_para_fiscalizacao_da_parte_superior_dos_veiculos', label: 'Plataforma Fiscalização' },
+      { key: 'ponto_de_pouso_para_aeronaves', label: 'Ponto Pouso Aeronaves' },
+      { key: 'rampa_de_fiscalizacao_de_veiculos', label: 'Rampa Fiscalização' },
+      { key: 'recepcao', label: 'Recepção' },
+      { key: 'sala_administrativa_escritorio', label: 'Sala Administrativa' },
+      { key: 'sala_de_assepsia', label: 'Sala de Assepsia' },
+      { key: 'sala_de_aula', label: 'Sala de Aula' },
+      { key: 'sala_de_reuniao', label: 'Sala de Reunião' },
+      { key: 'sala_de_revista_pessoal', label: 'Sala Revista Pessoal' },
+      { key: 'sala_operacional_observatorio', label: 'Sala Operacional' },
+      { key: 'sala_tecnica', label: 'Sala Técnica' },
+      { key: 'sanitario_publico', label: 'Sanitário Público' },
+      { key: 'telefone_publico', label: 'Telefone Público' },
+      { key: 'torre_de_telecomunicacoes', label: 'Torre Telecomunicações' },
+      { key: 'vestiario_para_nao_policiais', label: 'Vestiário Não-Policiais' },
+      { key: 'vestiario_para_policiais', label: 'Vestiário Policiais' },
+    ],
+    'Imagens': [
+      { key: 'imagem_geral', label: 'Imagem Geral' },
+      { key: 'imagem_fachada', label: 'Imagem da Fachada' },
+      { key: 'imagem_lateral_1', label: 'Imagem Lateral 1' },
+      { key: 'imagem_lateral_2', label: 'Imagem Lateral 2' },
+      { key: 'imagem_fundos', label: 'Imagem dos Fundos' },
+      { key: 'imagem_sala_cofre', label: 'Imagem Sala Cofre' },
+      { key: 'imagem_cofre', label: 'Imagem do Cofre' },
+      { key: 'imagem_interna_alojamento_masculino', label: 'Imagem Alojamento Masculino' },
+      { key: 'imagem_interna_alojamento_feminino', label: 'Imagem Alojamento Feminino' },
+      { key: 'imagem_interna_plantao_uop', label: 'Imagem Plantão UOP' },
+    ],
+    'Outras': [
+      { key: 'o_trecho_e_concessionado', label: 'Trecho Concessionado' },
+      { key: 'adere_ao_pgprf_teletrabalho', label: 'PGPRF Teletrabalho' },
+      { key: 'identidade_visual', label: 'Identidade Visual' },
+      { key: 'observacoes', label: 'Observações' },
+    ],
+  };
+
+  const availableFields = Object.values(fieldsByCategory).flat().map(f => f.key);
+  
+  const fieldLabels: Record<string, string> = Object.fromEntries(
+    Object.values(fieldsByCategory).flat().map(f => [f.key, f.label])
+  );
 
   const [selectedFields, setSelectedFields] = useState<string[]>(
     savedData?.selectedFields || ['nome_da_unidade', 'tipo_de_unidade', 'endereco', 'area_construida_m2', 'estado_de_conservacao']
@@ -160,110 +242,23 @@ const Relatorios = () => {
     setFilteredData(filtered);
   };
 
-  // Criar labels amigáveis para os campos
-  const fieldLabels: Record<string, string> = {
-    // Básico
-    'nome_da_unidade': 'Nome da Unidade',
-    'tipo_de_unidade': 'Tipo de Unidade', 
-    'unidade_gestora': 'Unidade Gestora',
-    'endereco': 'Endereço',
-    'ano_caip': 'Ano CAIP',
-    'processo_sei': 'Processo SEI',
-    'servo2_pdi': 'Servo2/PDI',
-    'coordenadas': 'Coordenadas',
-    'zona': 'Zona',
-    'rip': 'RIP',
-    'matricula_do_imovel': 'Matrícula do Imóvel',
-    
-    // Dimensões
-    'area_construida_m2': 'Área Construída (m²)',
-    'area_do_terreno_m2': 'Área do Terreno (m²)',
-    'area_do_patio_para_retencao_de_veiculos_m2': 'Área do Pátio para Retenção (m²)',
-    'area_da_cobertura_de_pista_m2': 'Área da Cobertura de Pista (m²)',
-    'area_da_cobertura_para_fiscalizacao_de_veiculos_m2': 'Área Cobertura Fiscalização (m²)',
-    
-    // Avaliação
-    'estado_de_conservacao': 'Estado de Conservação',
-    'idade_aparente_do_imovel': 'Idade Aparente (anos)',
-    'nota_global': 'Nota Global',
-    'vida_util_estimada_anos': 'Vida Útil Estimada (anos)',
-    'nota_para_adequacao': 'Nota para Adequação',
-    'nota_para_manutencao': 'Nota para Manutenção',
-    
-    // Financeiro
-    'rvr': 'RVR',
-    
-    // Propriedade
-    'tipo_de_imovel': 'Tipo de Imóvel',
-    'situacao_do_imovel': 'Situação do Imóvel',
-    'implantacao_da_unidade': 'Implantação da Unidade',
-    
-    // Infraestrutura
-    'fornecimento_de_agua': 'Fornecimento de Água',
-    'fornecimento_de_energia_eletrica': 'Energia Elétrica',
-    'esgotamento_sanitario': 'Esgotamento Sanitário',
-    'conexao_de_internet': 'Conexão de Internet',
-    'possui_wireless_wifi': 'WiFi',
-    'abastecimento_de_agua': 'Abastecimento de Água',
-    'energia_eletrica_de_emergencia': 'Energia de Emergência',
-    'iluminacao_externa': 'Iluminação Externa',
-    'radiocomunicacao': 'Radiocomunicação',
-    'cabeamento_estruturado': 'Cabeamento Estruturado',
-    
-    // Segurança
-    'blindagem': 'Blindagem',
-    'protecao_contra_incendios': 'Proteção Contra Incêndios',
-    'protecao_contra_intrusao': 'Proteção Contra Intrusão',
-    'aterramento_e_protecao_contra_descargas_atmosfericas': 'Proteção Descargas',
-    'claviculario': 'Claviculário',
-    'sala_cofre': 'Sala Cofre',
-    'concertina': 'Concertina',
-    'muro_ou_alambrado': 'Muro/Alambrado',
-    
-    // Sustentabilidade
-    'acessibilidade': 'Acessibilidade',
-    'sustentabilidade': 'Sustentabilidade',
-    'aproveitamento_da_agua_da_chuva': 'Aproveitamento Água da Chuva',
-    'energia_solar': 'Energia Solar',
-    
-    // Manutenção
-    'ano_da_ultima_reavaliacao_rvr': 'Última Reavaliação RVR',
-    'ano_da_ultima_intervencao_na_infraestrutura_do_imovel': 'Última Intervenção',
-    'tempo_de_intervencao': 'Tempo de Intervenção',
-    'ha_contrato_de_manutencao_predial': 'Contrato Manutenção',
-    'ha_plano_de_manutencao_do_imovel': 'Plano de Manutenção',
-    'precisaria_de_qual_intervencao': 'Intervenção Necessária',
-    
-    // Ambientes (simplificados)
-    'almoxarifado': 'Almoxarifado',
-    'alojamento_feminino': 'Alojamento Feminino',
-    'alojamento_masculino': 'Alojamento Masculino',
-    'recepcao': 'Recepção',
-    'sala_administrativa_escritorio': 'Sala Administrativa',
-    'garagem_para_viaturas': 'Garagem para Viaturas',
-    
-     // Imagens
-     'imagem_geral': 'Imagem Geral',
-     'imagem_fachada': 'Imagem da Fachada',
-     'imagem_lateral_1': 'Imagem Lateral 1',
-     'imagem_lateral_2': 'Imagem Lateral 2',
-     'imagem_fundos': 'Imagem dos Fundos',
-     'imagem_sala_cofre': 'Imagem Sala Cofre',
-     'imagem_cofre': 'Imagem do Cofre',
-     'imagem_interna_alojamento_masculino': 'Imagem Alojamento Masculino',
-     'imagem_interna_alojamento_feminino': 'Imagem Alojamento Feminino',
-     'imagem_interna_plantao_uop': 'Imagem Plantão UOP',
-    
-    // Outras
-    'o_trecho_e_concessionado': 'Trecho Concessionado',
-    'adere_ao_pgprf_teletrabalho': 'PGPRF Teletrabalho',
-    'identidade_visual': 'Identidade Visual',
-    'climatizacao_de_ambientes': 'Climatização',
-    'coleta_de_lixo': 'Coleta de Lixo',
-    'observacoes': 'Observações'
+  const handleFieldToggle = (fieldKey: string) => {
+    setSelectedFields(prev => 
+      prev.includes(fieldKey) 
+        ? prev.filter(f => f !== fieldKey) 
+        : [...prev, fieldKey]
+    );
   };
 
-  const fieldOptions = availableFields.map(field => fieldLabels[field] || field).sort((a, b) => a.localeCompare(b));
+  const handleToggleCategory = (category: string) => {
+    const categoryKeys = fieldsByCategory[category].map(f => f.key);
+    const allSelected = categoryKeys.every(k => selectedFields.includes(k));
+    if (allSelected) {
+      setSelectedFields(prev => prev.filter(f => !categoryKeys.includes(f)));
+    } else {
+      setSelectedFields(prev => [...new Set([...prev, ...categoryKeys])]);
+    }
+  };
 
   const handleGenerateReport = async () => {
     if (selectedItems.length === 0) {
@@ -403,14 +398,6 @@ const Relatorios = () => {
     );
   }
 
-  const handleFieldsChange = (selectedLabels: string[]) => {
-    // Converter labels de volta para field IDs
-    const selectedFieldIds = selectedLabels.map(label => {
-      const field = Object.entries(fieldLabels).find(([_, fieldLabel]) => fieldLabel === label);
-      return field ? field[0] : label;
-    });
-    setSelectedFields(selectedFieldIds);
-  };
 
   const clearCustomization = () => {
     setSelectedItems([]);
@@ -537,17 +524,43 @@ const Relatorios = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <MultiSelect
-                options={fieldOptions}
-                selected={selectedFields.map(field => fieldLabels[field] || field)}
-                onChange={handleFieldsChange}
-                placeholder="Selecione os campos para incluir..."
-                className="w-full"
-              />
-              <div className="text-xs text-muted-foreground">
-                {selectedFields.length} campos selecionados
+            <CardContent>
+              <div className="flex items-center justify-between mb-2">
+                <Badge variant="secondary" className="text-xs">
+                  {selectedFields.length} campos selecionados
+                </Badge>
               </div>
+              <ScrollArea className="h-72 border rounded-md p-2">
+                {Object.entries(fieldsByCategory).map(([category, fields]) => {
+                  const allSelected = fields.every(f => selectedFields.includes(f.key));
+                  return (
+                    <div key={category} className="mb-3">
+                      <div 
+                        className="flex items-center gap-2 mb-1 cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5"
+                        onClick={() => handleToggleCategory(category)}
+                      >
+                        <Checkbox checked={allSelected} onCheckedChange={() => handleToggleCategory(category)} />
+                        <span className="text-xs font-bold text-primary uppercase">{category}</span>
+                        <span className="text-xs text-muted-foreground">({fields.filter(f => selectedFields.includes(f.key)).length}/{fields.length})</span>
+                      </div>
+                      <div className="ml-4 space-y-1">
+                        {fields.map(field => (
+                          <div key={field.key} className="flex items-center gap-2">
+                            <Checkbox
+                              id={`field-${field.key}`}
+                              checked={selectedFields.includes(field.key)}
+                              onCheckedChange={() => handleFieldToggle(field.key)}
+                            />
+                            <Label htmlFor={`field-${field.key}`} className="text-xs cursor-pointer">
+                              {field.label}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </ScrollArea>
             </CardContent>
           </Card>
         </div>
