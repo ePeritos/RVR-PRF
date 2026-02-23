@@ -362,7 +362,7 @@ export const ReportContent: React.FC<ReportContentProps> = ({
         </div>
       )}
 
-      {/* Seção de Resumo Agregado */}
+      {/* Seção de Resumo Agregado — Tabela Cruzada (Pivot) */}
       {data.incluir_agregacao && data.dados && data.dados.length > 0 && (() => {
         const booleanFields = [
           'almoxarifado', 'alojamento_feminino', 'alojamento_masculino', 'alojamento_misto',
@@ -393,71 +393,148 @@ export const ReportContent: React.FC<ReportContentProps> = ({
         const selectedBooleanFields = (data.campos_incluidos || []).filter((f: string) => booleanFields.includes(f));
         if (selectedBooleanFields.length === 0) return null;
 
+        // Determinar se temos campos de agrupamento selecionados
+        const hasUG = data.campos_incluidos.includes('unidade_gestora');
+        const hasAno = data.campos_incluidos.includes('ano_caip');
+
+        // Extrair valores únicos para eixos do pivot
+        const uniqueUGs = hasUG
+          ? [...new Set(data.dados.map((d: any) => d.unidade_gestora || 'Não informado'))].sort()
+          : ['Todos'];
+        const uniqueAnos = hasAno
+          ? [...new Set(data.dados.map((d: any) => d.ano_caip || 'N/I'))].sort()
+          : ['Todos'];
+
+        const isSim = (val: any) => {
+          const s = String(val || '').toLowerCase().trim();
+          return s === 'sim' || s === 'on' || s === 'true' || s === '1';
+        };
+
         const total = data.dados.length;
 
         return (
-          <div
-            className="mt-8 border border-gray-300 rounded p-4"
-            style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}
-          >
-            <h2 className="text-base font-bold mb-4 pb-2 border-b border-gray-300">
-              Resumo Agregado — Campos Sim/Não
+          <div className="mt-8" style={{ pageBreakBefore: 'auto' }}>
+            <h2 className="text-base font-bold mb-2 pb-2 border-b-2 border-gray-800">
+              Resumo Agregado — Tabela Cruzada
             </h2>
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-xs text-gray-500 mb-4">
               Base: {total} imóveis selecionados
+              {hasUG && ' | Linhas: Unidade Gestora'}
+              {hasAno && ' | Colunas: Ano CAIP'}
             </p>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#f3f4f6' }}>
-                  <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '2px solid #d1d5db' }}>Campo</th>
-                  <th style={{ textAlign: 'center', padding: '6px 8px', borderBottom: '2px solid #d1d5db' }}>Sim</th>
-                  <th style={{ textAlign: 'center', padding: '6px 8px', borderBottom: '2px solid #d1d5db' }}>Não</th>
-                  <th style={{ textAlign: 'center', padding: '6px 8px', borderBottom: '2px solid #d1d5db' }}>N/I</th>
-                  <th style={{ textAlign: 'center', padding: '6px 8px', borderBottom: '2px solid #d1d5db' }}>% Sim</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedBooleanFields.map((field: string, idx: number) => {
-                  let simCount = 0;
-                  let naoCount = 0;
-                  let niCount = 0;
 
-                  data.dados.forEach((item: any) => {
-                    const val = String(item[field] || '').toLowerCase().trim();
-                    if (val === 'sim' || val === 'on' || val === 'true' || val === '1') {
-                      simCount++;
-                    } else if (val === 'não' || val === 'nao' || val === 'off' || val === 'false' || val === '0') {
-                      naoCount++;
-                    } else {
-                      niCount++;
-                    }
-                  });
+            {selectedBooleanFields.map((field: string) => (
+              <div
+                key={field}
+                className="mb-6 border border-gray-300 rounded p-3"
+                style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}
+              >
+                <h3 className="text-sm font-bold mb-2" style={{ color: '#1e3a5f' }}>
+                  {fieldLabels[field] || field}
+                </h3>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#f3f4f6' }}>
+                      <th style={{ textAlign: 'left', padding: '5px 6px', borderBottom: '2px solid #d1d5db', minWidth: '120px' }}>
+                        {hasUG ? 'Unidade Gestora' : ''}
+                      </th>
+                      {uniqueAnos.map((ano: string) => (
+                        <th key={ano} colSpan={2} style={{ textAlign: 'center', padding: '5px 6px', borderBottom: '2px solid #d1d5db' }}>
+                          {hasAno ? ano : 'Total'}
+                        </th>
+                      ))}
+                      <th colSpan={2} style={{ textAlign: 'center', padding: '5px 6px', borderBottom: '2px solid #d1d5db', backgroundColor: '#e5e7eb', fontWeight: 700 }}>
+                        Total Geral
+                      </th>
+                    </tr>
+                    <tr style={{ backgroundColor: '#f9fafb' }}>
+                      <th style={{ padding: '3px 6px', borderBottom: '1px solid #d1d5db' }}></th>
+                      {uniqueAnos.map((ano: string) => (
+                        <React.Fragment key={`sub-${ano}`}>
+                          <th style={{ textAlign: 'center', padding: '3px 4px', borderBottom: '1px solid #d1d5db', fontSize: '9px', color: '#16a34a' }}>Sim</th>
+                          <th style={{ textAlign: 'center', padding: '3px 4px', borderBottom: '1px solid #d1d5db', fontSize: '9px', color: '#6b7280' }}>%</th>
+                        </React.Fragment>
+                      ))}
+                      <th style={{ textAlign: 'center', padding: '3px 4px', borderBottom: '1px solid #d1d5db', fontSize: '9px', color: '#16a34a', backgroundColor: '#e5e7eb' }}>Sim</th>
+                      <th style={{ textAlign: 'center', padding: '3px 4px', borderBottom: '1px solid #d1d5db', fontSize: '9px', color: '#6b7280', backgroundColor: '#e5e7eb' }}>%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {uniqueUGs.map((ug: string, ugIdx: number) => {
+                      const ugItems = hasUG
+                        ? data.dados.filter((d: any) => (d.unidade_gestora || 'Não informado') === ug)
+                        : data.dados;
+                      const ugTotalSim = ugItems.filter((d: any) => isSim(d[field])).length;
+                      const ugTotal = ugItems.length;
+                      const bgColor = ugIdx % 2 === 0 ? '#ffffff' : '#f9fafb';
 
-                  const pctSim = total > 0 ? ((simCount / total) * 100).toFixed(1) : '0.0';
-                  const bgColor = idx % 2 === 0 ? '#ffffff' : '#f9fafb';
+                      return (
+                        <tr key={ug} style={{ backgroundColor: bgColor }}>
+                          <td style={{ padding: '4px 6px', borderBottom: '1px solid #e5e7eb', fontWeight: 500, fontSize: '10px' }}>
+                            {hasUG ? ug : 'Todos'}
+                          </td>
+                          {uniqueAnos.map((ano: string) => {
+                            const cellItems = hasAno
+                              ? ugItems.filter((d: any) => (d.ano_caip || 'N/I') === ano)
+                              : ugItems;
+                            const simCount = cellItems.filter((d: any) => isSim(d[field])).length;
+                            const cellTotal = cellItems.length;
+                            const pct = cellTotal > 0 ? ((simCount / cellTotal) * 100).toFixed(1) : '-';
 
-                  return (
-                    <tr key={field} style={{ backgroundColor: bgColor }}>
-                      <td style={{ padding: '5px 8px', borderBottom: '1px solid #e5e7eb' }}>
-                        {fieldLabels[field] || field}
+                            return (
+                              <React.Fragment key={`${ug}-${ano}`}>
+                                <td style={{ textAlign: 'center', padding: '4px 4px', borderBottom: '1px solid #e5e7eb', fontWeight: 600, color: simCount > 0 ? '#16a34a' : '#9ca3af' }}>
+                                  {cellTotal > 0 ? `${simCount}/${cellTotal}` : '-'}
+                                </td>
+                                <td style={{ textAlign: 'center', padding: '4px 4px', borderBottom: '1px solid #e5e7eb', color: '#374151', fontSize: '10px' }}>
+                                  {pct !== '-' ? `${pct}%` : '-'}
+                                </td>
+                              </React.Fragment>
+                            );
+                          })}
+                          <td style={{ textAlign: 'center', padding: '4px 4px', borderBottom: '1px solid #e5e7eb', fontWeight: 700, color: '#16a34a', backgroundColor: '#f0fdf4' }}>
+                            {ugTotal > 0 ? `${ugTotalSim}/${ugTotal}` : '-'}
+                          </td>
+                          <td style={{ textAlign: 'center', padding: '4px 4px', borderBottom: '1px solid #e5e7eb', fontWeight: 700, color: '#374151', backgroundColor: '#f0fdf4' }}>
+                            {ugTotal > 0 ? `${((ugTotalSim / ugTotal) * 100).toFixed(1)}%` : '-'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  {/* Linha de total geral */}
+                  <tfoot>
+                    <tr style={{ backgroundColor: '#e5e7eb', fontWeight: 700 }}>
+                      <td style={{ padding: '5px 6px', borderTop: '2px solid #9ca3af' }}>TOTAL</td>
+                      {uniqueAnos.map((ano: string) => {
+                        const anoItems = hasAno
+                          ? data.dados.filter((d: any) => (d.ano_caip || 'N/I') === ano)
+                          : data.dados;
+                        const simCount = anoItems.filter((d: any) => isSim(d[field])).length;
+                        const anoTotal = anoItems.length;
+                        const pct = anoTotal > 0 ? ((simCount / anoTotal) * 100).toFixed(1) : '-';
+                        return (
+                          <React.Fragment key={`total-${ano}`}>
+                            <td style={{ textAlign: 'center', padding: '5px 4px', borderTop: '2px solid #9ca3af', color: '#16a34a' }}>
+                              {anoTotal > 0 ? `${simCount}/${anoTotal}` : '-'}
+                            </td>
+                            <td style={{ textAlign: 'center', padding: '5px 4px', borderTop: '2px solid #9ca3af' }}>
+                              {pct !== '-' ? `${pct}%` : '-'}
+                            </td>
+                          </React.Fragment>
+                        );
+                      })}
+                      <td style={{ textAlign: 'center', padding: '5px 4px', borderTop: '2px solid #9ca3af', color: '#16a34a' }}>
+                        {`${data.dados.filter((d: any) => isSim(d[field])).length}/${total}`}
                       </td>
-                      <td style={{ textAlign: 'center', padding: '5px 8px', borderBottom: '1px solid #e5e7eb', fontWeight: 600, color: '#16a34a' }}>
-                        {simCount}
-                      </td>
-                      <td style={{ textAlign: 'center', padding: '5px 8px', borderBottom: '1px solid #e5e7eb', fontWeight: 600, color: '#dc2626' }}>
-                        {naoCount}
-                      </td>
-                      <td style={{ textAlign: 'center', padding: '5px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b7280' }}>
-                        {niCount}
-                      </td>
-                      <td style={{ textAlign: 'center', padding: '5px 8px', borderBottom: '1px solid #e5e7eb', fontWeight: 700 }}>
-                        {simCount} ({pctSim}%)
+                      <td style={{ textAlign: 'center', padding: '5px 4px', borderTop: '2px solid #9ca3af' }}>
+                        {total > 0 ? `${((data.dados.filter((d: any) => isSim(d[field])).length / total) * 100).toFixed(1)}%` : '-'}
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </tfoot>
+                </table>
+              </div>
+            ))}
           </div>
         );
       })()}
