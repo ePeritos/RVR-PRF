@@ -78,13 +78,13 @@ const buildAggregationSheet = (data: any[], selectedFields: string[], labels: Re
         const cellItems = hasAno ? ugItems.filter(d => (d.ano_caip || 'N/I') === ano) : ugItems;
         const simCount = cellItems.filter(d => isSim(d[field])).length;
         const total = cellItems.length;
-        const pct = total > 0 ? ((simCount / total) * 100).toFixed(1) + '%' : '-';
+        const pct = total > 0 ? ((simCount / total) * 100).toFixed(1).replace('.', ',') + '%' : '-';
         row.push(total > 0 ? `${simCount}/${total}` : '-', pct);
       });
 
       const ugSim = ugItems.filter(d => isSim(d[field])).length;
       const ugTotal = ugItems.length;
-      row.push(ugTotal > 0 ? `${ugSim}/${ugTotal}` : '-', ugTotal > 0 ? ((ugSim / ugTotal) * 100).toFixed(1) + '%' : '-');
+      row.push(ugTotal > 0 ? `${ugSim}/${ugTotal}` : '-', ugTotal > 0 ? ((ugSim / ugTotal) * 100).toFixed(1).replace('.', ',') + '%' : '-');
       rows.push(row);
     });
 
@@ -93,10 +93,10 @@ const buildAggregationSheet = (data: any[], selectedFields: string[], labels: Re
       const anoItems = hasAno ? data.filter(d => (d.ano_caip || 'N/I') === ano) : data;
       const simCount = anoItems.filter(d => isSim(d[field])).length;
       const anoTotal = anoItems.length;
-      totalRow.push(anoTotal > 0 ? `${simCount}/${anoTotal}` : '-', anoTotal > 0 ? ((simCount / anoTotal) * 100).toFixed(1) + '%' : '-');
+      totalRow.push(anoTotal > 0 ? `${simCount}/${anoTotal}` : '-', anoTotal > 0 ? ((simCount / anoTotal) * 100).toFixed(1).replace('.', ',') + '%' : '-');
     });
     const allSim = data.filter(d => isSim(d[field])).length;
-    totalRow.push(`${allSim}/${data.length}`, data.length > 0 ? ((allSim / data.length) * 100).toFixed(1) + '%' : '-');
+    totalRow.push(`${allSim}/${data.length}`, data.length > 0 ? ((allSim / data.length) * 100).toFixed(1).replace('.', ',') + '%' : '-');
     rows.push(totalRow);
   });
 
