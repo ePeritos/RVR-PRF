@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
@@ -53,18 +53,30 @@ export const useCAIPForm = ({ editingItem, open, onOpenChange, onSuccess, avalia
     }
   }, [editingItem, open, setValue, reset]);
 
+  // Use a ref to debounce percentual calculation and avoid infinite loop
+  const percentualTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
   useEffect(() => {
-    if (watchedValues) {
-      const campos = Object.keys(watchedValues);
+    if (percentualTimerRef.current) {
+      clearTimeout(percentualTimerRef.current);
+    }
+    percentualTimerRef.current = setTimeout(() => {
+      const valores = watch();
+      const campos = Object.keys(valores);
       const camposPreenchidos = campos.filter(campo => {
-        const valor = watchedValues[campo as keyof DadosCAIP];
+        const valor = valores[campo as keyof DadosCAIP];
         return valor !== null && valor !== undefined && valor !== '';
       });
-      
       const percentual = Math.round((camposPreenchidos.length / campos.length) * 100);
       setPercentualPreenchimento(percentual);
-    }
-  }, [watchedValues]);
+    }, 500);
+    
+    return () => {
+      if (percentualTimerRef.current) {
+        clearTimeout(percentualTimerRef.current);
+      }
+    };
+  }, [open, editingItem]);
 
   const validateImages = (): boolean => {
     const imageFields = [
