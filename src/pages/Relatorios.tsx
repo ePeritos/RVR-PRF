@@ -332,7 +332,9 @@ const Relatorios = () => {
           exportToExcel({
             title: reportTitle,
             data: selectedData,
-            selectedFields: selectedFields
+            selectedFields: selectedFields,
+            includeAggregation: includeAggregation,
+            fieldLabels: fieldLabels
           });
           toast({
             title: "Sucesso",
