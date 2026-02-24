@@ -1,4 +1,4 @@
-import { UseFormRegister } from 'react-hook-form';
+import { UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,9 +10,11 @@ type DadosCAIP = Tables<'dados_caip'>;
 
 interface TechnicalDataSectionProps {
   register: UseFormRegister<DadosCAIP>;
+  setValue: UseFormSetValue<DadosCAIP>;
+  watchedValues?: any;
 }
 
-export const TechnicalDataSection = ({ register }: TechnicalDataSectionProps) => {
+export const TechnicalDataSection = ({ register, setValue, watchedValues }: TechnicalDataSectionProps) => {
   const checkboxFields = [
     { key: 'ha_contrato_de_manutencao_predial', label: 'Há contrato de manutenção predial?' },
     { key: 'ha_plano_de_manutencao_do_imovel', label: 'Há plano de manutenção do imóvel?' },
@@ -81,7 +83,10 @@ export const TechnicalDataSection = ({ register }: TechnicalDataSectionProps) =>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {checkboxFields.map(({ key, label }) => (
           <div key={key} className="flex items-center space-x-2">
-            <Checkbox {...register(key as keyof DadosCAIP)} />
+            <Checkbox 
+              checked={watchedValues?.[key as keyof DadosCAIP] === 'Sim'}
+              onCheckedChange={(checked) => setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não')}
+            />
             <Label>{label}</Label>
           </div>
         ))}

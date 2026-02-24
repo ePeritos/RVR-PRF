@@ -154,7 +154,7 @@ export const CAIPFormDialog = ({ editingItem, open, onOpenChange, onSuccess }: C
             watchedValues={watchedValues}
           />
 
-          <TechnicalDataSection register={register} />
+          <TechnicalDataSection register={register} setValue={setValue} watchedValues={watchedValues} />
 
           <InfrastructureSection register={register} setValue={setValue} watchedValues={watchedValues} />
 
