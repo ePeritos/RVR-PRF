@@ -76,29 +76,16 @@ export class HTMLGenerator {
       valorAdotado
     });
 
-    // Extrair UF do endereço
-    const extrairUfDoEndereco = (endereco?: string) => {
-      if (!endereco) return 'XX';
-      
-      // Padrões comuns para extrair UF do endereço
-      const patterns = [
-        /\b([A-Z]{2})\s*$/, // UF no final (ex: "Rua X, Cidade - RN")
-        /\b([A-Z]{2})\s*,?\s*\d{5}-?\d{3}/, // UF antes do CEP (ex: "Cidade - RN, 59000-000")
-        /-\s*([A-Z]{2})\b/, // UF após hífen (ex: "Cidade - RN")
-        /,\s*([A-Z]{2})\b/, // UF após vírgula (ex: "Cidade, RN")
-      ];
-      
-      for (const pattern of patterns) {
-        const match = endereco.match(pattern);
-        if (match) {
-          return match[1];
-        }
-      }
-      
-      return 'XX';
+    // Extrair UF do solicitante (ex: SPRF/PE → PE)
+    const extrairUfDoSolicitante = (unidadeGestora?: string) => {
+      if (!unidadeGestora) return 'XX';
+      const match = unidadeGestora.match(/\/([A-Z]{2})$/);
+      return match ? match[1] : 'XX';
     };
 
-    const uf = extrairUfDoEndereco(data.endereco);
+    const uf = extrairUfDoSolicitante(data.unidadeGestora) !== 'XX'
+      ? extrairUfDoSolicitante(data.unidadeGestora)
+      : 'XX';
     const ufCub = data.parametros?.uf || uf;
 
     // Dados do responsável técnico selecionado
