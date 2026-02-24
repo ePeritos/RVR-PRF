@@ -9,12 +9,14 @@ import { DataFilter } from '@/components/DataFilter';
 import { CAIPFormDialog } from '@/components/caip/CAIPFormDialog';
 import { BatchImageUploadDialog } from '@/components/caip/BatchImageUploadDialog';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useEditLock } from '@/hooks/useEditLock';
 
 type DadosCAIP = Tables<'dados_caip'>;
 
 const CAIP = () => {
   const { toast } = useToast();
   const { profile, isAdmin } = useUserProfile();
+  const { acquireLock, releaseLock } = useEditLock();
   const [existingData, setExistingData] = useState<DadosCAIP[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState<DadosCAIP[]>([]);
@@ -92,13 +94,9 @@ const CAIP = () => {
     }
   };
 
-  const handleEdit = (item: DadosCAIP) => {
-    console.log('✏️ === HANDLE EDIT ===');
-    console.log('Item selecionado para edição:', item);
-    console.log('ID:', item.id);
-    console.log('Nome:', item.nome_da_unidade);
-    console.log('Endereço:', item.endereco);
-    console.log('Ano CAIP:', item.ano_caip);
+  const handleEdit = async (item: DadosCAIP) => {
+    const acquired = await acquireLock(item.id);
+    if (!acquired) return;
     
     setEditingItem(item);
     setDialogOpen(true);
@@ -135,9 +133,19 @@ const CAIP = () => {
   };
 
   const handleDialogSuccess = () => {
+    if (editingItem) {
+      releaseLock(editingItem.id);
+    }
     fetchExistingData();
     setSearchTerm('');
     setFilterResetKey(prev => prev + 1);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open && editingItem) {
+      releaseLock(editingItem.id);
+    }
+    setDialogOpen(open);
   };
 
   const handleFilterChange = (filters: any) => {
@@ -227,7 +235,7 @@ const CAIP = () => {
       <CAIPFormDialog
         editingItem={editingItem}
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChange={handleDialogClose}
         onSuccess={handleDialogSuccess}
       />
 
