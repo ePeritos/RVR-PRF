@@ -175,16 +175,25 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
     'CREA/[UF] [Número]';
   const formacaoResponsavel = responsavelTecnico?.formacao || 'Engenheiro Civil';
 
-  // Extrair UF da unidade gestora ou usar dados do responsável
-  const getUfFromUnidade = (unidadeGestora?: string) => {
-    if (responsavelTecnico?.uf) return responsavelTecnico.uf;
-    if (!unidadeGestora) return 'XX';
-    // Tentar extrair UF do final da string da unidade gestora
-    const match = unidadeGestora.match(/([A-Z]{2})$/);
-    return match ? match[1] : 'XX';
+  // Extrair UF do endereço do imóvel
+  const extrairUfDoEndereco = (endereco?: string) => {
+    if (!endereco) return 'XX';
+    const patterns = [
+      /\b([A-Z]{2})\s*$/,
+      /\b([A-Z]{2})\s*,?\s*\d{5}-?\d{3}/,
+      /-\s*([A-Z]{2})\b/,
+      /,\s*([A-Z]{2})\b/,
+    ];
+    for (const pattern of patterns) {
+      const match = endereco.match(pattern);
+      if (match) return match[1];
+    }
+    return 'XX';
   };
 
-  const uf = getUfFromUnidade(data.unidadeGestora);
+  const uf = extrairUfDoEndereco(data.endereco) !== 'XX' 
+    ? extrairUfDoEndereco(data.endereco) 
+    : (responsavelTecnico?.uf || 'XX');
   const ufCub = data.parametros?.uf || uf;
   const solicitante = data.unidadeGestora || 'PRF/XX';
 
