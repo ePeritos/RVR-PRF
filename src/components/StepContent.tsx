@@ -109,7 +109,7 @@ export const StepContent = ({
           <div className="space-y-4 px-4">
             <div className="text-center mb-4">
               <h2 className="text-lg sm:text-xl font-bold text-foreground mb-1">
-                Etapa 2: Seleção de Imóveis
+                Etapa 1: Seleção de Imóveis
               </h2>
               <p className="text-sm text-muted-foreground">
                 Filtre e selecione os imóveis do banco de dados que serão incluídos no Relatório de Valor Referencial
@@ -133,7 +133,7 @@ export const StepContent = ({
           <div className="space-y-6 px-4">
             <div className="text-center mb-6">
               <h2 className="text-lg sm:text-xl font-bold text-foreground mb-1">
-                Etapa 3: Parâmetros RVR
+                Etapa 2: Parâmetros RVR
               </h2>
               <p className="text-sm text-muted-foreground">
                 Configure os parâmetros técnicos para geração do Relatório de Valor Referencial
@@ -151,7 +151,7 @@ export const StepContent = ({
           <div className="space-y-4 px-4">
             <div className="text-center mb-4">
               <h2 className="text-lg sm:text-xl font-bold text-foreground mb-1">
-                Etapa 4: Relatório RVR
+                Etapa 3: Relatório RVR
               </h2>
               <p className="text-sm text-muted-foreground">
                 Visualize os resultados da avaliação e gere os Relatórios de Valor Referencial em PDF
