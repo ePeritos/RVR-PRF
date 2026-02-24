@@ -100,14 +100,32 @@ export const ExistingRecordsList = ({
                   <span className="truncate"><strong>Tipo:</strong> {item.tipo_de_unidade || 'N/I'}</span>
                 </div>
                 
-                {item.nota_global && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">Nota Global:</span>
-                    <Badge variant={Number(item.nota_global) >= 70 ? "default" : "destructive"}>
-                      {Number(item.nota_global).toFixed(1)}
-                    </Badge>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {item.nota_para_adequacao && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-muted-foreground">Adequação:</span>
+                      <Badge variant="outline" className="text-xs">
+                        {Number(item.nota_para_adequacao).toFixed(1)}
+                      </Badge>
+                    </div>
+                  )}
+                  {item.nota_para_manutencao && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-muted-foreground">Manutenção:</span>
+                      <Badge variant="outline" className="text-xs">
+                        {Number(item.nota_para_manutencao).toFixed(1)}
+                      </Badge>
+                    </div>
+                  )}
+                  {item.nota_global != null && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs font-medium">Global:</span>
+                      <Badge variant={Number(item.nota_global) >= 70 ? "default" : "destructive"}>
+                        {Number(item.nota_global).toFixed(1)}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="flex items-center gap-2 shrink-0 self-end sm:self-start">
