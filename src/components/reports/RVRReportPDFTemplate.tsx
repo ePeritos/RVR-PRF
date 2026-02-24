@@ -156,7 +156,7 @@ export function RVRReportPDFTemplate({ data, className = "" }: RVRReportPDFTempl
 
   const uf = extrairUfDoSolicitante(data.unidadeGestora) !== 'XX'
     ? extrairUfDoSolicitante(data.unidadeGestora)
-    : (responsavelTecnico?.uf || 'XX');
+    : '';
   const ufCub = data.parametros?.uf || uf;
   const solicitante = data.unidadeGestora || 'PRF/XX';
 

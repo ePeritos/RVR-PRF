@@ -85,7 +85,7 @@ export class HTMLGenerator {
 
     const uf = extrairUfDoSolicitante(data.unidadeGestora) !== 'XX'
       ? extrairUfDoSolicitante(data.unidadeGestora)
-      : 'XX';
+      : '';
     const ufCub = data.parametros?.uf || uf;
 
     // Dados do responsável técnico selecionado
