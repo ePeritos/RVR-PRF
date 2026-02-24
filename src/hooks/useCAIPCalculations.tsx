@@ -38,9 +38,9 @@ export const useCAIPCalculations = ({ watchedValues, setValue, setPercentualPree
 
       // Definir peso total possível baseado no tipo de unidade
       if (tipoUnidade === 'UOP') {
-        pesoTotalPossivel = 192;
+        pesoTotalPossivel = 176;
       } else if (tipoUnidade === 'Delegacia' || tipoUnidade === 'DEL') {
-        pesoTotalPossivel = 154;
+        pesoTotalPossivel = 165;
       } else {
         setValue('nota_para_adequacao', '0');
         return;
