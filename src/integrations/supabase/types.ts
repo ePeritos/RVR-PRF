@@ -136,6 +136,8 @@ export type Database = {
           deposito_de_materiais_de_descarte_e_baixa: string | null
           deposito_de_material_de_limpeza: string | null
           deposito_de_material_operacional: string | null
+          editing_at: string | null
+          editing_by: string | null
           endereco: string | null
           energia_eletrica_de_emergencia: string | null
           energia_solar: string | null
@@ -268,6 +270,8 @@ export type Database = {
           deposito_de_materiais_de_descarte_e_baixa?: string | null
           deposito_de_material_de_limpeza?: string | null
           deposito_de_material_operacional?: string | null
+          editing_at?: string | null
+          editing_by?: string | null
           endereco?: string | null
           energia_eletrica_de_emergencia?: string | null
           energia_solar?: string | null
@@ -400,6 +404,8 @@ export type Database = {
           deposito_de_materiais_de_descarte_e_baixa?: string | null
           deposito_de_material_de_limpeza?: string | null
           deposito_de_material_operacional?: string | null
+          editing_at?: string | null
+          editing_by?: string | null
           endereco?: string | null
           energia_eletrica_de_emergencia?: string | null
           energia_solar?: string | null
@@ -823,6 +829,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      acquire_edit_lock: {
+        Args: { p_record_id: string; p_user_id: string }
+        Returns: Json
+      }
       calcular_nota_global:
         | { Args: never; Returns: undefined }
         | { Args: { p_imovel_id: string }; Returns: number }
@@ -848,6 +858,14 @@ export type Database = {
         | { Args: { role_name: string; user_id: number }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      refresh_edit_lock: {
+        Args: { p_record_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      release_edit_lock: {
+        Args: { p_record_id: string; p_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "usuario_padrao"
