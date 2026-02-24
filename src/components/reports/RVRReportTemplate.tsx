@@ -184,7 +184,7 @@ export function RVRReportTemplate({ data, className = "" }: RVRReportTemplatePro
 
   const uf = extrairUfDoSolicitante(data.unidadeGestora) !== 'XX'
     ? extrairUfDoSolicitante(data.unidadeGestora)
-    : (responsavelTecnico?.uf || 'XX');
+    : '';
   const ufCub = data.parametros?.uf || uf;
   const solicitante = data.unidadeGestora || 'PRF/XX';
 
