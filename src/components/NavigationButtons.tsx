@@ -1,10 +1,10 @@
 
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useProfile } from '@/hooks/useProfile';
 
 interface NavigationButtonsProps {
   currentStep: number;
+  totalSteps?: number;
   canProceed: boolean;
   onNextStep: () => void;
   onPrevStep: () => void;
@@ -13,13 +13,14 @@ interface NavigationButtonsProps {
 
 export const NavigationButtons = ({
   currentStep,
+  totalSteps = 3,
   canProceed,
   onNextStep,
   onPrevStep,
   onNewEvaluation
 }: NavigationButtonsProps) => {
-  const { isAdmin } = useProfile();
-  if (currentStep === 4) {
+  // Last step
+  if (currentStep === totalSteps) {
     return (
       <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8 max-w-5xl mx-auto">
         <Button 
@@ -42,7 +43,7 @@ export const NavigationButtons = ({
     );
   }
 
-  // Na etapa 1, não mostra o botão "Anterior"
+  // First step - no "Anterior" button
   if (currentStep === 1) {
     return (
       <div className="flex justify-end mt-8 max-w-5xl mx-auto">
@@ -58,43 +59,35 @@ export const NavigationButtons = ({
     );
   }
 
-  // Na etapa 3, não mostra o botão "Próximo" pois será substituído pelo "Gerar Relatório RVR"
-  if (currentStep === 3) {
-    const minStep = isAdmin ? 1 : 2;
+  // Step before last - no "Próximo" (replaced by form submit)
+  if (currentStep === totalSteps - 1) {
     return (
       <div className="flex justify-start mt-8 max-w-5xl mx-auto">
-        {currentStep > minStep && (
-          <Button 
-            variant="outline" 
-            onClick={onPrevStep}
-            className="hover-scale w-full sm:w-auto"
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Anterior
-          </Button>
-        )}
-      </div>
-    );
-  }
-
-  // Para a etapa 2 - sempre mostra o botão Próximo do lado direito
-  const minStep = isAdmin ? 1 : 2;
-  const showPrevButton = currentStep > minStep;
-  
-  return (
-    <div className="flex flex-col sm:flex-row gap-4 mt-8 max-w-5xl mx-auto">
-      {showPrevButton && (
         <Button 
           variant="outline" 
           onClick={onPrevStep}
-          className="hover-scale w-full sm:w-auto order-2 sm:order-1"
+          className="hover-scale w-full sm:w-auto"
         >
           <ChevronLeft className="mr-2 h-4 w-4" />
           Anterior
         </Button>
-      )}
+      </div>
+    );
+  }
+
+  // Middle steps
+  return (
+    <div className="flex flex-col sm:flex-row gap-4 mt-8 max-w-5xl mx-auto">
+      <Button 
+        variant="outline" 
+        onClick={onPrevStep}
+        className="hover-scale w-full sm:w-auto order-2 sm:order-1"
+      >
+        <ChevronLeft className="mr-2 h-4 w-4" />
+        Anterior
+      </Button>
       
-      <div className={`${showPrevButton ? 'sm:ml-auto' : 'ml-auto'}`}>
+      <div className="sm:ml-auto">
         <Button 
           onClick={onNextStep} 
           disabled={!canProceed}
