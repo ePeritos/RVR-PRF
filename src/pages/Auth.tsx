@@ -14,8 +14,9 @@ const TERMS_STORAGE_KEY = 'sigi-prf-terms-accepted';
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
-  const [showTermsDialog, setShowTermsDialog] = useState(true);
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const savedTerms = localStorage.getItem(TERMS_STORAGE_KEY) === 'true';
+  const [showTermsDialog, setShowTermsDialog] = useState(!savedTerms);
+  const [termsAccepted, setTermsAccepted] = useState(savedTerms);
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -23,15 +24,6 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  // Verificar se os termos já foram aceitos
-  useEffect(() => {
-    const savedTermsAcceptance = localStorage.getItem(TERMS_STORAGE_KEY);
-    if (savedTermsAcceptance === 'true') {
-      setTermsAccepted(true);
-      setShowTermsDialog(false);
-    }
-  }, []);
 
   // Verificar se o usuário já está logado e redirecionar
   useEffect(() => {
