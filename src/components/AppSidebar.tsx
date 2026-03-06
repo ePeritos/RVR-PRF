@@ -29,6 +29,11 @@ const menuItems = [
   { title: "CAIP", url: "/caip", icon: Database },
   { title: "RVR", url: "/rvr", icon: Calculator },
   { title: "Relatórios", url: "/relatorios", icon: FileText },
+  { title: "Vistorias", url: "/vistorias", icon: ClipboardCheck },
+];
+
+const terceirizadoMenuItems = [
+  { title: "Vistorias", url: "/vistorias", icon: ClipboardCheck },
 ];
 
 const adminMenuItems = [
