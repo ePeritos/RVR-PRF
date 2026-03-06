@@ -89,7 +89,7 @@ export function VistoriaValidationDialog({ vistoria, open, onOpenChange, onSucce
     }
   };
 
-
+  const setFieldValidation = (secao: string, campo: string, status: string) => {
     const key = `${secao}__${campo}`;
     setValidacoes(prev => ({
       ...prev,
