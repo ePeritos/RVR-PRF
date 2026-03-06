@@ -824,6 +824,175 @@ export type Database = {
         }
         Relationships: []
       }
+      vistoria_validacoes: {
+        Row: {
+          campo: string
+          created_at: string | null
+          id: string
+          observacao_validador: string | null
+          secao: string
+          status: string
+          validado_em: string | null
+          validado_por: string | null
+          vistoria_id: string
+        }
+        Insert: {
+          campo: string
+          created_at?: string | null
+          id?: string
+          observacao_validador?: string | null
+          secao: string
+          status?: string
+          validado_em?: string | null
+          validado_por?: string | null
+          vistoria_id: string
+        }
+        Update: {
+          campo?: string
+          created_at?: string | null
+          id?: string
+          observacao_validador?: string | null
+          secao?: string
+          status?: string
+          validado_em?: string | null
+          validado_por?: string | null
+          vistoria_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vistoria_validacoes_vistoria_id_fkey"
+            columns: ["vistoria_id"]
+            isOneToOne: false
+            referencedRelation: "vistorias_manutencao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vistorias_manutencao: {
+        Row: {
+          acompanhamento_fiscalizacao: boolean | null
+          atribuido_por: string
+          classificacao_geral: string | null
+          crea_cau: string | null
+          created_at: string | null
+          dados_caip_id: string
+          data_atribuicao: string
+          data_envio: string | null
+          data_validacao: string | null
+          id: string
+          imagem_cofre: string | null
+          imagem_fachada: string | null
+          imagem_fundos: string | null
+          imagem_geral: string | null
+          imagem_interna_alojamento_feminino: string | null
+          imagem_interna_alojamento_masculino: string | null
+          imagem_interna_plantao_uop: string | null
+          imagem_lateral_1: string | null
+          imagem_lateral_2: string | null
+          imagem_sala_cofre: string | null
+          necessidades_iniciais: string | null
+          observacoes_gerais: string | null
+          prazo_adequacao_dias: number | null
+          prazo_entrega: string
+          responsavel_tecnico: string | null
+          secao_ar_condicionado: Json | null
+          secao_areas_externas: Json | null
+          secao_eletrico: Json | null
+          secao_hidrossanitario: Json | null
+          secao_incendio: Json | null
+          secao_obras_civis: Json | null
+          secao_rede_logica: Json | null
+          status: string
+          unidade_gestora: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          acompanhamento_fiscalizacao?: boolean | null
+          atribuido_por: string
+          classificacao_geral?: string | null
+          crea_cau?: string | null
+          created_at?: string | null
+          dados_caip_id: string
+          data_atribuicao?: string
+          data_envio?: string | null
+          data_validacao?: string | null
+          id?: string
+          imagem_cofre?: string | null
+          imagem_fachada?: string | null
+          imagem_fundos?: string | null
+          imagem_geral?: string | null
+          imagem_interna_alojamento_feminino?: string | null
+          imagem_interna_alojamento_masculino?: string | null
+          imagem_interna_plantao_uop?: string | null
+          imagem_lateral_1?: string | null
+          imagem_lateral_2?: string | null
+          imagem_sala_cofre?: string | null
+          necessidades_iniciais?: string | null
+          observacoes_gerais?: string | null
+          prazo_adequacao_dias?: number | null
+          prazo_entrega: string
+          responsavel_tecnico?: string | null
+          secao_ar_condicionado?: Json | null
+          secao_areas_externas?: Json | null
+          secao_eletrico?: Json | null
+          secao_hidrossanitario?: Json | null
+          secao_incendio?: Json | null
+          secao_obras_civis?: Json | null
+          secao_rede_logica?: Json | null
+          status?: string
+          unidade_gestora: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          acompanhamento_fiscalizacao?: boolean | null
+          atribuido_por?: string
+          classificacao_geral?: string | null
+          crea_cau?: string | null
+          created_at?: string | null
+          dados_caip_id?: string
+          data_atribuicao?: string
+          data_envio?: string | null
+          data_validacao?: string | null
+          id?: string
+          imagem_cofre?: string | null
+          imagem_fachada?: string | null
+          imagem_fundos?: string | null
+          imagem_geral?: string | null
+          imagem_interna_alojamento_feminino?: string | null
+          imagem_interna_alojamento_masculino?: string | null
+          imagem_interna_plantao_uop?: string | null
+          imagem_lateral_1?: string | null
+          imagem_lateral_2?: string | null
+          imagem_sala_cofre?: string | null
+          necessidades_iniciais?: string | null
+          observacoes_gerais?: string | null
+          prazo_adequacao_dias?: number | null
+          prazo_entrega?: string
+          responsavel_tecnico?: string | null
+          secao_ar_condicionado?: Json | null
+          secao_areas_externas?: Json | null
+          secao_eletrico?: Json | null
+          secao_hidrossanitario?: Json | null
+          secao_incendio?: Json | null
+          secao_obras_civis?: Json | null
+          secao_rede_logica?: Json | null
+          status?: string
+          unidade_gestora?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vistorias_manutencao_dados_caip_id_fkey"
+            columns: ["dados_caip_id"]
+            isOneToOne: false
+            referencedRelation: "dados_caip"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
