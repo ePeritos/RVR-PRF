@@ -13,6 +13,7 @@ export interface Profile {
   matricula?: string;
   cargo?: string;
   unidade_lotacao?: string;
+  unidade_gestora?: string;
   responsavel_tecnico_id?: string;
   role: UserRole;
 }
