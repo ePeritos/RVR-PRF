@@ -22,6 +22,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 import Gestao from "./pages/Gestao";
+import Vistorias from "./pages/Vistorias";
 
 const queryClient = new QueryClient();
 
