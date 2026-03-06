@@ -84,7 +84,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const { signOut, user } = useAuth();
-  const { profile, loading, updateProfile, isAdmin } = useProfile();
+  const { profile, loading, updateProfile, isAdmin, isTerceirizado } = useProfile();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
     nome_completo: '',
