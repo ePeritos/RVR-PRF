@@ -89,6 +89,7 @@ const AppRoutes = () => {
                 <Route path="/relatorios" element={<Relatorios />} />
                 <Route path="/relatorio-preview" element={<RelatorioPreview />} />
                 <Route path="/gestao" element={<Gestao />} />
+                <Route path="/vistorias" element={<Vistorias />} />
                 <Route path="/auth" element={<Navigate to="/" replace />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

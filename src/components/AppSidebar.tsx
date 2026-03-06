@@ -207,7 +207,7 @@ export function AppSidebar() {
                       {profile?.nome_completo || user?.email || 'Usuário'}
                     </div>
                     <div className="text-xs text-muted-foreground truncate">
-                     {profile?.role === 'admin' ? 'ADMIN' : 'Usuário Padrão'}
+                     {profile?.role === 'admin' ? 'ADMIN' : profile?.role === 'terceirizado' ? 'TERCEIRIZADO' : 'Usuário Padrão'}
                     </div>
                     {profile?.unidade_lotacao && (
                       <div className="text-xs text-muted-foreground truncate">
