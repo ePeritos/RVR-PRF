@@ -152,7 +152,7 @@ export function AppSidebar() {
 
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {(isTerceirizado ? terceirizadoMenuItems : menuItems).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={currentPath === item.url}>
                     <NavLink 
