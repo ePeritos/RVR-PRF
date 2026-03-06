@@ -82,6 +82,7 @@ export const useProfile = () => {
 
   const isAdmin = profile?.role === 'admin';
   const isUsuarioPadrao = profile?.role === 'usuario_padrao';
+  const isTerceirizado = profile?.role === 'terceirizado';
 
   return {
     profile,
@@ -89,6 +90,7 @@ export const useProfile = () => {
     updateProfile,
     refetch: fetchProfile,
     isAdmin,
-    isUsuarioPadrao
+    isUsuarioPadrao,
+    isTerceirizado
   };
 };

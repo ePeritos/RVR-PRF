@@ -326,7 +326,7 @@ export function UserManagement() {
                 <SimpleSelect
                   options={roleOptions}
                   value={editForm.role || "usuario_padrao"}
-                  onChange={(v) => setEditForm((p) => ({ ...p, role: v as "admin" | "usuario_padrao" }))}
+                  onChange={(v) => setEditForm((p) => ({ ...p, role: v as "admin" | "usuario_padrao" | "terceirizado" }))}
                   placeholder="Selecione o perfil"
                 />
               </div>
