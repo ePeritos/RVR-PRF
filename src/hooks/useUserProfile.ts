@@ -6,7 +6,7 @@ interface UserProfile {
   id: string;
   nome_completo: string;
   email: string;
-  role: 'admin' | 'usuario_padrao';
+  role: 'admin' | 'usuario_padrao' | 'terceirizado';
   unidade_gestora?: string;
   cargo?: string;
   matricula?: string;
