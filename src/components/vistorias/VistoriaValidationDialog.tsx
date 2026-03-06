@@ -158,10 +158,11 @@ export function VistoriaValidationDialog({ vistoria, open, onOpenChange, onSucce
 
     if (Object.keys(updateData).length === 0) return 0;
 
+    const targetId = selectedCaipId || vistoria.dados_caip_id;
     const { error } = await supabase
       .from('dados_caip')
       .update(updateData)
-      .eq('id', vistoria.dados_caip_id);
+      .eq('id', targetId);
 
     if (error) throw error;
     return Object.keys(updateData).length;
