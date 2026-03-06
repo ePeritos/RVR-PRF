@@ -60,7 +60,7 @@ const opcoesFormacao = [
   'Engenharia Mecânica', 'Outra'
 ];
 
-const roleOptions = ['admin', 'usuario_padrao'];
+const roleOptions = ['admin', 'usuario_padrao', 'terceirizado'];
 
 export function UserManagement() {
   const [users, setUsers] = useState<UserProfile[]>([]);
