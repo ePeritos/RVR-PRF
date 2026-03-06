@@ -111,6 +111,33 @@ export function VistoriaValidationDialog({ vistoria, open, onOpenChange, onSucce
     }
   };
 
+  const copyImagesToCAIP = async () => {
+    const imageFields = [
+      'imagem_geral', 'imagem_fachada', 'imagem_lateral_1', 'imagem_lateral_2',
+      'imagem_fundos', 'imagem_sala_cofre', 'imagem_cofre',
+      'imagem_interna_alojamento_masculino', 'imagem_interna_alojamento_feminino',
+      'imagem_interna_plantao_uop',
+    ] as const;
+
+    const updateData: Record<string, string> = {};
+    for (const field of imageFields) {
+      const value = vistoria[field];
+      if (value && typeof value === 'string' && value.trim() !== '') {
+        updateData[field] = value;
+      }
+    }
+
+    if (Object.keys(updateData).length === 0) return 0;
+
+    const { error } = await supabase
+      .from('dados_caip')
+      .update(updateData)
+      .eq('id', vistoria.dados_caip_id);
+
+    if (error) throw error;
+    return Object.keys(updateData).length;
+  };
+
   const handleFinalizeValidation = async (approved: boolean) => {
     if (!user) return;
     try {
@@ -130,9 +157,22 @@ export function VistoriaValidationDialog({ vistoria, open, onOpenChange, onSucce
 
       if (error) throw error;
 
+      // Copy images to CAIP on approval
+      let imagesCopied = 0;
+      if (approved) {
+        try {
+          imagesCopied = await copyImagesToCAIP();
+        } catch (imgError: any) {
+          console.error('Erro ao copiar imagens para CAIP:', imgError);
+          toast({ title: 'Aviso', description: 'Vistoria aprovada, mas houve erro ao copiar imagens para o CAIP.', variant: 'destructive' });
+        }
+      }
+
       toast({
         title: approved ? 'Vistoria aprovada' : 'Vistoria rejeitada',
-        description: approved ? 'A vistoria foi validada com sucesso.' : 'A vistoria foi rejeitada. O terceirizado poderá corrigir.',
+        description: approved
+          ? `A vistoria foi validada com sucesso.${imagesCopied > 0 ? ` ${imagesCopied} imagem(ns) copiada(s) para o CAIP.` : ''}`
+          : 'A vistoria foi rejeitada. O terceirizado poderá corrigir.',
       });
       onSuccess();
     } catch (error: any) {
