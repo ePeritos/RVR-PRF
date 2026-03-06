@@ -39,6 +39,7 @@ export function VistoriaValidationDialog({ vistoria, open, onOpenChange, onSucce
   useEffect(() => {
     if (open && vistoria?.id) {
       fetchValidacoes();
+      fetchCaipRecords();
     }
   }, [open, vistoria?.id]);
 
