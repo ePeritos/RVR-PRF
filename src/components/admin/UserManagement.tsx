@@ -232,9 +232,9 @@ export function UserManagement() {
                     <TableCell>{user.matricula || "—"}</TableCell>
                     <TableCell>{user.unidade_gestora || user.unidade_lotacao || "—"}</TableCell>
                     <TableCell>
-                      <Badge variant={user.role === "admin" ? "default" : "secondary"} className="flex items-center gap-1 w-fit">
+                      <Badge variant={user.role === "admin" ? "default" : user.role === "terceirizado" ? "outline" : "secondary"} className="flex items-center gap-1 w-fit">
                         {user.role === "admin" ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
-                        {user.role === "admin" ? "Admin" : "Padrão"}
+                        {user.role === "admin" ? "Admin" : user.role === "terceirizado" ? "Terceirizado" : "Padrão"}
                       </Badge>
                     </TableCell>
                     <TableCell>
