@@ -1,4 +1,4 @@
-import { Home, Calculator, Database, LogOut, User, Menu, Building, FileText, Settings } from "lucide-react";
+import { Home, Calculator, Database, LogOut, User, Menu, Building, FileText, Settings, ClipboardCheck } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -29,6 +29,11 @@ const menuItems = [
   { title: "CAIP", url: "/caip", icon: Database },
   { title: "RVR", url: "/rvr", icon: Calculator },
   { title: "Relatórios", url: "/relatorios", icon: FileText },
+  { title: "Vistorias", url: "/vistorias", icon: ClipboardCheck },
+];
+
+const terceirizadoMenuItems = [
+  { title: "Vistorias", url: "/vistorias", icon: ClipboardCheck },
 ];
 
 const adminMenuItems = [
@@ -79,7 +84,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const { signOut, user } = useAuth();
-  const { profile, loading, updateProfile, isAdmin } = useProfile();
+  const { profile, loading, updateProfile, isAdmin, isTerceirizado } = useProfile();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
     nome_completo: '',
@@ -147,7 +152,7 @@ export function AppSidebar() {
 
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {(isTerceirizado ? terceirizadoMenuItems : menuItems).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={currentPath === item.url}>
                     <NavLink 
@@ -202,7 +207,7 @@ export function AppSidebar() {
                       {profile?.nome_completo || user?.email || 'Usuário'}
                     </div>
                     <div className="text-xs text-muted-foreground truncate">
-                     {profile?.role === 'admin' ? 'ADMIN' : 'Usuário Padrão'}
+                     {profile?.role === 'admin' ? 'ADMIN' : profile?.role === 'terceirizado' ? 'TERCEIRIZADO' : 'Usuário Padrão'}
                     </div>
                     {profile?.unidade_lotacao && (
                       <div className="text-xs text-muted-foreground truncate">

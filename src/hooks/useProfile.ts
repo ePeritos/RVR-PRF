@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 
-export type UserRole = 'admin' | 'usuario_padrao';
+export type UserRole = 'admin' | 'usuario_padrao' | 'terceirizado';
 
 export interface Profile {
   id: string;
@@ -13,6 +13,7 @@ export interface Profile {
   matricula?: string;
   cargo?: string;
   unidade_lotacao?: string;
+  unidade_gestora?: string;
   responsavel_tecnico_id?: string;
   role: UserRole;
 }
@@ -82,6 +83,7 @@ export const useProfile = () => {
 
   const isAdmin = profile?.role === 'admin';
   const isUsuarioPadrao = profile?.role === 'usuario_padrao';
+  const isTerceirizado = profile?.role === 'terceirizado';
 
   return {
     profile,
@@ -89,6 +91,7 @@ export const useProfile = () => {
     updateProfile,
     refetch: fetchProfile,
     isAdmin,
-    isUsuarioPadrao
+    isUsuarioPadrao,
+    isTerceirizado
   };
 };

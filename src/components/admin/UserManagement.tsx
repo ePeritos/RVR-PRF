@@ -42,7 +42,7 @@ interface UserProfile {
   unidade_lotacao: string | null;
   formacao: string | null;
   cargo: string | null;
-  role: "admin" | "usuario_padrao";
+  role: "admin" | "usuario_padrao" | "terceirizado";
   created_at: string;
 }
 
@@ -60,7 +60,7 @@ const opcoesFormacao = [
   'Engenharia Mecânica', 'Outra'
 ];
 
-const roleOptions = ['admin', 'usuario_padrao'];
+const roleOptions = ['admin', 'usuario_padrao', 'terceirizado'];
 
 export function UserManagement() {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -151,7 +151,7 @@ export function UserManagement() {
           telefone: editForm.telefone || null,
           formacao: editForm.formacao || null,
           cargo: editForm.cargo || null,
-          role: editForm.role as "admin" | "usuario_padrao",
+          role: editForm.role as "admin" | "usuario_padrao" | "terceirizado",
         })
         .eq("id", editingUser.id);
 
@@ -232,9 +232,9 @@ export function UserManagement() {
                     <TableCell>{user.matricula || "—"}</TableCell>
                     <TableCell>{user.unidade_gestora || user.unidade_lotacao || "—"}</TableCell>
                     <TableCell>
-                      <Badge variant={user.role === "admin" ? "default" : "secondary"} className="flex items-center gap-1 w-fit">
+                      <Badge variant={user.role === "admin" ? "default" : user.role === "terceirizado" ? "outline" : "secondary"} className="flex items-center gap-1 w-fit">
                         {user.role === "admin" ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
-                        {user.role === "admin" ? "Admin" : "Padrão"}
+                        {user.role === "admin" ? "Admin" : user.role === "terceirizado" ? "Terceirizado" : "Padrão"}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -326,7 +326,7 @@ export function UserManagement() {
                 <SimpleSelect
                   options={roleOptions}
                   value={editForm.role || "usuario_padrao"}
-                  onChange={(v) => setEditForm((p) => ({ ...p, role: v as "admin" | "usuario_padrao" }))}
+                  onChange={(v) => setEditForm((p) => ({ ...p, role: v as "admin" | "usuario_padrao" | "terceirizado" }))}
                   placeholder="Selecione o perfil"
                 />
               </div>
