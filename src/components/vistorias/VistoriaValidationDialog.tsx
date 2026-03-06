@@ -352,19 +352,39 @@ export function VistoriaValidationDialog({ vistoria, open, onOpenChange, onSucce
             </Card>
           )}
 
-          {/* Actions */}
+          {/* CAIP year selector + Actions */}
           {canValidate && (
-            <div className="flex gap-2 justify-end pt-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>Fechar</Button>
-              <Button variant="secondary" onClick={handleSaveValidations} disabled={saving}>
-                Salvar Validações
-              </Button>
-              <Button variant="destructive" onClick={() => handleFinalizeValidation(false)} disabled={saving}>
-                Rejeitar Vistoria
-              </Button>
-              <Button onClick={() => handleFinalizeValidation(true)} disabled={saving}>
-                Aprovar Vistoria
-              </Button>
+            <div className="space-y-4 pt-4 border-t">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Vincular imagens ao CAIP do ano:</Label>
+                <Select value={selectedCaipId} onValueChange={setSelectedCaipId}>
+                  <SelectTrigger className="w-full max-w-xs">
+                    <SelectValue placeholder="Selecione o ano CAIP" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {caipRecords.map((record) => (
+                      <SelectItem key={record.id} value={record.id}>
+                        {record.ano_caip} — {record.nome_da_unidade}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Ao aprovar, as imagens da vistoria serão copiadas para o registro CAIP selecionado.
+                </p>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => onOpenChange(false)}>Fechar</Button>
+                <Button variant="secondary" onClick={handleSaveValidations} disabled={saving}>
+                  Salvar Validações
+                </Button>
+                <Button variant="destructive" onClick={() => handleFinalizeValidation(false)} disabled={saving}>
+                  Rejeitar Vistoria
+                </Button>
+                <Button onClick={() => handleFinalizeValidation(true)} disabled={saving || !selectedCaipId}>
+                  Aprovar Vistoria
+                </Button>
+              </div>
             </div>
           )}
 
