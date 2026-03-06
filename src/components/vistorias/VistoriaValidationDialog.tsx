@@ -33,6 +33,8 @@ export function VistoriaValidationDialog({ vistoria, open, onOpenChange, onSucce
   const [validacoes, setValidacoes] = useState<Record<string, Validacao>>({});
   const [saving, setSaving] = useState(false);
   const [existingValidacoes, setExistingValidacoes] = useState<any[]>([]);
+  const [caipRecords, setCaipRecords] = useState<{ id: string; ano_caip: string; nome_da_unidade: string }[]>([]);
+  const [selectedCaipId, setSelectedCaipId] = useState<string>('');
 
   useEffect(() => {
     if (open && vistoria?.id) {
