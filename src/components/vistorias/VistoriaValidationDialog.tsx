@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { VISTORIA_SECTIONS, SECTION_STATUS_OPTIONS, VISTORIA_STATUS_LABELS } from '@/constants/vistoriaConstants';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
 
@@ -32,10 +33,13 @@ export function VistoriaValidationDialog({ vistoria, open, onOpenChange, onSucce
   const [validacoes, setValidacoes] = useState<Record<string, Validacao>>({});
   const [saving, setSaving] = useState(false);
   const [existingValidacoes, setExistingValidacoes] = useState<any[]>([]);
+  const [caipRecords, setCaipRecords] = useState<{ id: string; ano_caip: string; nome_da_unidade: string }[]>([]);
+  const [selectedCaipId, setSelectedCaipId] = useState<string>('');
 
   useEffect(() => {
     if (open && vistoria?.id) {
       fetchValidacoes();
+      fetchCaipRecords();
     }
   }, [open, vistoria?.id]);
 
@@ -57,6 +61,31 @@ export function VistoriaValidationDialog({ vistoria, open, onOpenChange, onSucce
         };
       });
       setValidacoes(map);
+    }
+  };
+
+  const fetchCaipRecords = async () => {
+    const { data: currentCaip } = await supabase
+      .from('dados_caip')
+      .select('id, ano_caip, nome_da_unidade')
+      .eq('id', vistoria.dados_caip_id)
+      .single();
+
+    if (!currentCaip?.nome_da_unidade) {
+      setCaipRecords(currentCaip ? [{ id: currentCaip.id, ano_caip: currentCaip.ano_caip || '—', nome_da_unidade: currentCaip.nome_da_unidade || '—' }] : []);
+      setSelectedCaipId(vistoria.dados_caip_id);
+      return;
+    }
+
+    const { data } = await supabase
+      .from('dados_caip')
+      .select('id, ano_caip, nome_da_unidade')
+      .eq('nome_da_unidade', currentCaip.nome_da_unidade)
+      .order('ano_caip', { ascending: false });
+
+    if (data && data.length > 0) {
+      setCaipRecords(data.map(r => ({ id: r.id, ano_caip: r.ano_caip || '—', nome_da_unidade: r.nome_da_unidade || '—' })));
+      setSelectedCaipId(vistoria.dados_caip_id);
     }
   };
 
@@ -129,10 +158,11 @@ export function VistoriaValidationDialog({ vistoria, open, onOpenChange, onSucce
 
     if (Object.keys(updateData).length === 0) return 0;
 
+    const targetId = selectedCaipId || vistoria.dados_caip_id;
     const { error } = await supabase
       .from('dados_caip')
       .update(updateData)
-      .eq('id', vistoria.dados_caip_id);
+      .eq('id', targetId);
 
     if (error) throw error;
     return Object.keys(updateData).length;
@@ -322,19 +352,39 @@ export function VistoriaValidationDialog({ vistoria, open, onOpenChange, onSucce
             </Card>
           )}
 
-          {/* Actions */}
+          {/* CAIP year selector + Actions */}
           {canValidate && (
-            <div className="flex gap-2 justify-end pt-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>Fechar</Button>
-              <Button variant="secondary" onClick={handleSaveValidations} disabled={saving}>
-                Salvar Validações
-              </Button>
-              <Button variant="destructive" onClick={() => handleFinalizeValidation(false)} disabled={saving}>
-                Rejeitar Vistoria
-              </Button>
-              <Button onClick={() => handleFinalizeValidation(true)} disabled={saving}>
-                Aprovar Vistoria
-              </Button>
+            <div className="space-y-4 pt-4 border-t">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Vincular imagens ao CAIP do ano:</Label>
+                <Select value={selectedCaipId} onValueChange={setSelectedCaipId}>
+                  <SelectTrigger className="w-full max-w-xs">
+                    <SelectValue placeholder="Selecione o ano CAIP" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {caipRecords.map((record) => (
+                      <SelectItem key={record.id} value={record.id}>
+                        {record.ano_caip} — {record.nome_da_unidade}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Ao aprovar, as imagens da vistoria serão copiadas para o registro CAIP selecionado.
+                </p>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => onOpenChange(false)}>Fechar</Button>
+                <Button variant="secondary" onClick={handleSaveValidations} disabled={saving}>
+                  Salvar Validações
+                </Button>
+                <Button variant="destructive" onClick={() => handleFinalizeValidation(false)} disabled={saving}>
+                  Rejeitar Vistoria
+                </Button>
+                <Button onClick={() => handleFinalizeValidation(true)} disabled={saving || !selectedCaipId}>
+                  Aprovar Vistoria
+                </Button>
+              </div>
             </div>
           )}
 
