@@ -151,7 +151,7 @@ export function UserManagement() {
           telefone: editForm.telefone || null,
           formacao: editForm.formacao || null,
           cargo: editForm.cargo || null,
-          role: editForm.role as "admin" | "usuario_padrao",
+          role: editForm.role as "admin" | "usuario_padrao" | "terceirizado",
         })
         .eq("id", editingUser.id);
 
