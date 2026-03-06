@@ -1,4 +1,4 @@
-import { Home, Calculator, Database, LogOut, User, Menu, Building, FileText, Settings } from "lucide-react";
+import { Home, Calculator, Database, LogOut, User, Menu, Building, FileText, Settings, ClipboardCheck } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
