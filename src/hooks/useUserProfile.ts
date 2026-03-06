@@ -49,8 +49,8 @@ export const useUserProfile = () => {
         if (data) {
           console.log('✅ useUserProfile - Perfil encontrado:', data);
           setProfile(data);
-          // Verificar se o perfil precisa ser configurado (usuário padrão sem unidade gestora)
-          if (data.role === 'usuario_padrao' && !data.unidade_gestora) {
+          // Verificar se o perfil precisa ser configurado (usuário sem unidade gestora, exceto admin)
+          if (data.role !== 'admin' && !data.unidade_gestora) {
             console.log('⚠️ useUserProfile - Perfil precisa de configuração (sem unidade gestora)');
             setNeedsSetup(true);
           } else {
