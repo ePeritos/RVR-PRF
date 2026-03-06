@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 
-export type UserRole = 'admin' | 'usuario_padrao';
+export type UserRole = 'admin' | 'usuario_padrao' | 'terceirizado';
 
 export interface Profile {
   id: string;
