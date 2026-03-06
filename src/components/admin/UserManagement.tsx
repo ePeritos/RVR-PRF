@@ -42,7 +42,7 @@ interface UserProfile {
   unidade_lotacao: string | null;
   formacao: string | null;
   cargo: string | null;
-  role: "admin" | "usuario_padrao";
+  role: "admin" | "usuario_padrao" | "terceirizado";
   created_at: string;
 }
 
