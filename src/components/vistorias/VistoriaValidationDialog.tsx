@@ -64,7 +64,32 @@ export function VistoriaValidationDialog({ vistoria, open, onOpenChange, onSucce
     }
   };
 
-  const setFieldValidation = (secao: string, campo: string, status: string) => {
+  const fetchCaipRecords = async () => {
+    const { data: currentCaip } = await supabase
+      .from('dados_caip')
+      .select('id, ano_caip, nome_da_unidade')
+      .eq('id', vistoria.dados_caip_id)
+      .single();
+
+    if (!currentCaip?.nome_da_unidade) {
+      setCaipRecords(currentCaip ? [{ id: currentCaip.id, ano_caip: currentCaip.ano_caip || '—', nome_da_unidade: currentCaip.nome_da_unidade || '—' }] : []);
+      setSelectedCaipId(vistoria.dados_caip_id);
+      return;
+    }
+
+    const { data } = await supabase
+      .from('dados_caip')
+      .select('id, ano_caip, nome_da_unidade')
+      .eq('nome_da_unidade', currentCaip.nome_da_unidade)
+      .order('ano_caip', { ascending: false });
+
+    if (data && data.length > 0) {
+      setCaipRecords(data.map(r => ({ id: r.id, ano_caip: r.ano_caip || '—', nome_da_unidade: r.nome_da_unidade || '—' })));
+      setSelectedCaipId(vistoria.dados_caip_id);
+    }
+  };
+
+
     const key = `${secao}__${campo}`;
     setValidacoes(prev => ({
       ...prev,
