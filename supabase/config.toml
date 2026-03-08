@@ -2,3 +2,6 @@ project_id = "sbefwlhezngkwsxybrsj"
 
 [functions.batch-upload-images]
 verify_jwt = false
+
+[functions.mcp-imoveis]
+verify_jwt = false
