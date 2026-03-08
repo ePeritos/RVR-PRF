@@ -20,8 +20,80 @@ const mcpServer = new McpServer({
 });
 
 mcpServer.tool({
+  name: "get_campos_disponiveis",
+  description: "Retorna a lista de todos os campos disponíveis nos imóveis da PRF, com descrição e tipo de cada campo. Use para saber quais dados podem ser usados para preencher formulários.",
+  inputSchema: { type: "object", properties: {} },
+  handler: async () => {
+    const campos = [
+      { campo: "id", tipo: "uuid", descricao: "Identificador único do imóvel" },
+      { campo: "nome_da_unidade", tipo: "text", descricao: "Nome do imóvel/unidade" },
+      { campo: "endereco", tipo: "text", descricao: "Endereço completo do imóvel" },
+      { campo: "coordenadas", tipo: "text", descricao: "Coordenadas geográficas (lat, lng)" },
+      { campo: "zona", tipo: "text", descricao: "Zona (urbana/rural)" },
+      { campo: "unidade_gestora", tipo: "text", descricao: "Unidade gestora responsável (ex: SPRF/SC)" },
+      { campo: "tipo_de_unidade", tipo: "text", descricao: "Tipo de unidade (UOP, DEL, Sede Administrativa, Centro de Treinamento)" },
+      { campo: "tipo_de_imovel", tipo: "text", descricao: "Tipo do imóvel (próprio, alugado, cedido, etc.)" },
+      { campo: "situacao_do_imovel", tipo: "text", descricao: "Situação atual do imóvel" },
+      { campo: "estado_de_conservacao", tipo: "text", descricao: "Estado de conservação (A-H)" },
+      { campo: "ano_caip", tipo: "text", descricao: "Ano do CAIP" },
+      { campo: "rip", tipo: "text", descricao: "Registro Imobiliário Patrimonial" },
+      { campo: "matricula_do_imovel", tipo: "text", descricao: "Matrícula do imóvel no cartório" },
+      { campo: "processo_sei", tipo: "text", descricao: "Número do processo SEI" },
+      { campo: "implantacao_da_unidade", tipo: "text", descricao: "Tipo de implantação da unidade" },
+      { campo: "area_construida_m2", tipo: "number", descricao: "Área construída em metros quadrados" },
+      { campo: "area_do_terreno_m2", tipo: "number", descricao: "Área do terreno em metros quadrados" },
+      { campo: "area_do_patio_para_retencao_de_veiculos_m2", tipo: "number", descricao: "Área do pátio para retenção de veículos (m²)" },
+      { campo: "area_da_cobertura_de_pista_m2", tipo: "number", descricao: "Área da cobertura de pista (m²)" },
+      { campo: "vida_util_estimada_anos", tipo: "number", descricao: "Vida útil estimada em anos" },
+      { campo: "idade_aparente_do_imovel", tipo: "number", descricao: "Idade aparente do imóvel em anos (pode ser usado como Ano de Construção)" },
+      { campo: "rvr", tipo: "number", descricao: "Valor de Referência do Imóvel (RVR) em reais" },
+      { campo: "ano_da_ultima_reavaliacao_rvr", tipo: "text", descricao: "Ano da última reavaliação RVR" },
+      { campo: "nota_global", tipo: "number", descricao: "Nota global do imóvel (0-100)" },
+      { campo: "nota_para_adequacao", tipo: "text", descricao: "Nota de adequação (0-100)" },
+      { campo: "nota_para_manutencao", tipo: "text", descricao: "Nota de manutenção (0-100)" },
+      { campo: "ano_da_ultima_intervencao_na_infraestrutura_do_imovel", tipo: "text", descricao: "Ano da última intervenção na infraestrutura" },
+      { campo: "tempo_de_intervencao", tipo: "text", descricao: "Tempo da intervenção" },
+      { campo: "precisaria_de_qual_intervencao", tipo: "text", descricao: "Tipo de intervenção necessária" },
+      { campo: "ha_contrato_de_manutencao_predial", tipo: "text", descricao: "Possui contrato de manutenção predial (Sim/Não)" },
+      { campo: "ha_plano_de_manutencao_do_imovel", tipo: "text", descricao: "Possui plano de manutenção (Sim/Não)" },
+      { campo: "observacoes", tipo: "text", descricao: "Observações gerais sobre o imóvel" },
+      // Infraestrutura
+      { campo: "fornecimento_de_agua", tipo: "text", descricao: "Tipo de fornecimento de água" },
+      { campo: "fornecimento_de_energia_eletrica", tipo: "text", descricao: "Tipo de fornecimento de energia" },
+      { campo: "esgotamento_sanitario", tipo: "text", descricao: "Tipo de esgotamento sanitário" },
+      { campo: "conexao_de_internet", tipo: "text", descricao: "Tipo de conexão de internet" },
+      { campo: "possui_wireless_wifi", tipo: "text", descricao: "Possui WiFi (Sim/Não)" },
+      { campo: "energia_solar", tipo: "text", descricao: "Possui energia solar (Sim/Não)" },
+      { campo: "acessibilidade", tipo: "text", descricao: "Condição de acessibilidade" },
+      { campo: "blindagem", tipo: "text", descricao: "Possui blindagem (Sim/Não)" },
+      // Ambientes (Sim/Não)
+      { campo: "almoxarifado", tipo: "text", descricao: "Possui almoxarifado (Sim/Não)" },
+      { campo: "alojamento_masculino", tipo: "text", descricao: "Possui alojamento masculino (Sim/Não)" },
+      { campo: "alojamento_feminino", tipo: "text", descricao: "Possui alojamento feminino (Sim/Não)" },
+      { campo: "copa_e_cozinha", tipo: "text", descricao: "Possui copa e cozinha (Sim/Não)" },
+      { campo: "garagem_para_viaturas", tipo: "text", descricao: "Possui garagem para viaturas (Sim/Não)" },
+      { campo: "sala_administrativa_escritorio", tipo: "text", descricao: "Possui sala administrativa (Sim/Não)" },
+      { campo: "sala_de_reuniao", tipo: "text", descricao: "Possui sala de reunião (Sim/Não)" },
+      { campo: "auditorio", tipo: "text", descricao: "Possui auditório (Sim/Não)" },
+      // Imagens
+      { campo: "imagem_geral", tipo: "text", descricao: "URL da imagem geral do imóvel" },
+      { campo: "imagem_fachada", tipo: "text", descricao: "URL da imagem da fachada" },
+      { campo: "imagem_lateral_1", tipo: "text", descricao: "URL da imagem lateral 1" },
+      { campo: "imagem_lateral_2", tipo: "text", descricao: "URL da imagem lateral 2" },
+      { campo: "imagem_fundos", tipo: "text", descricao: "URL da imagem dos fundos" },
+      // Metadados
+      { campo: "cadastrador", tipo: "text", descricao: "Nome de quem cadastrou" },
+      { campo: "alterador", tipo: "text", descricao: "Nome de quem alterou por último" },
+      { campo: "created_at", tipo: "timestamp", descricao: "Data de criação do registro" },
+      { campo: "updated_at", tipo: "timestamp", descricao: "Data da última atualização" },
+    ];
+    return { content: [{ type: "text", text: JSON.stringify({ total_campos: campos.length, campos }, null, 2) }] };
+  },
+});
+
+mcpServer.tool({
   name: "list_imoveis",
-  description: "Lista imóveis da PRF com dados básicos. Suporta paginação e filtro por unidade gestora, tipo de unidade e ano CAIP.",
+  description: "Lista imóveis da PRF com TODOS os dados disponíveis. Suporta paginação e filtro por unidade gestora, tipo de unidade e ano CAIP.",
   inputSchema: {
     type: "object",
     properties: {
@@ -39,7 +111,7 @@ mcpServer.tool({
 
     let query = supabase
       .from('dados_caip')
-      .select(BASIC_FIELDS, { count: 'exact' });
+      .select(ALL_FIELDS, { count: 'exact' });
 
     if (unidade_gestora) query = query.eq('unidade_gestora', unidade_gestora);
     if (tipo_de_unidade) query = query.eq('tipo_de_unidade', tipo_de_unidade);
@@ -64,7 +136,7 @@ mcpServer.tool({
 
 mcpServer.tool({
   name: "search_imoveis",
-  description: "Busca imóveis por nome ou endereço (busca textual parcial).",
+  description: "Busca imóveis por nome ou endereço (busca textual parcial). Retorna todos os campos disponíveis.",
   inputSchema: {
     type: "object",
     properties: {
@@ -80,7 +152,7 @@ mcpServer.tool({
 
     const { data, error } = await supabase
       .from('dados_caip')
-      .select(BASIC_FIELDS)
+      .select(ALL_FIELDS)
       .or(`nome_da_unidade.ilike.${searchTerm},endereco.ilike.${searchTerm}`)
       .order('nome_da_unidade')
       .limit(pageLimit);
@@ -100,7 +172,7 @@ mcpServer.tool({
 
 mcpServer.tool({
   name: "get_imovel",
-  description: "Busca um imóvel específico pelo ID, retornando dados básicos.",
+  description: "Busca um imóvel específico pelo ID, retornando todos os campos disponíveis.",
   inputSchema: {
     type: "object",
     properties: {
@@ -113,7 +185,7 @@ mcpServer.tool({
 
     const { data, error } = await supabase
       .from('dados_caip')
-      .select(BASIC_FIELDS)
+      .select(ALL_FIELDS)
       .eq('id', id)
       .single();
 
