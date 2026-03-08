@@ -196,13 +196,14 @@ mcpServer.tool("get_imovel", {
 });
 
 const transport = new StreamableHttpTransport();
+const httpHandler = transport.bind(mcpServer);
 
 app.all("/*", async (c) => {
   if (c.req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const response = await transport.handleRequest(c.req.raw, mcpServer);
+  const response = await httpHandler(c.req.raw);
 
   const newHeaders = new Headers(response.headers);
   Object.entries(corsHeaders).forEach(([k, v]) => newHeaders.set(k, v));
