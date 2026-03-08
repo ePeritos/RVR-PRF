@@ -19,10 +19,10 @@ const mcpServer = new McpServer({
   version: "1.0.0",
 });
 
-mcpServer.tool({
-  name: "get_campos_disponiveis",
+// Tool: get_campos_disponiveis
+mcpServer.tool("get_campos_disponiveis", {
   description: "Retorna a lista de todos os campos disponíveis nos imóveis da PRF, com descrição e tipo de cada campo. Use para saber quais dados podem ser usados para preencher formulários.",
-  inputSchema: { type: "object", properties: {} },
+  inputSchema: { type: "object" as const, properties: {} },
   handler: async () => {
     const campos = [
       { campo: "id", tipo: "uuid", descricao: "Identificador único do imóvel" },
@@ -45,7 +45,7 @@ mcpServer.tool({
       { campo: "area_do_patio_para_retencao_de_veiculos_m2", tipo: "number", descricao: "Área do pátio para retenção de veículos (m²)" },
       { campo: "area_da_cobertura_de_pista_m2", tipo: "number", descricao: "Área da cobertura de pista (m²)" },
       { campo: "vida_util_estimada_anos", tipo: "number", descricao: "Vida útil estimada em anos" },
-      { campo: "idade_aparente_do_imovel", tipo: "number", descricao: "Idade aparente do imóvel em anos (pode ser usado como Ano de Construção)" },
+      { campo: "idade_aparente_do_imovel", tipo: "number", descricao: "Idade aparente do imóvel em anos" },
       { campo: "rvr", tipo: "number", descricao: "Valor de Referência do Imóvel (RVR) em reais" },
       { campo: "ano_da_ultima_reavaliacao_rvr", tipo: "text", descricao: "Ano da última reavaliação RVR" },
       { campo: "nota_global", tipo: "number", descricao: "Nota global do imóvel (0-100)" },
@@ -57,7 +57,6 @@ mcpServer.tool({
       { campo: "ha_contrato_de_manutencao_predial", tipo: "text", descricao: "Possui contrato de manutenção predial (Sim/Não)" },
       { campo: "ha_plano_de_manutencao_do_imovel", tipo: "text", descricao: "Possui plano de manutenção (Sim/Não)" },
       { campo: "observacoes", tipo: "text", descricao: "Observações gerais sobre o imóvel" },
-      // Infraestrutura
       { campo: "fornecimento_de_agua", tipo: "text", descricao: "Tipo de fornecimento de água" },
       { campo: "fornecimento_de_energia_eletrica", tipo: "text", descricao: "Tipo de fornecimento de energia" },
       { campo: "esgotamento_sanitario", tipo: "text", descricao: "Tipo de esgotamento sanitário" },
@@ -66,7 +65,6 @@ mcpServer.tool({
       { campo: "energia_solar", tipo: "text", descricao: "Possui energia solar (Sim/Não)" },
       { campo: "acessibilidade", tipo: "text", descricao: "Condição de acessibilidade" },
       { campo: "blindagem", tipo: "text", descricao: "Possui blindagem (Sim/Não)" },
-      // Ambientes (Sim/Não)
       { campo: "almoxarifado", tipo: "text", descricao: "Possui almoxarifado (Sim/Não)" },
       { campo: "alojamento_masculino", tipo: "text", descricao: "Possui alojamento masculino (Sim/Não)" },
       { campo: "alojamento_feminino", tipo: "text", descricao: "Possui alojamento feminino (Sim/Não)" },
@@ -75,33 +73,31 @@ mcpServer.tool({
       { campo: "sala_administrativa_escritorio", tipo: "text", descricao: "Possui sala administrativa (Sim/Não)" },
       { campo: "sala_de_reuniao", tipo: "text", descricao: "Possui sala de reunião (Sim/Não)" },
       { campo: "auditorio", tipo: "text", descricao: "Possui auditório (Sim/Não)" },
-      // Imagens
       { campo: "imagem_geral", tipo: "text", descricao: "URL da imagem geral do imóvel" },
       { campo: "imagem_fachada", tipo: "text", descricao: "URL da imagem da fachada" },
       { campo: "imagem_lateral_1", tipo: "text", descricao: "URL da imagem lateral 1" },
       { campo: "imagem_lateral_2", tipo: "text", descricao: "URL da imagem lateral 2" },
       { campo: "imagem_fundos", tipo: "text", descricao: "URL da imagem dos fundos" },
-      // Metadados
       { campo: "cadastrador", tipo: "text", descricao: "Nome de quem cadastrou" },
       { campo: "alterador", tipo: "text", descricao: "Nome de quem alterou por último" },
       { campo: "created_at", tipo: "timestamp", descricao: "Data de criação do registro" },
       { campo: "updated_at", tipo: "timestamp", descricao: "Data da última atualização" },
     ];
-    return { content: [{ type: "text", text: JSON.stringify({ total_campos: campos.length, campos }, null, 2) }] };
+    return { content: [{ type: "text" as const, text: JSON.stringify({ total_campos: campos.length, campos }, null, 2) }] };
   },
 });
 
-mcpServer.tool({
-  name: "list_imoveis",
+// Tool: list_imoveis
+mcpServer.tool("list_imoveis", {
   description: "Lista imóveis da PRF com TODOS os dados disponíveis. Suporta paginação e filtro por unidade gestora, tipo de unidade e ano CAIP.",
   inputSchema: {
-    type: "object",
+    type: "object" as const,
     properties: {
-      unidade_gestora: { type: "string", description: "Filtrar por unidade gestora (ex: SPRF/SC)" },
-      tipo_de_unidade: { type: "string", description: "Filtrar por tipo (UOP, DEL, Sede Administrativa, Centro de Treinamento)" },
-      ano_caip: { type: "string", description: "Filtrar por ano CAIP (ex: 2025)" },
-      limit: { type: "number", description: "Quantidade máxima de registros (padrão: 50, máx: 200)" },
-      offset: { type: "number", description: "Offset para paginação (padrão: 0)" },
+      unidade_gestora: { type: "string" as const, description: "Filtrar por unidade gestora (ex: SPRF/SC)" },
+      tipo_de_unidade: { type: "string" as const, description: "Filtrar por tipo (UOP, DEL, Sede Administrativa, Centro de Treinamento)" },
+      ano_caip: { type: "string" as const, description: "Filtrar por ano CAIP (ex: 2025)" },
+      limit: { type: "number" as const, description: "Quantidade máxima de registros (padrão: 50, máx: 200)" },
+      offset: { type: "number" as const, description: "Offset para paginação (padrão: 0)" },
     },
   },
   handler: async ({ unidade_gestora, tipo_de_unidade, ano_caip, limit, offset }: any) => {
@@ -122,28 +118,28 @@ mcpServer.tool({
       .range(pageOffset, pageOffset + pageLimit - 1);
 
     if (error) {
-      return { content: [{ type: "text", text: `Erro: ${error.message}` }] };
+      return { content: [{ type: "text" as const, text: `Erro: ${error.message}` }] };
     }
 
     return {
       content: [{
-        type: "text",
+        type: "text" as const,
         text: JSON.stringify({ total: count, limit: pageLimit, offset: pageOffset, data }, null, 2),
       }],
     };
   },
 });
 
-mcpServer.tool({
-  name: "search_imoveis",
+// Tool: search_imoveis
+mcpServer.tool("search_imoveis", {
   description: "Busca imóveis por nome ou endereço (busca textual parcial). Retorna todos os campos disponíveis.",
   inputSchema: {
-    type: "object",
+    type: "object" as const,
     properties: {
-      query: { type: "string", description: "Termo de busca (nome ou endereço do imóvel)" },
-      limit: { type: "number", description: "Quantidade máxima de resultados (padrão: 20, máx: 100)" },
+      query: { type: "string" as const, description: "Termo de busca (nome ou endereço do imóvel)" },
+      limit: { type: "number" as const, description: "Quantidade máxima de resultados (padrão: 20, máx: 100)" },
     },
-    required: ["query"],
+    required: ["query"] as const,
   },
   handler: async ({ query, limit }: any) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -158,27 +154,27 @@ mcpServer.tool({
       .limit(pageLimit);
 
     if (error) {
-      return { content: [{ type: "text", text: `Erro: ${error.message}` }] };
+      return { content: [{ type: "text" as const, text: `Erro: ${error.message}` }] };
     }
 
     return {
       content: [{
-        type: "text",
+        type: "text" as const,
         text: JSON.stringify({ total: data?.length || 0, data }, null, 2),
       }],
     };
   },
 });
 
-mcpServer.tool({
-  name: "get_imovel",
+// Tool: get_imovel
+mcpServer.tool("get_imovel", {
   description: "Busca um imóvel específico pelo ID, retornando todos os campos disponíveis.",
   inputSchema: {
-    type: "object",
+    type: "object" as const,
     properties: {
-      id: { type: "string", description: "UUID do imóvel" },
+      id: { type: "string" as const, description: "UUID do imóvel" },
     },
-    required: ["id"],
+    required: ["id"] as const,
   },
   handler: async ({ id }: any) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -190,25 +186,25 @@ mcpServer.tool({
       .single();
 
     if (error) {
-      return { content: [{ type: "text", text: `Erro: ${error.message}` }] };
+      return { content: [{ type: "text" as const, text: `Erro: ${error.message}` }] };
     }
 
     return {
-      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+      content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
     };
   },
 });
 
 const transport = new StreamableHttpTransport();
+const httpHandler = transport.bind(mcpServer);
 
 app.all("/*", async (c) => {
   if (c.req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const response = await transport.handleRequest(c.req.raw, mcpServer);
+  const response = await httpHandler(c.req.raw);
 
-  // Add CORS headers to the response
   const newHeaders = new Headers(response.headers);
   Object.entries(corsHeaders).forEach(([k, v]) => newHeaders.set(k, v));
 
