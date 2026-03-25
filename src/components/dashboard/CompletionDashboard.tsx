@@ -217,20 +217,34 @@ export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
 
       {/* Bar Chart */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">Média de Preenchimento por Regional</CardTitle>
+          <div className="flex gap-1 border rounded-md overflow-hidden">
+            <button
+              onClick={() => { setChartSortField('mediaPreenchimento'); setChartSortDir(prev => chartSortField === 'mediaPreenchimento' ? (prev === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+              className={`px-3 py-1 text-xs font-medium transition-colors ${chartSortField === 'mediaPreenchimento' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
+            >
+              Por Média {chartSortField === 'mediaPreenchimento' ? (chartSortDir === 'asc' ? '↑' : '↓') : ''}
+            </button>
+            <button
+              onClick={() => { setChartSortField('unidade'); setChartSortDir(prev => chartSortField === 'unidade' ? (prev === 'asc' ? 'desc' : 'asc') : 'asc'); }}
+              className={`px-3 py-1 text-xs font-medium transition-colors ${chartSortField === 'unidade' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
+            >
+              Por Nome {chartSortField === 'unidade' ? (chartSortDir === 'asc' ? 'A-Z' : 'Z-A') : ''}
+            </button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="h-[500px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={regionalStats} layout="vertical" margin={{ left: 80, right: 20, top: 10, bottom: 10 }}>
+              <BarChart data={chartStats} layout="vertical" margin={{ left: 80, right: 20, top: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis type="number" domain={[0, 100]} tickFormatter={v => `${v}%`} />
                 <YAxis type="category" dataKey="unidade" width={75} fontSize={11} />
                 <Tooltip content={<CustomTooltip />} />
                 <ReferenceLine x={80} stroke="hsl(var(--chart-1))" strokeDasharray="3 3" label={{ value: '80%', position: 'top', fontSize: 10 }} />
                 <Bar dataKey="mediaPreenchimento" radius={[0, 4, 4, 0]}>
-                  {regionalStats.map((entry, index) => (
+                  {chartStats.map((entry, index) => (
                     <Cell key={index} fill={getCompletionColor(entry.mediaPreenchimento, theme)} />
                   ))}
                 </Bar>
