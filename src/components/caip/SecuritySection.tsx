@@ -44,7 +44,6 @@ export const SecuritySection = ({ register, setValue, watchedValues }: SecurityS
         {securityFields.map(({ key, label }) => (
           <div key={key} className="flex items-center space-x-2">
             <Checkbox 
-              {...register(key as keyof DadosCAIP)}
               checked={watchedValues?.[key as keyof DadosCAIP] === 'Sim'}
               onCheckedChange={(checked) => setValue(key as keyof DadosCAIP, checked ? 'Sim' : 'Não')}
             />

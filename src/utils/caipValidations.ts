@@ -92,9 +92,14 @@ export const processFormData = async (data: any) => {
     processedData.nota_para_manutencao = isNaN(val) ? null : String(Math.min(100, val));
   }
 
-  // Clean any remaining empty string fields that might be sent to non-text columns
+  // Convert stray boolean/on values from register() to Sim/Não strings
   Object.keys(processedData).forEach(key => {
-    if (processedData[key] === '') {
+    const val = processedData[key];
+    if (val === true || val === 'on') {
+      processedData[key] = 'Sim';
+    } else if (val === false) {
+      processedData[key] = 'Não';
+    } else if (val === '') {
       processedData[key] = null;
     }
   });
