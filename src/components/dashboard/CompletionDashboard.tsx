@@ -57,7 +57,7 @@ export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
 
     data.forEach(item => {
       const ug = item.unidade_gestora || 'Não informado';
-      const pct = Math.min(parseFloat(item.percentual_preenchimento || '0') * 100, 100);
+      const pct = Math.min(parseFloat(item.percentual_preenchimento || '0'), 100);
       
       const existing = map.get(ug) || { total: 0, soma: 0, completos: 0, parcial: 0, baixo: 0 };
       existing.total += 1;
@@ -86,7 +86,7 @@ export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
     const total = data.length;
     let soma = 0, completos = 0, parcial = 0, baixo = 0;
     data.forEach(item => {
-      const pct = Math.min(parseFloat(item.percentual_preenchimento || '0') * 100, 100);
+      const pct = Math.min(parseFloat(item.percentual_preenchimento || '0'), 100);
       soma += pct;
       if (pct >= 80) completos++;
       else if (pct >= 50) parcial++;
