@@ -1,4 +1,4 @@
-import { UseFormRegister, UseFormSetValue } from 'react-hook-form';
+import { UseFormSetValue } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -7,12 +7,11 @@ import { Tables } from '@/integrations/supabase/types';
 type DadosCAIP = Tables<'dados_caip'>;
 
 interface InfrastructureSectionProps {
-  register: UseFormRegister<DadosCAIP>;
   setValue: UseFormSetValue<DadosCAIP>;
   watchedValues?: any;
 }
 
-export const InfrastructureSection = ({ register, setValue, watchedValues }: InfrastructureSectionProps) => {
+export const InfrastructureSection = ({ setValue, watchedValues }: InfrastructureSectionProps) => {
   const infrastructureFields = [
     { key: 'fornecimento_de_agua', label: 'Fornecimento de Água' },
     { key: 'fornecimento_de_energia_eletrica', label: 'Fornecimento de Energia Elétrica' },

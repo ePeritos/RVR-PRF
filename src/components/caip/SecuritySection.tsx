@@ -1,4 +1,4 @@
-import { UseFormRegister, UseFormSetValue } from 'react-hook-form';
+import { UseFormSetValue } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -7,12 +7,11 @@ import { Tables } from '@/integrations/supabase/types';
 type DadosCAIP = Tables<'dados_caip'>;
 
 interface SecuritySectionProps {
-  register: UseFormRegister<DadosCAIP>;
   setValue: UseFormSetValue<DadosCAIP>;
   watchedValues?: any;
 }
 
-export const SecuritySection = ({ register, setValue, watchedValues }: SecuritySectionProps) => {
+export const SecuritySection = ({ setValue, watchedValues }: SecuritySectionProps) => {
   const securityFields = [
     { key: 'claviculario', label: 'Claviculário' },
     { key: 'sala_cofre', label: 'Sala Cofre' },
