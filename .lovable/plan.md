@@ -1,65 +1,47 @@
 
 
-# Plano: Gerar Capítulo DOCX para Manual da PRF — Fluxo CAIP e RVR
+# Plano: Diagnóstico e Recuperação de Dados CAIP 2025
 
-## Objetivo
-Criar um documento Word (.docx) profissional e detalhado, pronto para inserção no manual institucional da PRF, descrevendo os fluxos operacionais do CAIP e do RVR conforme implementados no sistema.
+## Problema Identificado
 
-## Estrutura do Capítulo
+Após análise do código, identifiquei um **bug na interação entre `register()` e `onCheckedChange`** nos checkboxes. Todas as seções (Ambientes, Infraestrutura, Sistemas, Segurança, Dados Técnicos) usam este padrão:
 
-O documento terá a seguinte organização:
+```jsx
+<Checkbox 
+  {...register(key)}              // ← register injeta onChange que grava boolean
+  checked={value === 'Sim'}
+  onCheckedChange={(checked) => setValue(key, checked ? 'Sim' : 'Não')}
+/>
+```
 
-**1. Introdução**
-- Objetivo do capítulo e contextualização dos módulos CAIP e RVR
+O `{...register(key)}` do react-hook-form injeta um `onChange` que pode gravar `true`/`false` (boolean) no formulário, competindo com o `onCheckedChange` que grava `'Sim'`/`'Não'`. Dependendo da ordem de execução, o valor final pode ser `true` em vez de `'Sim'`. Ao salvar, `processFormData` converte `true` para `null` (pois não é string vazia mas também não é tratado), e o campo é persistido como `null` no banco.
 
-**2. Módulo CAIP — Cadastro de Avaliação de Imóveis para Programação**
-- 2.1 Visão Geral e Finalidade
-- 2.2 Perfis de Acesso (Admin vs Usuário Padrão — filtro por unidade gestora)
-- 2.3 Fluxo de Cadastro — passo a passo com as 9 seções do formulário:
-  1. Informações Básicas (UG, tipo unidade, nome, ano CAIP — anos ímpares)
-  2. Registro Fotográfico (10 campos de imagem, limite 5MB)
-  3. Localização e Dados do Imóvel (endereço, coordenadas, RIP, matrícula, estado conservação A-H)
-  4. Dados Técnicos e Áreas (vida útil, áreas m², idade aparente, checkboxes técnicos)
-  5. Infraestrutura e Utilidades (7 itens: água, energia, esgoto, internet, etc.)
-  6. Ambientes (40+ ambientes com marcação Sim/Não + avaliação por estrelas obrigatória)
-  7. Sistemas e Equipamentos (10 itens: climatização, proteção incêndio, etc.)
-  8. Segurança e Proteção (4 itens: claviculário, sala cofre, concertina, muro)
-  9. Notas e Avaliação (notas calculadas automaticamente: adequação, manutenção, global)
-- 2.4 Sistema de Notas — metodologia de cálculo (pesos UOP vs DEL, fórmula 60/40)
-- 2.5 Controle de Edição (lock de registro, barra de progresso)
-- 2.6 Filtros e Consulta de Registros
-- 2.7 Upload em Lote de Imagens (funcionalidade admin)
+Na próxima edição, valores `null` não são carregados no formulário (linha 49: `if (value !== null)`), resultando em checkboxes desmarcados.
 
-**3. Módulo RVR — Relatório de Valor Referencial**
-- 3.1 Visão Geral e Finalidade
-- 3.2 Fluxo em 3 Etapas:
-  - Etapa 1: Seleção de Imóveis (filtros por ano, UG, tipo, nome)
-  - Etapa 2: Parâmetros RVR (valor m², CUB/m², BDI, responsável técnico, UF, padrão construtivo)
-  - Etapa 3: Relatório RVR (resultados calculados, geração de PDF)
-- 3.3 Metodologia de Cálculo (Ross-Heidecke)
-  - Custo de Reedição = Área Construída × CUB/m² × (1 + BDI%)
-  - Valor do Terreno = Área Terreno × Valor/m²
-  - Depreciação via tabela Ross-Heidecke (idade % × estado conservação A-H)
-  - Valor do Imóvel = Valor Terreno + Valor Depreciado da Benfeitoria
-- 3.4 Geração de Relatório PDF (conteúdo: dados gerais, resultados, memorial de cálculo, responsabilidade técnica)
+## Plano de Ação
 
-**4. Integração entre Módulos**
-- CAIP alimenta o RVR com dados cadastrais
-- Vistorias de Manutenção complementam com avaliações de terceirizados
-- Fluxo ponta-a-ponta: Cadastro CAIP → Vistoria → Reavaliação RVR
+### 1. Diagnóstico — Consultar dados no banco
+Executar query para verificar o estado real dos campos checkbox nos registros CAIP 2025 e cruzar com `manutencao_ambientes` para confirmar a inconsistência.
 
-**5. Controle de Acesso e Segurança**
-- Autenticação Google Workspace (@prf.gov.br)
-- RLS por unidade gestora
-- Perfis: admin, usuario_padrao, terceirizado
+### 2. Script de Recuperação via SQL
+Criar uma migration que reconstrói os campos de ambientes a partir de `manutencao_ambientes`:
+- Se existe registro em `manutencao_ambientes` para um `imovel_id` com `nome_ambiente = 'Almoxarifado'`, então `dados_caip.almoxarifado` deveria ser `'Sim'`
+- Aplicar para todos os 40+ campos de ambientes
+- Registros afetados: CAIP 2025 onde campos estão `null` mas `manutencao_ambientes` tem dados
 
-## Detalhes Técnicos da Implementação
+### 3. Correção do Bug no Código
+Remover `{...register(key)}` de TODOS os checkboxes nas 5 seções, mantendo apenas `checked` + `onCheckedChange` com `setValue`. Arquivos afetados:
+- `EnvironmentsSection.tsx`
+- `InfrastructureSection.tsx`
+- `SystemsSection.tsx`
+- `SecuritySection.tsx`
+- `TechnicalDataSection.tsx`
 
-- Usar `docx-js` (npm) para gerar o DOCX
-- Formatação profissional: fonte Arial, títulos hierárquicos, tabelas formatadas
-- Paleta de cores institucional (azul PRF)
-- Cabeçalho com referência "Manual PRF — Capítulo: Fluxo CAIP e RVR"
-- Rodapé com numeração de páginas
-- Tabelas para campos do formulário e parâmetros
-- Saída em `/mnt/documents/capitulo_caip_rvr.docx`
+### 4. Proteção adicional em `processFormData`
+Adicionar tratamento para valores booleanos — converter `true` → `'Sim'` e `false` → `'Não'` — como camada de segurança extra.
+
+## Limitações da Recuperação
+- **Ambientes**: Recuperação total possível via `manutencao_ambientes`
+- **Infraestrutura, Sistemas, Segurança, Dados Técnicos**: Estes checkboxes NÃO têm tabela auxiliar — se foram perdidos, não há fonte de dados para recuperar. Será necessário que os usuários remarquem manualmente esses campos.
+- Podemos gerar um relatório (CSV) listando quais registros CAIP 2025 têm campos de infraestrutura/sistemas/segurança como `null` para que os usuários identifiquem quais precisam revisar.
 
