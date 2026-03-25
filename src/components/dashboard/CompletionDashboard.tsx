@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 import { AlertTriangle, CheckCircle, Clock, Image } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
+import { PropertyDetailTable } from './PropertyDetailTable';
 
 const IMAGE_FIELDS = [
   { key: 'imagem_geral', label: 'Imagem Geral' },
@@ -242,6 +243,9 @@ export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Property Detail */}
+      <PropertyDetailTable data={data} />
 
       {/* Image Completion */}
       <Card>
