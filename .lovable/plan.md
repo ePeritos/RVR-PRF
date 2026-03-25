@@ -1,48 +1,36 @@
 
 
-## Diagnóstico: Lógica do Percentual de Preenchimento na aba "Preenchimento"
+## Plano: Adicionar lista de imóveis individuais na aba Preenchimento
 
-### Como funciona hoje
+### Problema
+Atualmente, a aba "Preenchimento" mostra apenas dados agregados por regional (média, contagem). Quando o usuário filtra por uma unidade gestora, não consegue ver quais imóveis específicos precisam de atenção.
 
-**1. Cálculo do percentual (`useCAIPCalculations.tsx`)**
+### Solução
+Adicionar uma seção "Detalhamento por Imóvel" no `CompletionDashboard.tsx` que lista cada imóvel individualmente com seu percentual de preenchimento, status e campos faltantes. A seção aparece sempre, mas é mais útil quando filtrado por unidade gestora.
 
-Quando um formulário CAIP é salvo, o sistema conta quantos campos da tabela `dados_caip` estão preenchidos (não nulos, não vazios) e divide pelo total de campos. O resultado é salvo como string inteira — por exemplo, `"75"` significa 75%.
+### Alterações
 
-```text
-percentual = (camposPreenchidos / totalCampos) × 100
-→ salvo como "75" no banco
-```
+**Arquivo: `src/components/dashboard/CompletionDashboard.tsx`**
 
-**2. Leitura no Dashboard (`CompletionDashboard.tsx`)**
+1. Adicionar uma nova seção abaixo da tabela "Detalhamento por Regional" com uma tabela de imóveis individuais contendo:
+   - Nome da unidade (`nome_da_unidade`)
+   - Tipo de unidade (`tipo_de_unidade`)
+   - Unidade gestora (abreviada)
+   - Percentual de preenchimento com barra de progresso
+   - Badge de status (Completo/Parcial/Baixo)
 
-O dashboard lê esse valor e **multiplica por 100 novamente**:
+2. A tabela será ordenada por percentual de preenchimento (menor primeiro) para priorizar onde atuar.
 
-```text
-const pct = parseFloat(item.percentual_preenchimento || '0') * 100;
-→ "75" × 100 = 7500
-→ Math.min(7500, 100) = 100  ← tudo vira 100%!
-```
+3. Adicionar paginação simples (mostrar 20 por vez com botão "Carregar mais") para não sobrecarregar a tela com centenas de registros.
 
-### O problema
+4. Adicionar campo de busca por nome do imóvel para facilitar a localização.
 
-Existe uma **inconsistência de formato**: o cálculo salva como inteiro (ex: `"75"`), mas o dashboard interpreta como decimal (ex: `"0.75"`). O `Math.min(..., 100)` mascara o bug, fazendo quase todos os imóveis aparecerem como "Completo (≥80%)".
+5. Adicionar filtro por status (Completo/Parcial/Baixo) via botões de toggle para focar nos que precisam de atenção.
 
-### Classificação dos imóveis
-
-| Faixa | Status |
-|-------|--------|
-| ≥ 80% | Completo (verde) |
-| 50–79% | Parcial (amarelo) |
-| < 50% | Baixo (vermelho) |
-
-### Outros pontos de atenção
-
-- **Todos os ~100+ campos** são contados igualmente, incluindo metadados como `cadastrador`, `alterador`, `ultima_alteracao`, que são preenchidos automaticamente e inflam o percentual.
-- Os campos de imagem e notas calculadas também entram na contagem.
-
-### Plano de correção
-
-1. **Arquivo `src/components/dashboard/CompletionDashboard.tsx`** — Remover a multiplicação por 100 na leitura do `percentual_preenchimento`, já que o valor já está em formato inteiro (0–100).
-
-2. **Arquivo `src/hooks/useCAIPCalculations.tsx`** *(opcional, recomendado)* — Excluir campos de metadados da contagem para que o percentual reflita apenas os campos substantivos do formulário (dados do imóvel, ambientes, infraestrutura, etc.).
+### Detalhes técnicos
+- Usa `useMemo` para calcular a lista de imóveis com percentual parseado
+- Estado local para paginação (`visibleCount`), busca (`searchTerm`) e filtro de status (`statusFilter`)
+- Importar `Search` do lucide-react e `Input` do UI
+- Reutilizar `getCompletionBadge` já existente
+- Dados vêm do mesmo prop `data` já passado ao componente
 
