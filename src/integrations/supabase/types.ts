@@ -1015,16 +1015,13 @@ export type Database = {
             Args: { _user_id: string }
             Returns: Database["public"]["Enums"]["app_role"]
           }
-      has_role:
-        | { Args: never; Returns: boolean }
-        | {
-            Args: {
-              _role: Database["public"]["Enums"]["app_role"]
-              _user_id: string
-            }
-            Returns: boolean
-          }
-        | { Args: { role_name: string; user_id: number }; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       refresh_edit_lock: {
