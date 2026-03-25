@@ -57,6 +57,8 @@ export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
   const { theme } = useTheme();
   const [sortField, setSortField] = useState<'unidade' | 'totalImoveis' | 'mediaPreenchimento' | 'completosCount' | 'parcialCount' | 'baixoCount'>('mediaPreenchimento');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [chartSortField, setChartSortField] = useState<'unidade' | 'mediaPreenchimento'>('mediaPreenchimento');
+  const [chartSortDir, setChartSortDir] = useState<'asc' | 'desc'>('asc');
   const regionalStatsRaw = useMemo(() => {
     const map = new Map<string, { total: number; soma: number; completos: number; parcial: number; baixo: number }>();
 
@@ -106,6 +108,14 @@ export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
     if (sortField !== field) return <ArrowUpDown className="h-3 w-3 opacity-30" />;
     return sortDir === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />;
   };
+
+  const chartStats = useMemo(() => {
+    const dir = chartSortDir === 'asc' ? 1 : -1;
+    return [...regionalStatsRaw].sort((a, b) => {
+      if (chartSortField === 'unidade') return dir * a.unidade.localeCompare(b.unidade, 'pt-BR');
+      return dir * (a.mediaPreenchimento - b.mediaPreenchimento);
+    });
+  }, [regionalStatsRaw, chartSortField, chartSortDir]);
 
   const globalStats = useMemo(() => {
     if (data.length === 0) return { media: 0, completos: 0, parcial: 0, baixo: 0 };
