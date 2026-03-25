@@ -2,10 +2,12 @@ import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
-import { AlertTriangle, CheckCircle, Clock, Image } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Image, Download, FileText } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { PropertyDetailTable } from './PropertyDetailTable';
+import { exportCompletionToExcel, exportCompletionToPDF } from '@/utils/completionExport';
 
 const IMAGE_FIELDS = [
   { key: 'imagem_geral', label: 'Imagem Geral' },
@@ -125,6 +127,18 @@ export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
 
   return (
     <div className="space-y-4">
+      {/* Export Buttons */}
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => exportCompletionToExcel(data)}>
+          <Download className="h-4 w-4" />
+          Exportar Excel
+        </Button>
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => exportCompletionToPDF(data)}>
+          <FileText className="h-4 w-4" />
+          Exportar PDF
+        </Button>
+      </div>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
