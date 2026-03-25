@@ -55,6 +55,8 @@ const getCompletionBadge = (value: number) => {
 
 export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
   const { theme } = useTheme();
+  const [sortField, setSortField] = useState<'unidade' | 'totalImoveis' | 'mediaPreenchimento' | 'completosCount' | 'parcialCount' | 'baixoCount'>('mediaPreenchimento');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const regionalStats = useMemo(() => {
     const map = new Map<string, { total: number; soma: number; completos: number; parcial: number; baixo: number }>();
 
