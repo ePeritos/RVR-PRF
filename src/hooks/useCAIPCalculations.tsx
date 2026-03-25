@@ -12,17 +12,29 @@ interface UseCAIPCalculationsProps {
   avaliacoesManutencao?: {[key: string]: number};
 }
 
+// Campos de metadados/sistema que não devem contar no percentual de preenchimento
+const CAMPOS_EXCLUIDOS_PERCENTUAL = new Set([
+  'id', 'created_at', 'updated_at', 'editing_by', 'editing_at',
+  'cadastrador', 'alterador', 'ultima_alteracao', 'data_alteracao_preenchida',
+  'percentual_preenchimento', 'preenchido', 'gatilho', 'id_caip',
+  'nota_para_adequacao', 'nota_para_manutencao', 'nota_global',
+]);
+
 export const useCAIPCalculations = ({ watchedValues, setValue, setPercentualPreenchimento, avaliacoesManutencao }: UseCAIPCalculationsProps) => {
   // Calcular percentual de preenchimento
   useEffect(() => {
     if (watchedValues) {
-      const campos = Object.keys(watchedValues);
-      const camposPreenchidos = campos.filter(campo => {
+      const camposSubstantivos = Object.keys(watchedValues).filter(
+        campo => !CAMPOS_EXCLUIDOS_PERCENTUAL.has(campo)
+      );
+      const camposPreenchidos = camposSubstantivos.filter(campo => {
         const valor = watchedValues[campo as keyof DadosCAIP];
         return valor !== null && valor !== undefined && valor !== '';
       });
       
-      const percentual = Math.round((camposPreenchidos.length / campos.length) * 100);
+      const percentual = camposSubstantivos.length > 0
+        ? Math.round((camposPreenchidos.length / camposSubstantivos.length) * 100)
+        : 0;
       setValue('percentual_preenchimento', percentual.toString());
       setValue('preenchido', percentual > 70 ? 'Sim' : 'Não');
       setValue('data_alteracao_preenchida', new Date().toISOString().split('T')[0]);
