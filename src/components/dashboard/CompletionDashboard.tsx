@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
-import { AlertTriangle, CheckCircle, Clock, Image, Download, FileText } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Image, Download, FileText, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { PropertyDetailTable } from './PropertyDetailTable';
 import { exportCompletionToExcel, exportCompletionToPDF } from '@/utils/completionExport';
@@ -55,7 +55,9 @@ const getCompletionBadge = (value: number) => {
 
 export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
   const { theme } = useTheme();
-  const regionalStats = useMemo(() => {
+  const [sortField, setSortField] = useState<'unidade' | 'totalImoveis' | 'mediaPreenchimento' | 'completosCount' | 'parcialCount' | 'baixoCount'>('mediaPreenchimento');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const regionalStatsRaw = useMemo(() => {
     const map = new Map<string, { total: number; soma: number; completos: number; parcial: number; baixo: number }>();
 
     data.forEach(item => {
@@ -80,9 +82,30 @@ export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
         completosCount: s.completos,
         parcialCount: s.parcial,
         baixoCount: s.baixo,
-      }))
-      .sort((a, b) => a.mediaPreenchimento - b.mediaPreenchimento) as RegionalStats[];
+      })) as RegionalStats[];
   }, [data]);
+
+  const regionalStats = useMemo(() => {
+    const dir = sortDir === 'asc' ? 1 : -1;
+    return [...regionalStatsRaw].sort((a, b) => {
+      if (sortField === 'unidade') return dir * a.unidade.localeCompare(b.unidade, 'pt-BR');
+      return dir * ((a as any)[sortField] - (b as any)[sortField]);
+    });
+  }, [regionalStatsRaw, sortField, sortDir]);
+
+  const handleSort = (field: typeof sortField) => {
+    if (sortField === field) {
+      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir(field === 'unidade' ? 'asc' : 'desc');
+    }
+  };
+
+  const SortIcon = ({ field }: { field: typeof sortField }) => {
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 opacity-30" />;
+    return sortDir === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />;
+  };
 
   const globalStats = useMemo(() => {
     if (data.length === 0) return { media: 0, completos: 0, parcial: 0, baixo: 0 };
@@ -217,12 +240,24 @@ export const CompletionDashboard = ({ data }: CompletionDashboardProps) => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-2 px-3 font-medium text-muted-foreground">Regional</th>
-                  <th className="text-center py-2 px-3 font-medium text-muted-foreground">Imóveis</th>
-                  <th className="text-center py-2 px-3 font-medium text-muted-foreground">Média</th>
-                  <th className="text-center py-2 px-3 font-medium text-muted-foreground hidden sm:table-cell">Completos</th>
-                  <th className="text-center py-2 px-3 font-medium text-muted-foreground hidden sm:table-cell">Parciais</th>
-                  <th className="text-center py-2 px-3 font-medium text-muted-foreground hidden sm:table-cell">Baixo</th>
+                  <th className="text-left py-2 px-3 font-medium text-muted-foreground cursor-pointer select-none hover:bg-muted/50" onClick={() => handleSort('unidade')}>
+                    <span className="inline-flex items-center gap-1">Regional <SortIcon field="unidade" /></span>
+                  </th>
+                  <th className="text-center py-2 px-3 font-medium text-muted-foreground cursor-pointer select-none hover:bg-muted/50" onClick={() => handleSort('totalImoveis')}>
+                    <span className="inline-flex items-center gap-1 justify-center">Imóveis <SortIcon field="totalImoveis" /></span>
+                  </th>
+                  <th className="text-center py-2 px-3 font-medium text-muted-foreground cursor-pointer select-none hover:bg-muted/50" onClick={() => handleSort('mediaPreenchimento')}>
+                    <span className="inline-flex items-center gap-1 justify-center">Média <SortIcon field="mediaPreenchimento" /></span>
+                  </th>
+                  <th className="text-center py-2 px-3 font-medium text-muted-foreground hidden sm:table-cell cursor-pointer select-none hover:bg-muted/50" onClick={() => handleSort('completosCount')}>
+                    <span className="inline-flex items-center gap-1 justify-center">Completos <SortIcon field="completosCount" /></span>
+                  </th>
+                  <th className="text-center py-2 px-3 font-medium text-muted-foreground hidden sm:table-cell cursor-pointer select-none hover:bg-muted/50" onClick={() => handleSort('parcialCount')}>
+                    <span className="inline-flex items-center gap-1 justify-center">Parciais <SortIcon field="parcialCount" /></span>
+                  </th>
+                  <th className="text-center py-2 px-3 font-medium text-muted-foreground hidden sm:table-cell cursor-pointer select-none hover:bg-muted/50" onClick={() => handleSort('baixoCount')}>
+                    <span className="inline-flex items-center gap-1 justify-center">Baixo <SortIcon field="baixoCount" /></span>
+                  </th>
                   <th className="text-center py-2 px-3 font-medium text-muted-foreground">Status</th>
                 </tr>
               </thead>
