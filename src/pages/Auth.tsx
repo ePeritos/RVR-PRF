@@ -8,7 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TermsAcceptanceDialog } from '@/components/TermsAcceptanceDialog';
-import { Building, Eye, EyeOff } from 'lucide-react';
+import { Building, Eye, EyeOff, KeyRound } from 'lucide-react';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 
 const TERMS_STORAGE_KEY = 'sigi-prf-terms-accepted';
 
@@ -19,9 +20,15 @@ const Auth = () => {
   const [termsAccepted, setTermsAccepted] = useState(savedTerms);
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [isOtpStep, setIsOtpStep] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [recoveryEmail, setRecoveryEmail] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -60,7 +67,6 @@ const Auth = () => {
 
     try {
       setLoading(true);
-      
 
       let result;
       if (isSignUp) {
@@ -92,15 +98,12 @@ const Auth = () => {
           title: "Login realizado com sucesso!",
           description: "Redirecionando para o dashboard...",
         });
-        // Redirecionar para o dashboard
         setTimeout(() => {
           navigate('/', { replace: true });
         }, 1000);
       }
 
     } catch (error: any) {
-      
-      
       let errorMessage = "Erro desconhecido. Tente novamente.";
       
       if (error.message?.includes('Invalid login credentials')) {
@@ -142,15 +145,93 @@ const Auth = () => {
 
       if (error) throw error;
 
+      setRecoveryEmail(email);
+      setIsOtpStep(true);
       toast({
-        title: "Email enviado!",
-        description: "Verifique sua caixa de entrada para redefinir sua senha.",
+        title: "Código enviado!",
+        description: "Verifique seu email e insira o código de 6 dígitos abaixo.",
       });
-      setIsForgotPassword(false);
     } catch (error: any) {
       toast({
         title: "Erro",
         description: error.message || "Erro ao enviar email de recuperação.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpVerifyAndReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (otpCode.length !== 6) {
+      toast({
+        title: "Código incompleto",
+        description: "Insira o código de 6 dígitos recebido por email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Senha muito curta",
+        description: "A senha deve ter pelo menos 6 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      toast({
+        title: "Senhas não conferem",
+        description: "As senhas digitadas são diferentes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Verificar o OTP de recuperação
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email: recoveryEmail,
+        token: otpCode,
+        type: 'recovery',
+      });
+
+      if (verifyError) throw verifyError;
+
+      // Atualizar a senha
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Senha alterada com sucesso!",
+        description: "Redirecionando para o sistema...",
+      });
+
+      // Resetar estados
+      setIsOtpStep(false);
+      setIsForgotPassword(false);
+      setOtpCode('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+
+      setTimeout(() => navigate('/', { replace: true }), 1500);
+    } catch (error: any) {
+      let errorMessage = error.message || "Erro ao redefinir a senha.";
+      if (error.message?.includes('Token has expired or is invalid')) {
+        errorMessage = 'Código expirado ou inválido. Solicite um novo código.';
+      }
+      toast({
+        title: "Erro na recuperação",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -164,9 +245,17 @@ const Auth = () => {
     localStorage.setItem(TERMS_STORAGE_KEY, 'true');
   };
 
+  const resetForgotPassword = () => {
+    setIsForgotPassword(false);
+    setIsOtpStep(false);
+    setOtpCode('');
+    setNewPassword('');
+    setConfirmNewPassword('');
+    setRecoveryEmail('');
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
-      {/* Theme toggle button in top right corner */}
       <div className="absolute top-4 right-4">
         <ThemeToggle showText={false} />
       </div>
@@ -174,20 +263,119 @@ const Auth = () => {
       <Card className="w-full max-w-md shadow-lg hover:shadow-xl transition-shadow duration-300 animate-scale-in">
         <CardHeader className="text-center px-6 md:px-16">
           <div className="flex flex-col items-center justify-center mb-4 space-y-3">
-            <Building className="h-8 md:h-12 w-8 md:w-12" />
-            <CardTitle className="text-xl md:text-2xl font-bold">SIGI-PRF</CardTitle>
+            {isOtpStep ? (
+              <KeyRound className="h-8 md:h-12 w-8 md:w-12 text-primary" />
+            ) : (
+              <Building className="h-8 md:h-12 w-8 md:w-12" />
+            )}
+            <CardTitle className="text-xl md:text-2xl font-bold">
+              {isOtpStep ? 'Redefinir Senha' : 'SIGI-PRF'}
+            </CardTitle>
           </div>
           <CardDescription className="text-sm md:text-base">
-            {isForgotPassword 
-              ? 'Informe seu email para recuperar a senha' 
-              : isSignUp 
-                ? 'Criar conta no' 
-                : 'Faça login para acessar o'} {!isForgotPassword && 'Sistema de Gestão de Imóveis da PRF'}
+            {isOtpStep
+              ? `Insira o código de 6 dígitos enviado para ${recoveryEmail}`
+              : isForgotPassword 
+                ? 'Informe seu email para recuperar a senha' 
+                : isSignUp 
+                  ? 'Criar conta no' 
+                  : 'Faça login para acessar o'} {!isForgotPassword && !isOtpStep && 'Sistema de Gestão de Imóveis da PRF'}
           </CardDescription>
         </CardHeader>
         
         <CardContent className="px-6 md:px-16">
-          {isForgotPassword ? (
+          {isOtpStep ? (
+            <form onSubmit={handleOtpVerifyAndReset} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Código de Verificação</Label>
+                <div className="flex justify-center">
+                  <InputOTP
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={(value) => setOtpCode(value)}
+                    disabled={loading}
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">Nova Senha</Label>
+                <div className="relative">
+                  <Input
+                    id="newPassword"
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Mínimo 6 caracteres"
+                    disabled={loading}
+                    required
+                    minLength={6}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmNewPassword">Confirmar Senha</Label>
+                <Input
+                  id="confirmNewPassword"
+                  type="password"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  placeholder="Repita a nova senha"
+                  disabled={loading}
+                  required
+                  minLength={6}
+                />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading || otpCode.length !== 6}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                {loading ? "Verificando..." : "Redefinir Senha"}
+              </Button>
+
+              <div className="flex flex-col items-center gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOtpStep(false);
+                    handleForgotPassword(new Event('submit') as any);
+                  }}
+                  className="text-sm text-muted-foreground hover:text-foreground underline"
+                  disabled={loading}
+                >
+                  Reenviar código
+                </button>
+                <button
+                  type="button"
+                  onClick={resetForgotPassword}
+                  className="text-sm text-muted-foreground hover:text-foreground underline"
+                >
+                  Voltar ao login
+                </button>
+              </div>
+            </form>
+          ) : isForgotPassword ? (
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -206,12 +394,12 @@ const Auth = () => {
                 disabled={loading}
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                {loading ? "Enviando..." : "Enviar Link de Recuperação"}
+                {loading ? "Enviando..." : "Enviar Código de Recuperação"}
               </Button>
               <div className="text-center">
                 <button
                   type="button"
-                  onClick={() => setIsForgotPassword(false)}
+                  onClick={resetForgotPassword}
                   className="text-sm text-muted-foreground hover:text-foreground underline"
                 >
                   Voltar ao login
